@@ -24,7 +24,7 @@ namespace TrOCR
 		{
 			Program.SetConfig();
 			Program.bool_error();
-			Program.checkTimer = new Timer();
+			Program.checkTimer = new System.Timers.Timer();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Version version = Environment.OSVersion.Version;
@@ -388,6 +388,6 @@ namespace TrOCR
 
 		public static bool createNew;
 
-		public static Timer checkTimer;
+		public static System.Timers.Timer checkTimer;
 	}
 }
