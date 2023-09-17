@@ -17,6 +17,9 @@
         <WarningLevel>7</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    </ItemGroup>
+    <ItemGroup>
         <Reference Include="Emgu.CV.World">
             <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\Emgu.CV.World.dll</HintPath>
         </Reference>

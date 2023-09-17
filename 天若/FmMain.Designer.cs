@@ -1,10 +1,12 @@
-﻿namespace TrOCR
+﻿using static TrOCR.External.NativeMethods;
+
+namespace TrOCR
 {
-	public partial class FmMain : global::System.Windows.Forms.Form
+    public partial class FmMain : global::System.Windows.Forms.Form
 	{
 		protected override void Dispose(bool disposing)
 		{
-			global::TrOCR.HelpWin32.ChangeClipboardChain(base.Handle, this.nextClipboardViewer);
+			ChangeClipboardChain(base.Handle, this.nextClipboardViewer);
 			if (disposing && this.components != null)
 			{
 				this.components.Dispose();
@@ -117,9 +119,9 @@
 			this.Main_copy.Text = "复制";
 			this.Main_copy.Click += new global::System.EventHandler(this.Main_copy_Click);
 			this.Main_paste.Text = "粘贴";
-			this.Main_paste.Click += new global::System.EventHandler(this.Main_paste_Click);
+			this.Main_paste.Click += new global::System.EventHandler(this.MainPasteClick);
 			this.Main_selectall.Text = "全选";
-			this.Main_selectall.Click += new global::System.EventHandler(this.Main_SelectAll_Click);
+			this.Main_selectall.Click += new global::System.EventHandler(this.MainSelectAllClick);
 			this.speak.Text = "朗读";
 			this.speak.Click += new global::System.EventHandler(this.Main_Voice_Click);
 			this.baidu_s.Text = "搜索";
@@ -127,15 +129,15 @@
 			this.Main_change.Text = "转换";
 			this.Main_jiekou.Text = "接口";
 			this.Main_exit.Text = "退出";
-			this.Main_exit.Click += new global::System.EventHandler(this.tray_exit_Click);
+			this.Main_exit.Click += new global::System.EventHandler(this.TrayExitClick);
 			this.menu.Items.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.Main_copy, this.Main_paste, this.Main_selectall, this.speak, this.baidu_s, this.Main_change, this.Main_jiekou, this.Main_exit });
 			this.menu.Font = new global::System.Drawing.Font("微软雅黑", 9f / global::TrOCR.StaticValue.Dpifactor, global::System.Drawing.FontStyle.Regular);
 			this.sougou.Text = "搜狗√";
-			this.sougou.Click += new global::System.EventHandler(this.OCR_sougou_Click);
+			this.sougou.Click += new global::System.EventHandler(this.OcrSogouClick);
 			this.Mathfuntion.Text = "公式";
 			this.Mathfuntion.Click += new global::System.EventHandler(this.OCR_Mathfuntion_Click);
 			this.tencent.Text = "腾讯";
-			this.tencent.Click += new global::System.EventHandler(this.OCR_tencent_Click);
+			this.tencent.Click += new global::System.EventHandler(this.OcrTencentClick);
 			this.baidu.Text = "百度";
 			this.baidu.Click += new global::System.EventHandler(this.OCR_baidu_Click);
 			this.youdao.Text = "有道";
@@ -168,7 +170,7 @@
 			this.change_button.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.Chinese, this.English, this.zh_tra, this.tra_zh, this.str_Upper, this.Upper_str, this.pinyin });
 			this.interface_button = this.Main_jiekou;
 			this.interface_button.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.sougou, this.tencent, this.youdao, this.baidu, this.toolStripSeparator1, this.Mathfuntion, this.ocr_table, this.shupai });
-			if (global::TrOCR.IniHelp.GetValue("配置", "接口") == "百度")
+			if (global::TrOCR.Helper.IniHelp.GetValue("配置", "接口") == "百度")
 			{
 				this.ch_en.Text = "中英√";
 			}
@@ -205,7 +207,7 @@
 			base.Resize += new global::System.EventHandler(this.Form_Resize);
 			base.Name = "Form1";
 			this.Text = "耗时：";
-			if (global::TrOCR.IniHelp.GetValue("工具栏", "顶置") == "True")
+			if (global::TrOCR.Helper.IniHelp.GetValue("工具栏", "顶置") == "True")
 			{
 				base.TopMost = true;
 			}

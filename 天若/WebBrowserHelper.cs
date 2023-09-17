@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using mshtml;
 
 namespace TrOCR;
@@ -29,7 +30,7 @@ internal class WebBrowserHelper
             try
             {
                 WebBrowserHelper.IServiceProvider serviceProvider = (WebBrowserHelper.IServiceProvider) htmlWindow;
-                _ = serviceProvider.QueryService(ref WebBrowserHelper.IID_IWebBrowserApp, ref WebBrowserHelper.IID_IWebBrowser2, out object obj);
+                serviceProvider.QueryService(ref WebBrowserHelper.IID_IWebBrowserApp, ref WebBrowserHelper.IID_IWebBrowser2, out object obj);
                 return (IHTMLDocument3) ((WebBrowserHelper.IWebBrowser2) obj).Document;
             }
             catch (Exception ex)
