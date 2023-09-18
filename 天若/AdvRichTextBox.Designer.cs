@@ -54,7 +54,7 @@ namespace TrOCR
             this.toolStripButtonBold = new ToolStripButton();
             this.toolStripButtonParagraph = new ToolStripButton();
             this.toolStripButtonFind = new ToolStripButton();
-            this.toolStripButtonColor = new HelpRepaint.ColorPicker();
+            this.toolStripButtonColor = new ColorPicker();
             this.toolStripSeparatorFont = new ToolStripSeparator();
             this.toolStripButtonFence = new ToolStripButton();
             this.toolStripButtonSplit = new ToolStripButton();
@@ -84,7 +84,7 @@ namespace TrOCR
             this.toolStripToolBar.Click += this.toolStripToolBar_Click;
             this.toolStripToolBar.Text = "Tool Bar";
             this.toolStripToolBar.BackColor = Color.White;
-            this.toolStripToolBar.Renderer = new HelpRepaint.MenuItemRenderer();
+            this.toolStripToolBar.Renderer = new MenuItemRenderer();
             this.toolStripButtonBold.DisplayStyle = ToolStripItemDisplayStyle.Image;
             this.toolStripButtonBold.Image = (Image)componentResourceManager.GetObject("toolStripButtonBold.Image");
             this.toolStripButtonBold.ImageTransparentColor = Color.Magenta;
@@ -1270,7 +1270,7 @@ namespace TrOCR
 
         private ToolStripMenuItem font_新罗马;
 
-        public HelpRepaint.ColorPicker toolStripButtonColor;
+        public ColorPicker toolStripButtonColor;
 
         public RichTextBoxEx richTextBox1;
 

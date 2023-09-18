@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
@@ -8,6 +7,7 @@ using Microsoft.Win32;
 
 using mshtml;
 using TrOCR.Helper;
+using static TrOCR.External.NativeMethods;
 
 namespace TrOCR;
 
@@ -31,21 +31,18 @@ public partial class AliTable : Form
         InitializeComponent( );
     }
 
-    [DllImport("wininet.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref int pcchCookieData, int dwFlags, object lpReserved);
-
     private static string GetCookieString(string url)
     {
         int num = 256;
         StringBuilder stringBuilder = new(num);
-        if (!AliTable.InternetGetCookieEx(url, null, stringBuilder, ref num, 8192, null))
+        if (!InternetGetCookieEx(url, null, stringBuilder, ref num, 8192, null))
         {
             if (num < 0)
             {
                 return null;
             }
             stringBuilder = new StringBuilder(num);
-            if (!AliTable.InternetGetCookieEx(url, null, stringBuilder, ref num, 8192, null))
+            if (!InternetGetCookieEx(url, null, stringBuilder, ref num, 8192, null))
             {
                 return null;
             }
@@ -53,12 +50,12 @@ public partial class AliTable : Form
         return stringBuilder.ToString( );
     }
 
-    private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+    private void BrowserLoaded(object o, WebBrowserDocumentCompletedEventArgs e)
     {
         try
         {
             count++;
-            textBox1.Text = GetCookieString(e.Url.ToString( ));
+            CookiesBox.Text = GetCookieString(e.Url.ToString( ));
             webBrowser1.Document.Window.ScrollTo(10000, 145);
             webBrowser1.Document.Body.SetAttribute("scroll", "no");
             webBrowser1.Document.GetElementById("guid-762944").OuterHtml = "";
@@ -73,25 +70,26 @@ public partial class AliTable : Form
         }
     }
 
-    private void Form2_Load(object sender, EventArgs e) => webBrowser1.Url = new Uri("https://data.aliyun.com/ai/ocr-other#/ocr-other");
+    private void FormLoad(object o, EventArgs e)
+        => webBrowser1.Url = new Uri("https://data.aliyun.com/ai/ocr-other#/ocr-other");
 
-    private void textBox1_TextChanged(object sender, EventArgs e)
+    private void CookiesBoxTextChange(object o, EventArgs e)
     {
-        if (textBox1.Text.Contains("login_aliyunid=\""))
+        if (CookiesBox.Text.Contains("login_aliyunid=\""))
         {
             webBrowser1.Url = new Uri("https://data.aliyun.com/ai/ocr-other#/ocr-other");
-            IniHelp.SetValue("特殊", "ali_cookie", textBox1.Text);
-            base.Hide( );
+            IniHelp.SetValue("特殊", "ali_cookie", CookiesBox.Text);
+            Hide( );
         }
     }
 
-    private void timer1_Tick(object sender, EventArgs e)
+    private void TimerTick(object o, EventArgs e)
     {
         if (webBrowser1.ReadyState == WebBrowserReadyState.Complete)
         {
             try
             {
-                cclick( );
+                CClick( );
             }
             catch
             {
@@ -99,42 +97,29 @@ public partial class AliTable : Form
             if (count >= 2)
             {
                 count = 0;
-                base.Show( );
+                Show( );
             }
             timer1.Stop( );
         }
     }
 
-    public string getcookie
+    public string GetCookie
     {
-        get => textBox1.Text;
+        get => CookiesBox.Text;
         set => webBrowser1.Url = new Uri("https://data.aliyun.com/ai/ocr-other#/ocr-other");
     }
 
-    private bool ComposeEncrypt_onclick( )
-    {
-        IHTMLDocument3 documentFromWindow = WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2);
-        string text = documentFromWindow.getElementById("fm-login-id").getAttribute("value", 0).ToString( );
-        string text2 = documentFromWindow.getElementById("fm-login-password").getAttribute("value", 0).ToString( );
-        IniHelp.SetValue("特殊", "ali_account", text);
-        IniHelp.SetValue("特殊", "ali_password", text2);
-        timer1.Stop( );
-        return true;
-    }
-
-    public void cclick( )
+    public void CClick( )
     {
         try
         {
-            if (IniHelp.GetValue("特殊", "ali_account").Trim( ) != "" && IniHelp.GetValue("特殊", "ali_password").Trim( ) != "")
+            if (!string.IsNullOrEmpty(IniHelp.GetValue("特殊", "ali_account").Trim( )) && !string.IsNullOrEmpty(IniHelp.GetValue("特殊", "ali_password").Trim( )))
             {
                 WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-id").setAttribute("value", IniHelp.GetValue("特殊", "ali_account"), 1);
                 WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-password").setAttribute("value", IniHelp.GetValue("特殊", "ali_password"), 1);
             }
         }
-        catch
-        {
-        }
+        catch { }
     }
 
     private int count;

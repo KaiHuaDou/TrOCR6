@@ -29,7 +29,7 @@ namespace TrOCR
 			this.ali_table = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.ocr_table = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.menu = new global::System.Windows.Forms.ContextMenuStrip();
-			this.menu.Renderer = new global::TrOCR.HelpRepaint.MenuItemRendererT();
+			this.menu.Renderer = new global::TrOCR.MenuItemRendererT();
 			this.ch_en = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.jap = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.kor = new global::System.Windows.Forms.ToolStripMenuItem();
@@ -73,7 +73,7 @@ namespace TrOCR
 			this.Split = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.Restore = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.menu_copy = new global::System.Windows.Forms.ContextMenuStrip();
-			this.menu_copy.Renderer = new global::TrOCR.HelpRepaint.MenuItemRendererT();
+			this.menu_copy.Renderer = new global::TrOCR.MenuItemRendererT();
 			this.PictureBox1 = new global::System.Windows.Forms.PictureBox();
 			this.RichBoxBody = new global::TrOCR.AdvRichTextBox();
 			this.RichBoxBody_T = new global::TrOCR.AdvRichTextBox();
@@ -155,7 +155,7 @@ namespace TrOCR
 			this.Chinese.Text = "中文标点";
 			this.Chinese.Click += new global::System.EventHandler(this.change_Chinese_Click);
 			this.English.Text = "英文标点";
-			this.English.Click += new global::System.EventHandler(this.change_English_Click);
+			this.English.Click += new global::System.EventHandler(this.ChangeEnglishClick);
 			this.zh_tra.Text = "中文繁体";
 			this.zh_tra.Click += new global::System.EventHandler(this.change_zh_tra_Click);
 			this.tra_zh.Text = "中文简体";

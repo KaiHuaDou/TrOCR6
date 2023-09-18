@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
 
 namespace TrOCR;
 
@@ -15,11 +13,6 @@ public class RichTextBoxEx : HelpRepaint.AdvRichTextBox
         base.Dispose(disposing);
     }
 
-    private void InitializeComponent( ) => components = new Container( );
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern IntPtr LoadLibrary(string path);
-
     [Bindable(true)]
     [Category("Appearance")]
     [DefaultValue(false)]
@@ -27,11 +20,9 @@ public class RichTextBoxEx : HelpRepaint.AdvRichTextBox
     [SettingsBindable(true)]
     public string Rtf2
     {
-        get => base.Rtf;
-        set => base.Rtf = value;
+        get => Rtf;
+        set => Rtf = value;
     }
 
     private IContainer components;
-
-    private static readonly IntPtr moduleHandle;
 }

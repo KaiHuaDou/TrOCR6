@@ -20,7 +20,7 @@
 			this.components = new global::System.ComponentModel.Container();
 			this.mainDataGrid = new global::System.Windows.Forms.DataGridView();
 			this.contextMenuStrip1 = new global::System.Windows.Forms.ContextMenuStrip(this.components);
-			this.contextMenuStrip1.Renderer = new global::TrOCR.HelpRepaint.MenuItemRendererT();
+			this.contextMenuStrip1.Renderer = new global::TrOCR.MenuItemRendererT();
 			((global::System.ComponentModel.ISupportInitialize)this.mainDataGrid).BeginInit();
 			base.SuspendLayout();
 			this.mainDataGrid.BackgroundColor = global::System.Drawing.Color.White;

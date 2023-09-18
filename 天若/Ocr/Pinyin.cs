@@ -24,11 +24,11 @@ public static class Pinyin
         foreach (char c in CnChar)
         {
             string text2 = c.ToString( );
-            if (FmMain.contain_ch(c.ToString( )))
+            if (TextUtils.ContainsZh(c.ToString( )))
                 text2 = hashtable[c.ToString( )] as string;
-            stringBuilder = FmMain.contain_en(c.ToString( ))
+            stringBuilder = TextUtils.ContainEn(c.ToString( ))
                 ? stringBuilder.Append(text2)
-                : FmMain.contain_en(text)
+                : TextUtils.ContainEn(text)
                 ? stringBuilder.Append(" " + text2 + " ")
                 : stringBuilder.Append(text2 + " ");
             text = text2;

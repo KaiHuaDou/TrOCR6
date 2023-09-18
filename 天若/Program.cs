@@ -12,32 +12,33 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 
 using TrOCR.Helper;
+using static TrOCR.External.NativeMethods;
 
 namespace TrOCR;
 
 internal static class Program
 {
-    public static void ProgramStart( ) => Program.ProgramStarted = new EventWaitHandle(false, EventResetMode.AutoReset, "天若", out Program.createNew);
+    public static void ProgramStart( ) => ProgramStarted = new EventWaitHandle(false, EventResetMode.AutoReset, "天若", out createNew);
 
     [STAThread]
     public static void Main(string[] args)
     {
-        Program.SetConfig( );
-        Program.bool_error( );
-        Program.checkTimer = new System.Timers.Timer( );
+        SetConfig( );
+        bool_error( );
+        checkTimer = new System.Timers.Timer( );
         Application.EnableVisualStyles( );
         Application.SetCompatibleTextRenderingDefault(false);
         Version version = Environment.OSVersion.Version;
         Version version2 = new("6.1");
-        Program.factor = Program.GetDpi_factor( );
+        factor = GetDpiFactor( );
         if (version.CompareTo(version2) >= 0)
         {
-            Program.SetProcessDPIAware( );
+            SetProcessDPIAware( );
         }
-        Program.ProgramStart( );
-        if (!Program.createNew)
+        ProgramStart( );
+        if (!createNew)
         {
-            Program.ProgramStarted.Set( );
+            ProgramStarted.Set( );
             FmFlags fmFlags = new( );
             fmFlags.Show( );
             fmFlags.DrawStr("软件已经运行");
@@ -52,13 +53,13 @@ internal static class Program
         }
         if (IniHelp.GetValue("更新", "检测更新") is "True" or "发生错误")
         {
-            new Thread(new ThreadStart(Program.CheckUpdate)).Start( );
+            new Thread(new ThreadStart(CheckUpdate)).Start( );
             if (IniHelp.GetValue("更新", "更新间隔") == "True")
             {
-                Program.checkTimer.Enabled = true;
-                Program.checkTimer.Interval = 3600000.0 * Convert.ToInt32(IniHelp.GetValue("更新", "间隔时间"));
-                Program.checkTimer.Elapsed += Program.CheckTimer_Elapsed;
-                Program.checkTimer.Start( );
+                checkTimer.Enabled = true;
+                checkTimer.Interval = 3600000.0 * Convert.ToInt32(IniHelp.GetValue("更新", "间隔时间"));
+                checkTimer.Elapsed += CheckTimer_Elapsed;
+                checkTimer.Start( );
             }
         }
         else
@@ -74,10 +75,7 @@ internal static class Program
     {
     }
 
-    [DllImport("wininet")]
-    private static extern bool InternetGetConnectedState(out int connectionDescription, int reservedValue);
-
-    public static bool IsConnectedInternet( ) => Program.InternetGetConnectedState(out int num, 0);
+    public static bool IsConnectedInternet( ) => InternetGetConnectedState(out _, 0);
 
     public static int GetPidByProcessName(string processName)
     {
@@ -87,10 +85,7 @@ internal static class Program
         return num2;
     }
 
-    [DllImport("user32.dll")]
-    private static extern bool SetProcessDPIAware( );
-
-    public static float GetDpi_factor( )
+    public static float GetDpiFactor( )
     {
         float num;
         try
@@ -121,7 +116,7 @@ internal static class Program
             JObject jobject = JObject.Parse(match.Value.Trim( ));
             string text = jobject["version"].Value<string>( );
             string productVersion = Application.ProductVersion;
-            if (!Program.CheckVersion(text, productVersion))
+            if (!CheckVersion(text, productVersion))
             {
                 FmFlags fmFlags = new( );
                 fmFlags.Show( );

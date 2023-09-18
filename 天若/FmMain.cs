@@ -2,40 +2,31 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
 using System.Windows.Forms;
-
 using CsharpHttpHelper;
-
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
-
 using MSScriptControl;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using ShareX.ScreenCaptureLib;
-
+using TrOCR.Helper;
+using TrOCR.Ocr;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
-
-using TrOCR.Ocr;
-using TrOCR.Helper;
 using static TrOCR.External.NativeMethods;
 
 namespace TrOCR;
@@ -73,7 +64,7 @@ public partial class FmMain : Form
         InitializeComponent( );
         nextClipboardViewer = (IntPtr) SetClipboardViewer((int) Handle);
         InitMinimize( );
-        readIniFile( );
+        ReadIniFile( );
         WindowState = FormWindowState.Minimized;
         Visible = false;
         SplitedText = "";
@@ -326,7 +317,7 @@ public partial class FmMain : Form
         Visible = false;
     }
 
-    public void InitMinimize( )
+    private void InitMinimize( )
     {
         try
         {
@@ -368,7 +359,7 @@ public partial class FmMain : Form
     private void TrayExitClick(object o, EventArgs e)
     {
         minico.Dispose( );
-        saveIniFile( );
+        SaveIniFile( );
         Process.GetCurrentProcess( ).Kill( );
     }
 
@@ -378,7 +369,7 @@ public partial class FmMain : Form
         RichBoxBody.richTextBox1.Copy( );
     }
 
-    public static string PunctuationEnZh(string text)
+    private static string PunctuationEnZh(string text)
     {
         char[] array = text.ToCharArray( );
         for (int i = 0; i < array.Length; i++)
@@ -404,10 +395,10 @@ public partial class FmMain : Form
         RichBoxBody.richTextBox1.Paste( );
     }
 
-    public void SplitClick(object o, EventArgs e)
+    private void SplitClick(object o, EventArgs e)
         => RichBoxBody.Text = SplitedText;
 
-    public static byte[] CopyBytes(byte[] a, byte[] b)
+    private static byte[] CopyBytes(byte[] a, byte[] b)
     {
         byte[] array = new byte[a.Length + b.Length];
         a.CopyTo(array, 0);
@@ -415,7 +406,7 @@ public partial class FmMain : Form
         return array;
     }
 
-    public void OcrSogou( )
+    private void OcrSogou( )
     {
         try
         {
@@ -456,7 +447,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static byte[] ImageToBytes(Image image)
+    private static byte[] ImageToBytes(Image image)
     {
         MemoryStream stream = new( );
         image.Save(stream, ImageFormat.Jpeg);
@@ -467,28 +458,7 @@ public partial class FmMain : Form
         return array;
     }
 
-    private static Bitmap GetPlus(Bitmap image, double times)
-    {
-        int num = (int) (image.Width / times);
-        int num2 = (int) (image.Height / times);
-        Bitmap bitmap = new(num, num2);
-        if (times is >= 1.0 and <= 1.1)
-        {
-            bitmap = image;
-        }
-        else
-        {
-            Graphics graphics = Graphics.FromImage(bitmap);
-            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            graphics.SmoothingMode = SmoothingMode.HighQuality;
-            graphics.CompositingQuality = CompositingQuality.HighQuality;
-            graphics.DrawImage(image, new Rectangle(0, 0, num, num2), new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
-            graphics.Dispose( );
-        }
-        return bitmap;
-    }
-
-    public void OcrTencent( )
+    private void OcrTencent( )
     {
         try
         {
@@ -558,7 +528,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void _bak_OcrBaidu( )
+    private void _bak_OcrBaidu( )
     {
         SplitedText = "";
         try
@@ -606,7 +576,7 @@ public partial class FmMain : Form
                 char[] array2 = jobject["words"].ToString( ).ToCharArray( );
                 if (!char.IsPunctuation(array2[array2.Length - 1]))
                 {
-                    if (!contain_ch(jobject["words"].ToString( )))
+                    if (!TextUtils.ContainsZh(jobject["words"].ToString( )))
                     {
                         text5 = text5 + jobject["words"].ToString( ).Trim( ) + " ";
                     }
@@ -617,7 +587,7 @@ public partial class FmMain : Form
                 }
                 else if (own_punctuation(array2[array2.Length - 1].ToString( )))
                 {
-                    if (!contain_ch(jobject["words"].ToString( )))
+                    if (!TextUtils.ContainsZh(jobject["words"].ToString( )))
                     {
                         text5 = text5 + jobject["words"].ToString( ).Trim( ) + " ";
                     }
@@ -645,17 +615,17 @@ public partial class FmMain : Form
         }
     }
 
-    private void OcrSogouClick(object o, EventArgs e) 
+    private void OcrSogouClick(object o, EventArgs e)
         => OcrForeach("搜狗");
 
-    private void OcrTencentClick(object o, EventArgs e) 
+    private void OcrTencentClick(object o, EventArgs e)
         => OcrForeach("腾讯");
 
     private void OCR_baidu_Click(object o, EventArgs e)
     {
     }
 
-    public void OcrYoudao( )
+    private void OcrYoudao( )
     {
         try
         {
@@ -750,28 +720,28 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_youdao_Click(object o, EventArgs e) => OcrForeach("有道");
+    private void OCR_youdao_Click(object o, EventArgs e) => OcrForeach("有道");
 
-    public void change_Chinese_Click(object o, EventArgs e)
+    private void change_Chinese_Click(object o, EventArgs e)
     {
         language = "中文标点";
         if (!string.IsNullOrEmpty(typeset_txt))
         {
             RichBoxBody.Text = punctuation_en_ch_x(RichBoxBody.Text);
-            RichBoxBody.Text = punctuation_quotation(RichBoxBody.Text);
+            RichBoxBody.Text = TextUtils.PunctuationQuotation(RichBoxBody.Text);
         }
     }
 
-    public void change_English_Click(object o, EventArgs e)
+    private void ChangeEnglishClick(object o, EventArgs e)
     {
         language = "英文标点";
         if (!string.IsNullOrEmpty(typeset_txt))
         {
-            RichBoxBody.Text = punctuation_ch_en(RichBoxBody.Text);
+            RichBoxBody.Text = PunctuationChEn(RichBoxBody.Text);
         }
     }
 
-    public static string punctuation_ch_en(string text)
+    private static string PunctuationChEn(string text)
     {
         char[] array = text.ToCharArray( );
         for (int i = 0; i < array.Length; i++)
@@ -785,9 +755,10 @@ public partial class FmMain : Form
         return new string(array);
     }
 
-    public void saveIniFile( ) => IniHelp.SetValue("配置", "接口", interface_flag);
+    private void SaveIniFile( )
+        => IniHelp.SetValue("配置", "接口", interface_flag);
 
-    public void readIniFile( )
+    private void ReadIniFile( )
     {
         Proxy_flag = IniHelp.GetValue("代理", "代理类型");
         Proxy_url = IniHelp.GetValue("代理", "服务器");
@@ -870,17 +841,17 @@ public partial class FmMain : Form
         }
     }
 
-    public static string check_ch_en(string text)
+    private static string check_ch_en(string text)
     {
         char[] array = text.ToCharArray( );
         for (int i = 0; i < array.Length; i++)
         {
             int num = "：".IndexOf(array[i]);
-            if (num != -1 && i - 1 >= 0 && i + 1 < array.Length && contain_en(array[i - 1].ToString( )) && contain_en(array[i + 1].ToString( )))
+            if (num != -1 && i - 1 >= 0 && i + 1 < array.Length && TextUtils.ContainEn(array[i - 1].ToString( )) && TextUtils.ContainEn(array[i + 1].ToString( )))
             {
                 array[i] = ":"[num];
             }
-            if (num != -1 && i - 1 >= 0 && i + 1 < array.Length && contain_en(array[i - 1].ToString( )) && contain_punctuation(array[i + 1].ToString( )))
+            if (num != -1 && i - 1 >= 0 && i + 1 < array.Length && TextUtils.ContainEn(array[i - 1].ToString( )) && contain_punctuation(array[i + 1].ToString( )))
             {
                 array[i] = ":"[num];
             }
@@ -888,7 +859,7 @@ public partial class FmMain : Form
         return new string(array);
     }
 
-    public void TraySettingClick(object o, EventArgs e)
+    private void TraySettingClick(object o, EventArgs e)
     {
         string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         UnregisterHotKey(Handle, 200);
@@ -982,9 +953,9 @@ public partial class FmMain : Form
         }
     }
 
-    public void tray_limit_Click(object o, EventArgs e) => new Thread(new ThreadStart(about)).Start( );
+    private void tray_limit_Click(object o, EventArgs e) => new Thread(new ThreadStart(about)).Start( );
 
-    public static bool IsNum(string str)
+    private static bool IsNum(string str)
     {
         for (int i = 0; i < str.Length; i++)
         {
@@ -996,9 +967,9 @@ public partial class FmMain : Form
         return true;
     }
 
-    public static bool own_punctuation(string text) => ",;，、__《》()-（）.。".IndexOf(text) != -1;
+    private static bool own_punctuation(string text) => ",;，、__《》()-（）.。".IndexOf(text) != -1;
 
-    public static string punctuation_Del_space(string text)
+    private static string punctuation_Del_space(string text)
     {
         string text2 = "(?<=.)([^\\*]+)(?=.)";
         string text3;
@@ -1019,9 +990,7 @@ public partial class FmMain : Form
         return text3;
     }
 
-    public static bool contain_ch(string str) => Regex.IsMatch(str, "[\\u4e00-\\u9fa5]");
-
-    public void transtalate_Click( )
+    private void transtalate_Click( )
     {
         typeset_txt = RichBoxBody.Text;
         RichBoxBody_T.Visible = true;
@@ -1062,25 +1031,25 @@ public partial class FmMain : Form
         }
     }
 
-    public void Trans_copy_Click(object o, EventArgs e)
+    private void Trans_copy_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
         RichBoxBody_T.richTextBox1.Copy( );
     }
 
-    public void Trans_paste_Click(object o, EventArgs e)
+    private void Trans_paste_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
         RichBoxBody_T.richTextBox1.Paste( );
     }
 
-    public void Trans_SelectAll_Click(object o, EventArgs e)
+    private void Trans_SelectAll_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
         RichBoxBody_T.richTextBox1.SelectAll( );
     }
 
-    public void trans_Calculate( )
+    private void trans_Calculate( )
     {
         if (pinyin_flag)
         {
@@ -1119,7 +1088,7 @@ public partial class FmMain : Form
             }
             if (IniHelp.GetValue("配置", "翻译接口") == "百度")
             {
-                googleTranslate_txt = Translate_baidu(typeset_txt);
+                googleTranslate_txt = TranslateBaidu(typeset_txt);
             }
             if (IniHelp.GetValue("配置", "翻译接口") == "腾讯")
             {
@@ -1132,7 +1101,7 @@ public partial class FmMain : Form
         pinyin_flag = false;
     }
 
-    public void Trans_close_Click(object o, EventArgs e)
+    private void Trans_close_Click(object o, EventArgs e)
     {
         base.MinimumSize = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
         transtalate_fla = "关闭";
@@ -1167,48 +1136,9 @@ public partial class FmMain : Form
         }
     }
 
-    public static bool contain(string text, string subStr) => text.Contains(subStr);
+    private void TTS( ) => new Thread(new ThreadStart(TTS_thread)).Start( );
 
-    public static bool contain_en(string str) => Regex.IsMatch(str, "[a-zA-Z]");
-
-    public static bool punctuation_has_punctuation(string str)
-    {
-        string text = contain_ch(str) ? "[\\；\\，\\。\\！\\？]" : "[\\;\\,\\.\\!\\?]";
-        return Regex.IsMatch(str, text);
-    }
-
-    public static string quotation(string str) => Regex.Replace(str.Replace("“", "\"").Replace("”", "\""), "(?<=\")([^\\\"\\“\\”]+)(?=\")", "$1_测_$2");
-
-    private static string punctuation_quotation(string pStr)
-    {
-        pStr = pStr.Replace("“", "\"").Replace("”", "\"");
-        string[] array = pStr.Split(new char[] { '"' });
-        string text = "";
-        for (int i = 1; i <= array.Length; i++)
-        {
-            text = i % 2 == 0 ? text + array[i - 1] + "”" : text + array[i - 1] + "“";
-        }
-        return text.Substring(0, text.Length - 1);
-    }
-
-    public static bool HasenPunctuation(string str)
-    {
-        string text = "[\\;\\,\\.\\!\\?]";
-        return Regex.IsMatch(str, text);
-    }
-
-    public static string Del_Space(string text)
-    {
-        text = Regex.Replace(text, "([\\p{P}]+)", "**&&**$1**&&**");
-        char[] array = null;
-        text = text.TrimEnd(array).Replace(" **&&**", "").Replace("**&&** ", "")
-            .Replace("**&&**", "");
-        return text;
-    }
-
-    public void TTS( ) => new Thread(new ThreadStart(TTS_thread)).Start( );
-
-    public void about( )
+    private void about( )
     {
         WindowState = FormWindowState.Minimized;
         CheckForIllegalCrossThreadCalls = false;
@@ -1225,14 +1155,14 @@ public partial class FmMain : Form
         googleTranslate_txt = "";
     }
 
-    public void TTS_thread( )
+    private void TTS_thread( )
     {
         try
         {
             Stream responseStream = ((HttpWebResponse) ((HttpWebRequest) WebRequest.Create(string.Format("{0}?{1}", "http://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=iQekhH39WqHoxur5ss59GpU4&client_secret=8bcee1cee76ed60cdfaed1f2c038584d"))).GetResponse( )).GetResponseStream( );
             string text = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
             responseStream.Close( );
-            string text2 = !contain_ch(htmltxt) ? "zh" : "zh";
+            string text2 = !TextUtils.ContainsZh(htmltxt) ? "zh" : "zh";
             HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create(string.Concat(new string[]
                 {
                     "http://tsn.baidu.com/text2audio?lan=" + text2 + "&ctp=1&cuid=abcdxxx&tok=",
@@ -1275,7 +1205,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void TTS_child( )
+    private void TTS_child( )
     {
         if (RichBoxBody.Text != null || !string.IsNullOrEmpty(RichBoxBody_T.Text))
         {
@@ -1300,6 +1230,14 @@ public partial class FmMain : Form
             speaking = true;
         }
     }
+    public void TrayUpdateClick(object o, EventArgs e) => Program.CheckUpdate( );
+
+    public void PlaySong(string file)
+    {
+        mciSendString("close media", null, 0, IntPtr.Zero);
+        mciSendString("open \"" + file + "\" type mpegvideo alias media", null, 0, IntPtr.Zero);
+        mciSendString("play media notify", null, 0, Handle);
+    }
 
     protected override CreateParams CreateParams
     {
@@ -1311,7 +1249,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static string GetGoogletHtml(string url, CookieContainer cookie, string refer)
+    private static string GetGoogletHtml(string url, CookieContainer cookie, string refer)
     {
         string text = "";
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -1341,7 +1279,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public static string Translate_Google(string text)
+    private static string Translate_Google(string text)
     {
         string text2 = "";
         try
@@ -1363,7 +1301,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_jp)
             {
-                if (contain_jap(repalceStr(Del_ch(text.Trim( )))))
+                if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(text.Trim( )))))
                 {
                     text3 = "ja";
                     text4 = "zh-CN";
@@ -1376,7 +1314,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_ko)
             {
-                if (contain_kor(text.Trim( )))
+                if (TextUtils.ContainKor(text.Trim( )))
                 {
                     text3 = "ko";
                     text4 = "zh-CN";
@@ -1419,7 +1357,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public static string CookieCollectionToStrCookie(CookieCollection cookie)
+    private static string CookieCollectionToStrCookie(CookieCollection cookie)
     {
         string text;
         if (cookie == null)
@@ -1439,7 +1377,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public string ScanQRCode( )
+    private string ScanQRCode( )
     {
         string text = "";
         try
@@ -1457,7 +1395,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public void Main_baidu_search(object o, EventArgs e)
+    private void Main_baidu_search(object o, EventArgs e)
     {
         if (string.IsNullOrEmpty(RichBoxBody.SelectText))
         {
@@ -1467,114 +1405,7 @@ public partial class FmMain : Form
         Process.Start("https://www.baidu.com/s?wd=" + RichBoxBody.SelectText);
     }
 
-    public void TrayUpdateClick(object o, EventArgs e) => Program.CheckUpdate( );
-
-    public static bool contain_jap(string str) => Regex.IsMatch(str, "[\\u3040-\\u309F]") || Regex.IsMatch(str, "[\\u30A0-\\u30FF]");
-
-    public static bool contain_kor(string str) => Regex.IsMatch(str, "[\\uac00-\\ud7ff]");
-
-    public static string Del_ch(string str)
-    {
-        string text = str;
-        if (Regex.IsMatch(str, "[\\u4e00-\\u9fa5]"))
-        {
-            text = string.Empty;
-            char[] array = str.ToCharArray( );
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i] is < '一' or > '龥')
-                {
-                    text += array[i].ToString( );
-                }
-            }
-        }
-        return text;
-    }
-
-    public static string repalceStr(string hexData) => Regex.Replace(hexData, "[\\p{P}+~$`^=|__～\uff40＄\uff3e＋＝｜＜＞￥×┊ ]", "").ToUpper(System.Globalization.CultureInfo.CurrentCulture);
-
-    public static string RemovePunctuation(string str)
-    {
-        str = str.Replace(",", "").Replace("，", "").Replace(".", "")
-            .Replace("。", "")
-            .Replace("!", "")
-            .Replace("！", "")
-            .Replace("?", "")
-            .Replace("？", "")
-            .Replace(":", "")
-            .Replace("：", "")
-            .Replace(";", "")
-            .Replace("；", "")
-            .Replace("～", "")
-            .Replace("-", "")
-            .Replace("_", "")
-            .Replace("——", "")
-            .Replace("—", "")
-            .Replace("--", "")
-            .Replace("【", "")
-            .Replace("】", "")
-            .Replace("\\", "")
-            .Replace("(", "")
-            .Replace(")", "")
-            .Replace("（", "")
-            .Replace("）", "")
-            .Replace("#", "")
-            .Replace("$", "")
-            .Replace("、", "")
-            .Replace("‘", "")
-            .Replace("’", "")
-            .Replace("“", "")
-            .Replace("”", "");
-        return str;
-    }
-
-    public static string GetUniqueFileName(string fullName)
-    {
-        string text;
-        if (!File.Exists(fullName))
-        {
-            text = fullName;
-        }
-        else
-        {
-            string directoryName = Path.GetDirectoryName(fullName);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fullName);
-            string extension = Path.GetExtension(fullName);
-            int num = 1;
-            string text2;
-            do
-            {
-                text2 = Path.Combine(directoryName, string.Format("{0}[{1}].{2}", fileNameWithoutExtension, num++, extension));
-            }
-            while (File.Exists(text2));
-            text = text2;
-        }
-        return text;
-    }
-
-    public static string ReFileName(string strFolderPath, string strFileName)
-    {
-        string text = strFolderPath + "\\" + strFileName;
-        int num = text.LastIndexOf('.');
-        text = text.Insert(num, "_{0}");
-        int num2 = 1;
-        string text2 = string.Format(text, num2);
-        while (File.Exists(text2))
-        {
-            text2 = string.Format(text, num2);
-            num2++;
-        }
-        return Path.GetFileName(text2);
-    }
-
-    public void PlaySong(string file)
-    {
-        mciSendString("close media", null, 0, IntPtr.Zero);
-        mciSendString("open \"" + file + "\" type mpegvideo alias media", null, 0, IntPtr.Zero);
-        mciSendString("play media notify", null, 0, Handle);
-    }
-
-    public void Main_Voice_Click(object o, EventArgs e)
+    private void Main_Voice_Click(object o, EventArgs e)
     {
         RichBoxBody.Focus( );
         speak_copyb = "朗读";
@@ -1582,7 +1413,7 @@ public partial class FmMain : Form
         SendMessage(Handle, 786, 590);
     }
 
-    public void Trans_Voice_Click(object o, EventArgs e)
+    private void Trans_Voice_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
         speak_copyb = "朗读";
@@ -1590,7 +1421,7 @@ public partial class FmMain : Form
         SendMessage(Handle, 786, 590);
     }
 
-    public void Speak_child( )
+    private void Speak_child( )
     {
         if (RichBoxBody.Text != null || !string.IsNullOrEmpty(RichBoxBody_T.Text))
         {
@@ -1610,8 +1441,7 @@ public partial class FmMain : Form
         }
     }
 
-
-    public void change_zh_tra_Click(object o, EventArgs e)
+    private void change_zh_tra_Click(object o, EventArgs e)
     {
         if (RichBoxBody.Text != null)
         {
@@ -1619,7 +1449,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void change_tra_zh_Click(object o, EventArgs e)
+    private void change_tra_zh_Click(object o, EventArgs e)
     {
         if (RichBoxBody.Text != null)
         {
@@ -1627,7 +1457,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void change_str_Upper_Click(object o, EventArgs e)
+    private void change_str_Upper_Click(object o, EventArgs e)
     {
         if (RichBoxBody.Text != null)
         {
@@ -1635,7 +1465,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void change_Upper_str_Click(object o, EventArgs e)
+    private void change_Upper_str_Click(object o, EventArgs e)
     {
         if (RichBoxBody.Text != null)
         {
@@ -1643,7 +1473,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static string[] hotkey(string text, string text2, string value)
+    private static string[] hotkey(string text, string text2, string value)
     {
         string[] array = (value + "+").Split(new char[] { '+' });
         if (array.Length == 3)
@@ -1659,7 +1489,7 @@ public partial class FmMain : Form
         return new string[] { text, text2 };
     }
 
-    public void SetHotkey(string text, string text2, string value, int flag)
+    private void SetHotkey(string text, string text2, string value, int flag)
     {
         string[] array = (value + "+").Split(new char[] { '+' });
         if (array.Length == 3)
@@ -1681,8 +1511,7 @@ public partial class FmMain : Form
         RegisterHotKey(Handle, flag, (KeyModifiers) Enum.Parse(typeof(KeyModifiers), array2[0].Trim( )), (Keys) Enum.Parse(typeof(Keys), array2[1].Trim( )));
     }
 
-
-    public void p_note(string a)
+    private void p_note(string a)
     {
         for (int i = 0; i < StaticValue.v_notecount; i++)
         {
@@ -1697,21 +1526,21 @@ public partial class FmMain : Form
         }
     }
 
-    public void tray_note_Click(object o, EventArgs e)
+    private void tray_note_Click(object o, EventArgs e)
     {
         fmnote.Show( );
         fmnote.WindowState = FormWindowState.Normal;
         fmnote.Visible = true;
     }
 
-    public string Google_Hotkey(string text)
+    private string Google_Hotkey(string text)
     {
         string text2 = "";
         try
         {
             string text3;
             string text4;
-            if (contain_ch(trans_hotkey.Trim( )))
+            if (TextUtils.ContainsZh(trans_hotkey.Trim( )))
             {
                 text3 = "zh-CN";
                 text4 = "en";
@@ -1744,7 +1573,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public static string Get_html(string url)
+    private static string Get_html(string url)
     {
         string text = "";
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -1768,7 +1597,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public static CookieContainer Post_Html_Getcookie(string url, string post_str)
+    private static CookieContainer Post_Html_Getcookie(string url, string post_str)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(post_str);
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -1796,7 +1625,7 @@ public partial class FmMain : Form
         return httpWebRequest.CookieContainer;
     }
 
-    public static string Post_Html_Reccookie(string url, string post_str, CookieContainer CookieContainer)
+    private static string Post_Html_Reccookie(string url, string post_str, CookieContainer CookieContainer)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(post_str);
         string text = "";
@@ -1826,7 +1655,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public static string Post_Html(string url, string post_str)
+    private static string Post_Html(string url, string post_str)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(post_str);
         string text = "";
@@ -1854,7 +1683,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public void Main_OCR_Quickscreenshots( )
+    private void Main_OCR_Quickscreenshots( )
     {
         if (!StaticValue.截图排斥)
         {
@@ -2005,7 +1834,7 @@ public partial class FmMain : Form
                     }
                     else if (mode_flag == "自动保存" && IniHelp.GetValue("配置", "自动保存") == "True")
                     {
-                        string text11 = IniHelp.GetValue("配置", "截图位置") + "\\" + ReFileName(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
+                        string text11 = IniHelp.GetValue("配置", "截图位置") + "\\" + TextUtils.RenameFile(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
                         image_screen.Save(text11, ImageFormat.Png);
                         StaticValue.截图排斥 = false;
                         if (IniHelp.GetValue("截图音效", "自动保存") == "True")
@@ -2114,7 +1943,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void Main_OCR_Thread( )
+    private void Main_OCR_Thread( )
     {
         if (!string.IsNullOrEmpty(ScanQRCode( )))
         {
@@ -2196,7 +2025,7 @@ public partial class FmMain : Form
         GC.Collect( );
     }
 
-    public void Main_OCR_Thread_last( )
+    private void Main_OCR_Thread_last( )
     {
         image_screen.Dispose( );
         GC.Collect( );
@@ -2204,13 +2033,13 @@ public partial class FmMain : Form
         string text = typeset_txt;
         text = check_str(text);
         SplitedText = check_str(SplitedText);
-        if (!punctuation_has_punctuation(text))
+        if (!TextUtils.HasPunctuation(text))
         {
             text = SplitedText;
         }
-        if (contain_ch(text.Trim( )))
+        if (TextUtils.ContainsZh(text.Trim( )))
         {
-            text = Del_Space(text);
+            text = TextUtils.RemoveSpace(text);
         }
         if (!string.IsNullOrEmpty(text))
         {
@@ -2345,7 +2174,7 @@ public partial class FmMain : Form
 
     private void OCR_baidu_Kor_Click(object o, EventArgs e) => OcrForeach("韩语");
 
-    public static string Get_GoogletHtml(string url)
+    private static string Get_GoogletHtml(string url)
     {
         string text = "";
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -2377,7 +2206,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public void OCR_baidu( )
+    private void OCR_baidu( )
     {
         SplitedText = "";
         try
@@ -2437,17 +2266,22 @@ public partial class FmMain : Form
         }
     }
 
-    public static string check_str(string text)
+    private static string check_str(string text)
     {
-        if (contain_ch(text.Trim( )))
+        if (TextUtils.ContainsZh(text.Trim( )))
         {
             text = PunctuationEnZh(text.Trim( ));
             text = check_ch_en(text.Trim( ));
         }
         else
         {
-            text = punctuation_ch_en(text.Trim( ));
-            if (contain(text, ".") && (contain(text, ",") || contain(text, "!") || contain(text, "(") || contain(text, ")") || contain(text, "'")))
+            text = PunctuationChEn(text.Trim( ));
+            if (TextUtils.Contains(text, ".")
+                && (TextUtils.Contains(text, ",")
+                || TextUtils.Contains(text, "!")
+                || TextUtils.Contains(text, "(")
+                || TextUtils.Contains(text, ")")
+                || TextUtils.Contains(text, "'")))
             {
                 text = punctuation_Del_space(text);
             }
@@ -2455,7 +2289,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public static string punctuation_en_ch_x(string text)
+    private static string punctuation_en_ch_x(string text)
     {
         char[] array = text.ToCharArray( );
         for (int i = 0; i < array.Length; i++)
@@ -2469,7 +2303,7 @@ public partial class FmMain : Form
         return new string(array);
     }
 
-    public static string OCR_sougou_SogouPost(string url, CookieContainer cookie, byte[] content)
+    private static string OCR_sougou_SogouPost(string url, CookieContainer cookie, byte[] content)
     {
         string text = "";
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -2512,7 +2346,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public static string OCR_sougou_SogouGet(string url, CookieContainer cookie, string refer)
+    private static string OCR_sougou_SogouGet(string url, CookieContainer cookie, string refer)
     {
         string text = "";
         HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
@@ -2551,7 +2385,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public static string OCR_sougou_SogouOCR(Image img)
+    private static string OCR_sougou_SogouOCR(Image img)
     {
         CookieContainer cookieContainer = new( );
         string text = "http://pic.sogou.com/pic/upload_pic.jsp";
@@ -2581,7 +2415,7 @@ public partial class FmMain : Form
         return array2;
     }
 
-    public static byte[] OCR_sougou_Content_Length(Image img)
+    private static byte[] OCR_sougou_Content_Length(Image img)
     {
         byte[] bytes = Encoding.UTF8.GetBytes("------WebKitFormBoundary1ZZDB9E4sro7pf0g\r\nContent-Disposition: form-data; name=\"pic_path\"; filename=\"test2018.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n");
         byte[] array = OCR_ImgToByte(img);
@@ -2593,7 +2427,7 @@ public partial class FmMain : Form
         return array2;
     }
 
-    public void OCR_sougou2( )
+    private void OCR_sougou2( )
     {
         try
         {
@@ -2642,7 +2476,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static byte[] Mergebyte(byte[] a, byte[] b, byte[] c)
+    private static byte[] Mergebyte(byte[] a, byte[] b, byte[] c)
     {
         byte[] array = new byte[a.Length + b.Length + c.Length];
         a.CopyTo(array, 0);
@@ -2651,7 +2485,7 @@ public partial class FmMain : Form
         return array;
     }
 
-    public static bool contain_punctuation(string str) => Regex.IsMatch(str, "\\p{P}");
+    private static bool contain_punctuation(string str) => Regex.IsMatch(str, "\\p{P}");
 
     private void TrayHelpClick(object o, EventArgs e)
     {
@@ -2659,11 +2493,11 @@ public partial class FmMain : Form
         new FmHelp( ).Show( );
     }
 
-    public static bool Is_punctuation(string text) => ",;:，（）、；".IndexOf(text) != -1;
+    private static bool Is_punctuation(string text) => ",;:，（）、；".IndexOf(text) != -1;
 
-    public static bool has_punctuation(string text) => ",;，；、<>《》()-（）".IndexOf(text) != -1;
+    private static bool has_punctuation(string text) => ",;，；、<>《》()-（）".IndexOf(text) != -1;
 
-    public void checked_txt(JArray jarray, int lastlength, string words)
+    private void checked_txt(JArray jarray, int lastlength, string words)
     {
         int num = 0;
         for (int i = 0; i < jarray.Count; i++)
@@ -2686,7 +2520,7 @@ public partial class FmMain : Form
             int length3 = jobject2[words].ToString( ).Length;
             if (Math.Abs(length2 - length3) <= 0)
             {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
                 {
                     text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
                 }
@@ -2705,7 +2539,7 @@ public partial class FmMain : Form
             }
             else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Math.Abs(length2 - length3) <= 1)
             {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
                 {
                     text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
                 }
@@ -2722,47 +2556,47 @@ public partial class FmMain : Form
                     text2 += jobject[words].ToString( ).Trim( );
                 }
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && length2 <= num / 2)
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && length2 <= num / 2)
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )) && length3 - length2 < 4 && array2[1].ToString( ) == ".")
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )) && length3 - length2 < 4 && array2[1].ToString( ) == ".")
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_en(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_en(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (IsNum(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (IsNum(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
@@ -2886,7 +2720,7 @@ public partial class FmMain : Form
 
     private void OCR_righttoleft_Click(object o, EventArgs e) => OcrForeach("从右向左");
 
-    public void OCR_baidu_acc( )
+    private void OCR_baidu_acc( )
     {
         SplitedText = "";
         string text = "";
@@ -2939,7 +2773,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_Tencent_handwriting( )
+    private void OCR_Tencent_handwriting( )
     {
         try
         {
@@ -3015,7 +2849,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static Image BoundingBox(Image<Gray, byte> src, Image<Bgr, byte> draw)
+    private static Image BoundingBox(Image<Gray, byte> src, Image<Bgr, byte> draw)
     {
         Image image2;
         using (VectorOfVectorOfPoint vectorOfVectorOfPoint = new( ))
@@ -3048,7 +2882,7 @@ public partial class FmMain : Form
         return image2;
     }
 
-    public void select_image(Image<Gray, byte> src, Image<Bgr, byte> draw)
+    private void select_image(Image<Gray, byte> src, Image<Bgr, byte> draw)
     {
         try
         {
@@ -3107,7 +2941,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static Image FindBundingBox(Bitmap bitmap)
+    private static Image FindBundingBox(Bitmap bitmap)
     {
         Image<Bgr, byte> image = new(bitmap);
         Image<Gray, byte> image2 = new(image.Width, image.Height);
@@ -3122,7 +2956,7 @@ public partial class FmMain : Form
         return BoundingBox(image5, image4);
     }
 
-    public void Captureimage(int width, Image g_image, string saveFilePath, Rectangle rect)
+    private void Captureimage(int width, Image g_image, string saveFilePath, Rectangle rect)
     {
         Bitmap bitmap = new(width + 70, g_image.Size.Height);
         Graphics graphics = Graphics.FromImage(bitmap);
@@ -3137,7 +2971,7 @@ public partial class FmMain : Form
         graphics.Dispose( );
     }
 
-    public void OCR_baidu_use( )
+    private void OCR_baidu_use( )
     {
         SplitedText = "";
         try
@@ -3194,7 +3028,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_sougou_use( )
+    private void OCR_sougou_use( )
     {
         try
         {
@@ -3265,8 +3099,7 @@ public partial class FmMain : Form
         }
     }
 
-
-    public void baidu_image_a(object objEvent)
+    private void baidu_image_a(object objEvent)
     {
         try
         {
@@ -3284,7 +3117,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void baidu_image_b(object objEvent)
+    private void baidu_image_b(object objEvent)
     {
         try
         {
@@ -3342,7 +3175,7 @@ public partial class FmMain : Form
         image_ori.Dispose( );
     }
 
-    public void OCR_baidu_use_B(Image imagearr)
+    private void OCR_baidu_use_B(Image imagearr)
     {
         try
         {
@@ -3394,7 +3227,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_baidu_use_A(Image imagearr)
+    private void OCR_baidu_use_A(Image imagearr)
     {
         try
         {
@@ -3446,7 +3279,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static void DeleteFile(string path)
+    private static void DeleteFile(string path)
     {
         if (File.GetAttributes(path) == FileAttributes.Directory)
         {
@@ -3456,7 +3289,7 @@ public partial class FmMain : Form
         File.Delete(path);
     }
 
-    public static void OCR_baidu_image(Image imagearr, string str_image)
+    private static void OCR_baidu_image(Image imagearr, string str_image)
     {
         try
         {
@@ -3508,7 +3341,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_baidu_use_E(Image imagearr)
+    private void OCR_baidu_use_E(Image imagearr)
     {
         try
         {
@@ -3560,7 +3393,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_baidu_use_D(Image imagearr)
+    private void OCR_baidu_use_D(Image imagearr)
     {
         try
         {
@@ -3612,7 +3445,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_baidu_use_C(Image imagearr)
+    private void OCR_baidu_use_C(Image imagearr)
     {
         try
         {
@@ -3664,7 +3497,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void baidu_image_c(object objEvent)
+    private void baidu_image_c(object objEvent)
     {
         try
         {
@@ -3682,7 +3515,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void baidu_image_d(object objEvent)
+    private void baidu_image_d(object objEvent)
     {
         try
         {
@@ -3700,7 +3533,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void baidu_image_e(object objEvent)
+    private void baidu_image_e(object objEvent)
     {
         try
         {
@@ -3718,7 +3551,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void bool_image_count(int num)
+    private void bool_image_count(int num)
     {
         if (num >= 5)
         {
@@ -3811,7 +3644,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void exit_thread( )
+    private void exit_thread( )
     {
         try
         {
@@ -3837,40 +3670,7 @@ public partial class FmMain : Form
         UnregisterHotKey(Handle, 222);
     }
 
-    private static Image<Gray, byte> randon(Image<Gray, byte> imageInput)
-    {
-        int width = imageInput.Width;
-        int height = imageInput.Height;
-        int num = 0;
-        int[] array = new int[height];
-        Image<Gray, byte> image = imageInput;
-        for (int i = -20; i < 20; i++)
-        {
-            Image<Gray, byte> image2 = imageInput.Rotate(i, new Gray(1.0));
-            for (int j = 0; j < height; j++)
-            {
-                int num2 = 0;
-                for (int k = 0; k < width; k++)
-                {
-                    num2 += image2.Data[j, k, 0];
-                }
-                array[j] = num2;
-            }
-            int num3 = 0;
-            for (int l = 0; l < height - 1; l++)
-            {
-                num3 += Math.Abs(array[l] - array[l + 1]);
-            }
-            if (num3 > num)
-            {
-                image = image2;
-                num = num3;
-            }
-        }
-        return image;
-    }
-
-    public static void SetGlobalProxy( ) => WebRequest.DefaultWebProxy = null;
+    private static void SetGlobalProxy( ) => WebRequest.DefaultWebProxy = null;
 
     private void tray_null_Proxy_Click(object o, EventArgs e)
     {
@@ -3890,13 +3690,13 @@ public partial class FmMain : Form
         WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy( );
     }
 
-    public void change_pinyin_Click(object o, EventArgs e)
+    private void change_pinyin_Click(object o, EventArgs e)
     {
         pinyin_flag = true;
         transtalate_Click( );
     }
 
-    public static string Post_Html_pinyin(string url, string post_str)
+    private static string Post_Html_pinyin(string url, string post_str)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(post_str);
         string text = "";
@@ -3953,7 +3753,7 @@ public partial class FmMain : Form
         return new Bitmap(bitmap2);
     }
 
-    public void 翻译文本( )
+    private void 翻译文本( )
     {
         if (IniHelp.GetValue("配置", "快速翻译") == "True")
         {
@@ -3967,7 +3767,7 @@ public partial class FmMain : Form
                 }
                 if (IniHelp.GetValue("配置", "翻译接口") == "百度")
                 {
-                    text = Translate_baidu(trans_hotkey);
+                    text = TranslateBaidu(trans_hotkey);
                 }
                 if (IniHelp.GetValue("配置", "翻译接口") == "腾讯")
                 {
@@ -4001,7 +3801,7 @@ public partial class FmMain : Form
         TopMost = false;
     }
 
-    public static Rectangle[] GetRects(Bitmap pic)
+    private static Rectangle[] GetRects(Bitmap pic)
     {
         List<Rectangle> list = new( );
         bool[][] colors = getColors(pic);
@@ -4022,7 +3822,7 @@ public partial class FmMain : Form
         return list.ToArray( );
     }
 
-    public static Bitmap GetRect(Image pic, Rectangle Rect)
+    private static Bitmap GetRect(Image pic, Rectangle Rect)
     {
         Rectangle rectangle = new(0, 0, Rect.Width, Rect.Height);
         Bitmap bitmap = new(rectangle.Width, rectangle.Height);
@@ -4039,13 +3839,13 @@ public partial class FmMain : Form
         for (int i = 0; i < buildRects.Length; i++)
         {
             array[i] = GetRect(buildPic, buildRects[i]);
-            string text = IniHelp.GetValue("配置", "截图位置") + "\\" + ReFileName(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
+            string text = IniHelp.GetValue("配置", "截图位置") + "\\" + TextUtils.RenameFile(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
             array[i].Save(text, ImageFormat.Png);
         }
         return array;
     }
 
-    public static bool[][] getColors(Bitmap pic)
+    private static bool[][] getColors(Bitmap pic)
     {
         bool[][] array = new bool[pic.Height][];
         for (int i = 0; i < pic.Height; i++)
@@ -4073,9 +3873,9 @@ public partial class FmMain : Form
         return array;
     }
 
-    public static bool Exist(bool[][] Colors, int x, int y) => x >= 0 && y >= 0 && x < Colors.Length && y < Colors[0].Length && Colors[x][y];
+    private static bool Exist(bool[][] Colors, int x, int y) => x >= 0 && y >= 0 && x < Colors.Length && y < Colors[0].Length && Colors[x][y];
 
-    public static bool R_Exist(bool[][] Colors, Rectangle Rect)
+    private static bool R_Exist(bool[][] Colors, Rectangle Rect)
     {
         if (Rect.Right >= Colors[0].Length || Rect.Left < 0)
         {
@@ -4091,7 +3891,7 @@ public partial class FmMain : Form
         return false;
     }
 
-    public static bool D_Exist(bool[][] Colors, Rectangle Rect)
+    private static bool D_Exist(bool[][] Colors, Rectangle Rect)
     {
         if (Rect.Bottom >= Colors.Length || Rect.Top < 0)
         {
@@ -4107,7 +3907,7 @@ public partial class FmMain : Form
         return false;
     }
 
-    public static bool L_Exist(bool[][] Colors, Rectangle Rect)
+    private static bool L_Exist(bool[][] Colors, Rectangle Rect)
     {
         if (Rect.Right >= Colors[0].Length || Rect.Left < 0)
         {
@@ -4123,7 +3923,7 @@ public partial class FmMain : Form
         return false;
     }
 
-    public static bool U_Exist(bool[][] Colors, Rectangle Rect)
+    private static bool U_Exist(bool[][] Colors, Rectangle Rect)
     {
         if (Rect.Bottom >= Colors.Length || Rect.Top < 0)
         {
@@ -4139,7 +3939,7 @@ public partial class FmMain : Form
         return false;
     }
 
-    public static Rectangle GetRect(bool[][] Colors, int x, int y)
+    private static Rectangle GetRect(bool[][] Colors, int x, int y)
     {
         Rectangle rectangle = new(new Point(y, x), new Size(1, 1));
         bool flag;
@@ -4185,7 +3985,7 @@ public partial class FmMain : Form
         return rectangle;
     }
 
-    public static void clearRect(bool[][] Colors, Rectangle Rect)
+    private static void clearRect(bool[][] Colors, Rectangle Rect)
     {
         for (int i = Rect.Top; i <= Rect.Bottom; i++)
         {
@@ -4196,7 +3996,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static string ReFileNamekey(string strFilePath)
+    private static string ReFileNamekey(string strFilePath)
     {
         int num = strFilePath.LastIndexOf('.');
         string text = strFilePath.Insert(num, "_{0}");
@@ -4272,7 +4072,7 @@ public partial class FmMain : Form
         return array;
     }
 
-    public void OCR_sougou_bat(Bitmap image_screen)
+    private void OCR_sougou_bat(Bitmap image_screen)
     {
         try
         {
@@ -4314,7 +4114,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static Image BoundingBox_fences(Image<Gray, byte> src, Image<Bgr, byte> draw)
+    private static Image BoundingBox_fences(Image<Gray, byte> src, Image<Bgr, byte> draw)
     {
         Image image2;
         using (VectorOfVectorOfPoint vectorOfVectorOfPoint = new( ))
@@ -4346,7 +4146,7 @@ public partial class FmMain : Form
         return image2;
     }
 
-    public Image FindBundingBox_fences(Bitmap bitmap)
+    private Image FindBundingBox_fences(Bitmap bitmap)
     {
         Image<Bgr, byte> image = new(bitmap);
         Image<Gray, byte> image2 = new(image.Width, image.Height);
@@ -4360,7 +4160,7 @@ public partial class FmMain : Form
         CvInvoke.Canny(image3, image5, 255.0, 255.0, 5, true);
         Image image6 = BoundingBox_fences(image5, image4);
         Image<Gray, byte> image7 = new((Bitmap) image6);
-        BoundingBox_fences_Up(image7);
+        BoundingBoxFencesUp(image7);
         image.Dispose( );
         image2.Dispose( );
         image3.Dispose( );
@@ -4368,7 +4168,7 @@ public partial class FmMain : Form
         return image6;
     }
 
-    public void BoundingBox_fences_Up(Image<Gray, byte> src)
+    private void BoundingBoxFencesUp(Image<Gray, byte> src)
     {
         using VectorOfVectorOfPoint vectorOfVectorOfPoint = new( );
         CvInvoke.FindContours(src, vectorOfVectorOfPoint, null, RetrType.List, ChainApproxMethod.ChainApproxSimple, default);
@@ -4382,7 +4182,7 @@ public partial class FmMain : Form
         getSubPics_ocr(image_screen, array);
     }
 
-    public void checked_location_txt(JArray jarray, int lastlength, string words)
+    private void CheckedLocationTxt(JArray jarray, int lastlength, string words)
     {
         int num = 0;
         for (int i = 0; i < jarray.Count; i++)
@@ -4405,7 +4205,7 @@ public partial class FmMain : Form
             int length3 = jobject2[words].ToString( ).Length;
             if (Math.Abs(length2 - length3) <= 0)
             {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
                 {
                     text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
                 }
@@ -4424,7 +4224,7 @@ public partial class FmMain : Form
             }
             else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Math.Abs(length2 - length3) <= 1)
             {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
                 {
                     text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
                 }
@@ -4441,47 +4241,47 @@ public partial class FmMain : Form
                     text2 += jobject[words].ToString( ).Trim( );
                 }
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && length2 <= num / 2)
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && length2 <= num / 2)
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )) && length3 - length2 < 4 && array2[1].ToString( ) == ".")
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )) && length3 - length2 < 4 && array2[1].ToString( ) == ".")
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_en(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_en(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && contain_en(array2[0].ToString( )))
+            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
-            else if (contain_ch(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
+            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
-            else if (IsNum(array[array.Length - lastlength].ToString( )) && contain_ch(array2[0].ToString( )))
+            else if (IsNum(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
@@ -4503,7 +4303,7 @@ public partial class FmMain : Form
         typeset_txt = text2.Replace("\r\n\r\n", "\r\n") + JObject.Parse(jarray[jarray.Count - 1].ToString( ))[words];
     }
 
-    public void checked_location_sougou(JArray jarray, int lastlength, string words, string location)
+    private void checked_location_sougou(JArray jarray, int lastlength, string words, string location)
     {
         paragraph = false;
         int num = 20000;
@@ -4540,7 +4340,7 @@ public partial class FmMain : Form
             {
                 text = text.Trim( ) + "\r\n" + jobject4[words].ToString( ).Trim( );
             }
-            else if (IsNum(array[0].ToString( )) && !contain_ch(array[1].ToString( )) && flag)
+            else if (IsNum(array[0].ToString( )) && !TextUtils.ContainsZh(array[1].ToString( )) && flag)
             {
                 text = text.Trim( ) + "\r\n" + jobject4[words].ToString( ).Trim( ) + "\r\n";
             }
@@ -4548,7 +4348,7 @@ public partial class FmMain : Form
             {
                 text += jobject4[words].ToString( ).Trim( );
             }
-            if (contain_en(array[array.Length - lastlength].ToString( )))
+            if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )))
             {
                 text = text + jobject3[words].ToString( ).Trim( ) + " ";
             }
@@ -4558,7 +4358,7 @@ public partial class FmMain : Form
         typeset_txt = text;
     }
 
-    public static int split_char_x(string split_char) => Convert.ToInt32(split_char.Split(new char[] { ',' })[0]);
+    private static int split_char_x(string split_char) => Convert.ToInt32(split_char.Split(new char[] { ',' })[0]);
 
     private void tray_double_Click(object o, EventArgs e)
     {
@@ -4569,9 +4369,9 @@ public partial class FmMain : Form
         Main_OCR_Quickscreenshots( );
     }
 
-    public static int en_count(string text) => Regex.Matches(text, "\\s+").Count + 1;
+    private static int en_count(string text) => Regex.Matches(text, "\\s+").Count + 1;
 
-    public static int ch_count(string str)
+    private static int ch_count(string str)
     {
         int num = 0;
         Regex regex = new("^[\\u4E00-\\u9FA5]{0,}$");
@@ -4585,7 +4385,7 @@ public partial class FmMain : Form
         return num;
     }
 
-    public void checked_location_youdao(JArray jarray, int lastlength, string words, string location)
+    private void checked_location_youdao(JArray jarray, int lastlength, string words, string location)
     {
         paragraph = false;
         int num = 20000;
@@ -4622,7 +4422,7 @@ public partial class FmMain : Form
             {
                 text = text.Trim( ) + "\r\n" + jobject4[words].ToString( ).Trim( );
             }
-            else if (IsNum(array[0].ToString( )) && !contain_ch(array[1].ToString( )) && flag)
+            else if (IsNum(array[0].ToString( )) && !TextUtils.ContainsZh(array[1].ToString( )) && flag)
             {
                 text = text.Trim( ) + "\r\n" + jobject4[words].ToString( ).Trim( ) + "\r\n";
             }
@@ -4630,7 +4430,7 @@ public partial class FmMain : Form
             {
                 text += jobject4[words].ToString( ).Trim( );
             }
-            if (contain_en(array[array.Length - lastlength].ToString( )))
+            if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )))
             {
                 text = text + jobject3[words].ToString( ).Trim( ) + " ";
             }
@@ -4640,11 +4440,11 @@ public partial class FmMain : Form
         typeset_txt = text;
     }
 
-    public static int split_char_youdao(string split_char, int i) => Convert.ToInt32(split_char.Split(new char[] { ',' })[i - 1]);
+    private static int split_char_youdao(string split_char, int i) => Convert.ToInt32(split_char.Split(new char[] { ',' })[i - 1]);
 
-    public void Trans_google_Click(object o, EventArgs e) => Trans_foreach("谷歌");
+    private void Trans_google_Click(object o, EventArgs e) => Trans_foreach("谷歌");
 
-    public void Trans_baidu_Click(object o, EventArgs e) => Trans_foreach("百度");
+    private void Trans_baidu_Click(object o, EventArgs e) => Trans_foreach("百度");
 
     private void Trans_foreach(string name)
     {
@@ -4671,7 +4471,7 @@ public partial class FmMain : Form
         }
     }
 
-    public string GetBaiduHtml(string url, CookieContainer cookie, string refer, string content_length)
+    private string GetBaiduHtml(string url, CookieContainer cookie, string refer, string content_length)
     {
         string text2;
         try
@@ -4702,7 +4502,7 @@ public partial class FmMain : Form
         return text2;
     }
 
-    private static string Translate_baidu(string Text)
+    private static string TranslateBaidu(string Text)
     {
         string text = "";
         try
@@ -4725,7 +4525,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_jp)
             {
-                if (contain_jap(repalceStr(Del_ch(Text.Trim( )))))
+                if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(Text.Trim( )))))
                 {
                     text2 = "jp";
                     text3 = "zh";
@@ -4738,7 +4538,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_ko)
             {
-                if (contain_kor(Text.Trim( )))
+                if (TextUtils.ContainKor(Text.Trim( )))
                 {
                     text2 = "kor";
                     text3 = "zh";
@@ -4780,9 +4580,9 @@ public partial class FmMain : Form
         return text;
     }
 
-    public void Trans_tencent_Click(object o, EventArgs e) => Trans_foreach("腾讯");
+    private void Trans_tencent_Click(object o, EventArgs e) => Trans_foreach("腾讯");
 
-    public static string Content_Length(string text, string fromlang, string tolang) => string.Concat(new string[]
+    private static string Content_Length(string text, string fromlang, string tolang) => string.Concat(new string[]
         {
             "&source=",
             fromlang,
@@ -4792,7 +4592,7 @@ public partial class FmMain : Form
             HttpUtility.UrlEncode(text).Replace("+", "%20")
         });
 
-    public string TencentPOST(string url, string content)
+    private string TencentPOST(string url, string content)
     {
         string text2;
         try
@@ -4855,7 +4655,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_jp)
             {
-                if (contain_jap(repalceStr(Del_ch(strtrans.Trim( )))))
+                if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(strtrans.Trim( )))))
                 {
                     text2 = "jp";
                     text3 = "zh";
@@ -4868,7 +4668,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_ko)
             {
-                if (contain_kor(strtrans.Trim( )))
+                if (TextUtils.ContainKor(strtrans.Trim( )))
                 {
                     text2 = "kr";
                     text3 = "zh";
@@ -4892,11 +4692,6 @@ public partial class FmMain : Form
         }
         return text;
     }
-
-    public void webBrowser1_DocumentCompleted(object o, WebBrowserDocumentCompletedEventArgs e)
-    {
-    }
-
     private static string GetCookies(string url)
     {
         uint num = 1024U;
@@ -4916,10 +4711,7 @@ public partial class FmMain : Form
         return stringBuilder.ToString( );
     }
 
-    [DllImport("wininet.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref uint pcchCookieData, int dwFlags, IntPtr lpReserved);
-
-    public static string Post_GoogletHtml(string post_str)
+    private static string Post_GoogletHtml(string post_str)
     {
         string text = "";
         string text2 = "https://translate.google.cn/translate_a/single";
@@ -4949,7 +4741,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public static void httpDownload(string URL, string filename)
+    private static void httpDownload(string URL, string filename)
     {
         try
         {
@@ -4973,7 +4765,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_baidu_table( )
+    private void OCR_baidu_table( )
     {
         typeset_txt = "[消息]：表格已下载！";
         SplitedText = "";
@@ -5033,7 +4825,7 @@ public partial class FmMain : Form
         }
     }
 
-    public void OCR_table_Click(object o, EventArgs e) => OcrForeach("表格");
+    private void OCR_table_Click(object o, EventArgs e) => OcrForeach("表格");
 
     private void get_table(string str)
     {
@@ -5077,7 +4869,7 @@ public partial class FmMain : Form
         Graphics graphics = CreateGraphics( );
         int[] array4 = new int[array.Max( ) + 1];
         int num = 0;
-        _ = new SizeF(10f, 10f);
+        new SizeF(10f, 10f);
         int num2 = Screen.PrimaryScreen.Bounds.Width / 4;
         for (int k = 0; k < array3.GetLength(1); k++)
         {
@@ -5100,33 +4892,7 @@ public partial class FmMain : Form
         setClipboard_Table(array3, array4);
     }
 
-    private void setClipboard_table(string[,] wordo)
-    {
-        string text = "{\\rtf1\\ansi\\ansicpg936\\deff0\\deflang1033\\deflangfe2052{\\fonttbl{\\f0\\fnil\\fprq2\\fcharset134";
-        text += "\\'cb\\'ce\\'cc\\'e5;}{\\f1\\fnil\\fcharset134 \\'cb\\'ce\\'cc\\'e5;}}\\viewkind4\\uc1\\trowd\\trgaph108\\trleft-108";
-        text += "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrl\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 ";
-        for (int i = 1; i <= wordo.GetLength(1); i++)
-        {
-            text = text + "\\clbrdrt\\brdrw15\\brdrs\\clbrdrl\\brdrw15\\brdrs\\clbrdrb\\brdrw15\\brdrs\\clbrdrr\\brdrw15\\brdrs \\cellx" + i * 1800;
-        }
-        string text2 = "";
-        string text3 = "\\pard\\intbl\\kerning2\\f0";
-        string text4 = "\\row\\pard\\lang2052\\kerning0\\f1\\fs18\\par}";
-        for (int j = 0; j < wordo.GetLength(0); j++)
-        {
-            for (int k = 0; k < wordo.GetLength(1); k++)
-            {
-                text2 = k == 0 ? text2 + "\\fs24 " + wordo[j, k] : text2 + "\\cell " + wordo[j, k];
-            }
-            if (j != wordo.GetLength(0) - 1)
-            {
-                text2 += "\\row\\intbl";
-            }
-        }
-        RichBoxBody.rtf = text + text3 + text2 + text4;
-    }
-
-    public void Main_OCR_Thread_table( )
+    private void Main_OCR_Thread_table( )
     {
         ailibaba = new AliTable( );
         TimeSpan timeSpan = new(DateTime.Now.Ticks);
@@ -5163,8 +4929,8 @@ public partial class FmMain : Form
             {
                 SplitedText = "";
                 ailibaba.TopMost = true;
-                ailibaba.getcookie = "";
-                IniHelp.SetValue("特殊", "ali_cookie", ailibaba.getcookie);
+                ailibaba.GetCookie = "";
+                IniHelp.SetValue("特殊", "ali_cookie", ailibaba.GetCookie);
                 ailibaba.ShowDialog( );
                 SetForegroundWindow(ailibaba.Handle);
                 return;
@@ -5202,7 +4968,7 @@ public partial class FmMain : Form
         RichBoxBody.rtf = text + text3 + text2 + text4;
     }
 
-    public string Translate_Googlekey(string text)
+    private string Translate_Googlekey(string text)
     {
         string text2 = "";
         try
@@ -5224,7 +4990,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_jp)
             {
-                if (contain_jap(repalceStr(Del_ch(typeset_txt.Trim( )))))
+                if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(typeset_txt.Trim( )))))
                 {
                     text3 = "ja";
                     text4 = "zh-CN";
@@ -5237,7 +5003,7 @@ public partial class FmMain : Form
             }
             if (StaticValue.zh_ko)
             {
-                if (contain_kor(typeset_txt.Trim( )))
+                if (TextUtils.ContainKor(typeset_txt.Trim( )))
                 {
                     text3 = "ko";
                     text4 = "zh-CN";
@@ -5271,9 +5037,9 @@ public partial class FmMain : Form
         return text2;
     }
 
-    public void OCR_baidutable_Click(object o, EventArgs e) => OcrForeach("百度表格");
+    private void OCR_baidutable_Click(object o, EventArgs e) => OcrForeach("百度表格");
 
-    public void OCR_ailitable_Click(object o, EventArgs e) => OcrForeach("阿里表格");
+    private void OCR_ailitable_Click(object o, EventArgs e) => OcrForeach("阿里表格");
 
     private new void Refresh( )
     {
@@ -5293,11 +5059,11 @@ public partial class FmMain : Form
         Mathfuntion.Text = "公式";
     }
 
-    public static byte[] ImageToByteArray(Image img) => (byte[]) new ImageConverter( ).ConvertTo(img, typeof(byte[]));
+    private static byte[] ImageToByteArray(Image img) => (byte[]) new ImageConverter( ).ConvertTo(img, typeof(byte[]));
 
-    public static Stream BytesToStream(byte[] bytes) => new MemoryStream(bytes);
+    private static Stream BytesToStream(byte[] bytes) => new MemoryStream(bytes);
 
-    public void OCR_ali_table( )
+    private void OCR_ali_table( )
     {
         string text = "";
         SplitedText = "";
@@ -5323,7 +5089,7 @@ public partial class FmMain : Form
         }
     }
 
-    public static Bitmap BWPic(Bitmap mybm)
+    private static Bitmap BWPic(Bitmap mybm)
     {
         Bitmap bitmap = new(mybm.Width, mybm.Height);
         for (int i = 0; i < mybm.Width; i++)
@@ -5338,7 +5104,7 @@ public partial class FmMain : Form
         return bitmap;
     }
 
-    public static string Post_Html_final(string url, string post_str, string CookieContainer)
+    private static string Post_Html_final(string url, string post_str, string CookieContainer)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(post_str);
         string text = "";
@@ -5368,7 +5134,7 @@ public partial class FmMain : Form
         return text;
     }
 
-    public static void CopyHtmlToClipBoard(string html)
+    private static void CopyHtmlToClipBoard(string html)
     {
         Encoding utf = Encoding.UTF8;
         string text = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
@@ -5393,7 +5159,7 @@ public partial class FmMain : Form
         Clipboard.SetDataObject(dataObject);
     }
 
-    public static string Encript(string functionName, object[] pams)
+    private static string Encript(string functionName, object[] pams)
     {
         string text = File.ReadAllText("sign.js");
         ScriptControlClass scriptControlClass = new( );
@@ -5402,27 +5168,9 @@ public partial class FmMain : Form
         return ((IScriptControl) scriptControlClass).Run(functionName, ref pams).ToString( );
     }
 
-    private static object ExecuteScript(string sExpression, string sCode)
-    {
-        ScriptControl scriptControl = new ScriptControlClass
-        {
-            UseSafeSubset = true,
-            Language = "JScript"
-        };
-        scriptControl.AddCode(sCode);
-        try
-        {
-            return scriptControl.Eval(sExpression);
-        }
-        catch (Exception)
-        {
-        }
-        return null;
-    }
-
     private void OCR_Mathfuntion_Click(object o, EventArgs e) => OcrForeach("公式");
 
-    public void OCR_Math( )
+    private void OCR_Math( )
     {
         SplitedText = "";
         try
@@ -5463,147 +5211,100 @@ public partial class FmMain : Form
         }
     }
 
-    public string interface_flag;
+    private string interface_flag;
 
-    public string language;
+    private string language;
 
-    public string SplitedText;
+    private string SplitedText;
+    private string transtalate_fla;
 
-    public string note;
+    private Fmloading fmloading;
 
-    public string spacechar;
+    private Thread thread;
+    private string googleTranslate_txt;
 
-    public string richTextBox1_note;
+    private int num_ok;
+    private string auto_fla;
 
-    public string transtalate_fla;
+    private string baidu_vip;
 
-    public Fmloading fmloading;
+    private string htmltxt;
+    private bool speaking;
 
-    public Thread thread;
+    private static bool speak_copy;
 
-    public MenuItem Set;
+    private string speak_copyb;
+    private byte[] ttsData;
 
-    public string googleTranslate_txt;
+    private string[] pubnote;
 
-    public int num_ok;
+    private Fmnote fmnote;
 
-    public bool bolActive;
+    private Image image_screen;
 
-    public bool tencent_vip_f;
+    private int voice_count;
 
-    public string auto_fla;
+    private int form_width;
 
-    public string baidu_vip;
+    private int form_height;
 
-    public string htmltxt;
-
-    public static string TipText;
-
-    public bool speaking;
-
-    public static bool speak_copy;
-
-    public string speak_copyb;
-
-    public string speak_stop;
-
-    public byte[] ttsData;
-
-    public string[] pubnote;
-
-    public Fmnote fmnote;
-
-    public Image image_screen;
-
-    public int voice_count;
-
-    public int form_width;
-
-    public int form_height;
-
-    public bool change_QQ_screenshot;
+    private bool change_QQ_screenshot;
 
     private readonly FmFlags fmflags;
 
-    public string trans_hotkey;
+    private string trans_hotkey;
 
-    public TimeSpan ts;
+    private TimeSpan ts;
+    private Thread esc_thread;
 
-    public System.Timers.Timer esc_timer;
+    private string esc;
+    private string typeset_txt;
 
-    public Thread esc_thread;
-
-    public string esc;
-    public static string GetTkkJS;
-
-    public string typeset_txt;
-
-    public string baidu_flags;
-
-    public bool 截图排斥;
-
+    private string baidu_flags;
     private Image image_ori;
 
-    public string shupai_Right_txt;
+    private string shupai_Right_txt;
 
     private readonly AutoResetEvent are;
+    private string shupai_Left_txt;
+    private string OCR_baidu_a;
 
-    public string baiducookies;
+    private string OCR_baidu_b;
+    private List<Image> imagelist;
 
-    public string shupai_Left_txt;
+    private int imagelist_lenght;
 
-    public Image[] image_arr;
+    private string OCR_baidu_d;
 
-    public string OCR_baidu_a;
+    private string OCR_baidu_c;
 
-    public string OCR_baidu_b;
+    private string OCR_baidu_e;
 
-    public List<Image> imgArr;
+    private int[] image_num;
 
-    public List<Image> imagelist;
+    private string Proxy_flag;
 
-    public int imagelist_lenght;
+    private string Proxy_url;
 
-    public string OCR_baidu_d;
+    private string Proxy_port;
 
-    public string OCR_baidu_c;
+    private string Proxy_name;
 
-    public string OCR_baidu_e;
+    private string Proxy_password;
 
-    public int[] image_num;
+    private bool pinyin_flag;
 
-    public string Proxy_flag;
+    private bool set_split;
 
-    public string Proxy_url;
+    private bool set_merge;
 
-    public string Proxy_port;
-
-    public string Proxy_name;
-
-    public string Proxy_password;
-
-    public bool pinyin_flag;
-
-    public bool set_split;
-
-    public bool set_merge;
-
-    public bool tranclick;
-
-    public string myjsTextBox;
-    public int first_line;
-
-    public bool paragraph;
-
-    public WebBrowser webBrowser;
-
-    public string tencent_cookie;
-
+    private bool tranclick;
+    private bool paragraph;
     private AliTable ailibaba;
 
-    public delegate void translate( );
+    private delegate void translate( );
 
-    public delegate void ocr_thread( );
+    private delegate void ocr_thread( );
 
-    public delegate int Dllinput(string command);
+    private delegate int Dllinput(string command);
 }
