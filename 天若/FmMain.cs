@@ -7,7 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -23,7 +22,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ShareX.ScreenCaptureLib;
 using TrOCR.Helper;
-using TrOCR.Ocr;
+using TrOCR.Controls;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -800,7 +799,6 @@ public partial class FmMain : Form
         {
             OcrForeach(interface_flag);
         }
-        string text = AppDomain.CurrentDomain.BaseDirectory + "Data\\config.ini";
         if (IniHelp.GetValue("快捷键", "文字识别") != "请按下快捷键")
         {
             string value = IniHelp.GetValue("快捷键", "文字识别");
@@ -829,13 +827,13 @@ public partial class FmMain : Form
             string text9 = "F11";
             SetHotkey(text8, text9, value4, 235);
         }
-        StaticValue.baiduAPI_ID = IniHelp.GetValue("密钥_百度", "secret_id", text);
-        if (IniHelp.GetValue("密钥_百度", "secret_id", text) == "发生错误")
+        StaticValue.baiduAPI_ID = IniHelp.GetValue("密钥_百度", "secret_id");
+        if (IniHelp.GetValue("密钥_百度", "secret_id") == "发生错误")
         {
             StaticValue.baiduAPI_ID = "请输入secret_id";
         }
-        StaticValue.baiduAPI_key = IniHelp.GetValue("密钥_百度", "secret_key", text);
-        if (IniHelp.GetValue("密钥_百度", "secret_key", text) == "发生错误")
+        StaticValue.baiduAPI_key = IniHelp.GetValue("密钥_百度", "secret_key");
+        if (IniHelp.GetValue("密钥_百度", "secret_key") == "发生错误")
         {
             StaticValue.baiduAPI_key = "请输入secret_key";
         }

@@ -4,16 +4,16 @@ using System.Windows.Forms;
 
 namespace TrOCR;
 
-public static partial class HelpRepaint
+[DefaultEvent("SelectedColorChanged")]
+[DefaultProperty("Color")]
+[Description("ToolStripItem that allows selecting a color from a color picker control.")]
+[ToolboxItem(false)]
+[ToolboxBitmap(typeof(ToolStripColorPicker), "ToolStripColorPicker")]
+public class ToolStripColorPicker : ToolStripButton
 {
-    [DefaultEvent("SelectedColorChanged")]
-    [DefaultProperty("Color")]
-    [Description("ToolStripItem that allows selecting a color from a color picker control.")]
-    [ToolboxItem(false)]
-    [ToolboxBitmap(typeof(ToolStripColorPicker), "ToolStripColorPicker")]
-    public class ToolStripColorPicker : ToolStripButton
+    public Point OpenPoint
     {
-        public Point GetOpenPoint( )
+        get
         {
             Point point;
             if (Owner == null)
@@ -35,14 +35,6 @@ public static partial class HelpRepaint
                 point = new Point(num, -4);
             }
             return point;
-        }
-
-        public Point GetPoint
-        {
-            get => GetOpenPoint( );
-            set
-            {
-            }
         }
     }
 }

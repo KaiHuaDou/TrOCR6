@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace TrOCR;
 
-public class MenuItemRenderer : ToolStripProfessionalRenderer, IDisposable
+public class MenuItemRenderer : ToolStripProfessionalRenderer
 {
     public MenuItemRenderer( )
     {
@@ -65,11 +65,11 @@ public class MenuItemRenderer : ToolStripProfessionalRenderer, IDisposable
             Pen pen = new(Color.LightSlateGray);
             Point[] array = new Point[]
             {
-                        new Point(0, 0),
-                        new Point(item.Size.Width - 1, 0),
-                        new Point(item.Size.Width - 1, item.Size.Height - 3),
-                        new Point(0, item.Size.Height - 3),
-                        new Point(0, 0)
+                new Point(0, 0),
+                new Point(item.Size.Width - 1, 0),
+                new Point(item.Size.Width - 1, item.Size.Height - 3),
+                new Point(0, item.Size.Height - 3),
+                new Point(0, 0)
             };
             graphics.DrawLines(pen, array);
             return;
@@ -109,14 +109,7 @@ public class MenuItemRenderer : ToolStripProfessionalRenderer, IDisposable
         base.OnRenderMenuItemBackground(e);
     }
 
-    public Font textFont;
-
-    public Color menuItemSelectedColor;
-
-    public Color menuItemBorderColor;
-
-    public void Dispose( )
-    {
-        throw new NotImplementedException( );
-    }
+    private Font textFont;
+    private Color menuItemSelectedColor;
+    private Color menuItemBorderColor;
 }

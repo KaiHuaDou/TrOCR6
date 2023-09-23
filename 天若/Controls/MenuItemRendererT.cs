@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace TrOCR;
@@ -38,9 +37,7 @@ public class MenuItemRendererT : ToolStripProfessionalRenderer
         e.Graphics.DrawRectangle(pen, rectangle);
     }
 
-    public Font textFont;
-
-    public Color menuItemSelectedColor;
-
-    public Color menuItemBorderColor;
+    private Font textFont;
+    private Color menuItemSelectedColor;
+    private Color menuItemBorderColor;
 }

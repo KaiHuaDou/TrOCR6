@@ -4,13 +4,12 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using static TrOCR.HelpRepaint;
 
-namespace TrOCR.Ocr;
+namespace TrOCR.Controls;
 
 public class HWColorPicker : FloatLayerBase, IDisposable
 {
-    public Color SelectedColor => selectedColor;
+    public Color SelectedColor { get; private set; }
 
     [DefaultValue(true)]
     [Description("是否显示颜色提示")]
@@ -32,7 +31,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         }
     }
 
-    public List<ColorItemX> ColorTable => colorTable;
+    public List<ColorItemX> ColorTable { get; private set; }
 
     public HWColorPicker( )
     {
@@ -41,7 +40,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         InitializeComponent( );
         InitColor( );
         CalcWindowSize( );
-        sf = new StringFormat
+        stringFormat = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
@@ -88,9 +87,9 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         return num;
     }
 
-    public void SelectColor(Color clr)
+    public void SelectColor(Color color)
     {
-        selectedColor = clr;
+        SelectedColor = color;
         SelectedColorChanged?.Invoke(ctl_T, EventArgs.Empty);
         Hide( );
     }
@@ -117,7 +116,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         }
     }
 
-    public void HWColorPickerPaint(object sender, PaintEventArgs e)
+    private void HWColorPickerPaint(object o, PaintEventArgs e)
     {
         e.Graphics.DrawRectangle(Pens.LightGray, 0, 0, 150, 98);
         for (int i = 0; i < 40; i++)
@@ -127,7 +126,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         }
     }
 
-    public void HWColorPickerMouseMove(object sender, MouseEventArgs e)
+    private void HWColorPickerMouseMove(object o, MouseEventArgs e)
     {
         int indexFromPoint = GetIndexFromPoint(e.Location);
         if (indexFromPoint != hoverItem)
@@ -149,12 +148,12 @@ public class HWColorPicker : FloatLayerBase, IDisposable
         }
     }
 
-    public void HWColorPickerMouseClick(object sender, MouseEventArgs e)
+    private void HWColorPickerMouseClick(object o, MouseEventArgs e)
     {
         int indexFromPoint = GetIndexFromPoint(e.Location);
         if (indexFromPoint is not (-1) and not 40)
         {
-            SelectedColored = colorTable[indexFromPoint].ItemColor;
+            SelectedColored = ColorTable[indexFromPoint].ItemColor;
             DialogResult = DialogResult.OK;
         }
     }
@@ -167,8 +166,8 @@ public class HWColorPicker : FloatLayerBase, IDisposable
 
     public void InitColor( )
     {
-        colorTable = new List<ColorItemX>( );
-        colorTable.AddRange(new ColorItemX[]
+        ColorTable = new List<ColorItemX>( );
+        ColorTable.AddRange(new ColorItemX[]
         {
                     new ColorItemX("黑色", Color.FromArgb(0, 0, 0)),
                     new ColorItemX("褐色", Color.FromArgb(153, 51, 0)),
@@ -240,24 +239,11 @@ public class HWColorPicker : FloatLayerBase, IDisposable
 
     [CompilerGenerated]
     private readonly EventHandler SelectedColorChanged;
-
-    public Color selectedColor;
-
-    public Color hoverBKColor;
-
-    public List<ColorItemX> colorTable;
-
-    public StringFormat sf;
-
-    public int hoverItem;
-
-    public Control ctl;
-
-    public Brush hoverBrush;
-
-    public IContainer components;
-
-    public ToolTip tip;
-
-    public ToolStripButton ctl_T;
+    private Color hoverBKColor;
+    private int hoverItem;
+    private Brush hoverBrush;
+    private StringFormat stringFormat;
+    private IContainer components;
+    private ToolTip tip;
+    private ToolStripButton ctl_T;
 }

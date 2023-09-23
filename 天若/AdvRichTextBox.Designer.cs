@@ -12,6 +12,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using TrOCR.Controls;
 using TrOCR.Helper;
 using static TrOCR.External.NativeMethods;
 
@@ -49,7 +50,7 @@ namespace TrOCR
             this.languagle = new ToolStripDropDownButton();
             this.mode = new ToolStripDropDownButton();
             this.Fontstyle = new ToolStripDropDownButton();
-            this.toolStripToolBar = new HelpRepaint.ToolStripEx();
+            this.toolStripToolBar = new ToolStripEx();
             this.toolStripButtonclose = new ToolStripButton();
             this.toolStripButtonBold = new ToolStripButton();
             this.toolStripButtonParagraph = new ToolStripButton();
@@ -302,7 +303,7 @@ namespace TrOCR
             this.richTextBox1.MouseEnter += this.Form1_MouseEnter;
             this.richTextBox1.DragEnter += this.Form1_DragEnter;
             this.richTextBox1.DragDrop += this.Form1_DragDrop;
-            this.richTextBox1.SelectionAlignment = HelpRepaint.TextAlign.Justify;
+            this.richTextBox1.SelectionAlignment = TextAlign.Justify;
             this.richTextBox1.SetLine = "行高";
             this.richTextBox1.Font = new Font("Times New Roman", 16f * Program.factor, GraphicsUnit.Pixel);
             this.richTextBox1.LanguageOption = RichTextBoxLanguageOptions.UIFonts;
@@ -433,7 +434,7 @@ namespace TrOCR
         public void toolStripButtonLeft_Click(object sender, EventArgs e)
         {
             this.richTextBox1.SelectAll();
-            this.richTextBox1.SelectionAlignment = HelpRepaint.TextAlign.Left;
+            this.richTextBox1.SelectionAlignment = TextAlign.Left;
             this.richTextBox1.Select(0, 0);
             SetForegroundWindow(StaticValue.mainhandle);
         }
@@ -484,7 +485,7 @@ namespace TrOCR
         public void toolStripButtonFull_Click(object sender, EventArgs e)
         {
             this.richTextBox1.SelectAll();
-            this.richTextBox1.SelectionAlignment = HelpRepaint.TextAlign.Justify;
+            this.richTextBox1.SelectionAlignment = TextAlign.Justify;
             this.richTextBox1.Select(0, 0);
             SetForegroundWindow(StaticValue.mainhandle);
         }
@@ -1274,7 +1275,7 @@ namespace TrOCR
 
         public RichTextBoxEx richTextBox1;
 
-        public HelpRepaint.ToolStripEx toolStripToolBar;
+        public ToolStripEx toolStripToolBar;
 
         private ToolStripButton toolStripButtonNote;
 

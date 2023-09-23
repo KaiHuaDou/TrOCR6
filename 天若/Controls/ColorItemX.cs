@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace TrOCR.Ocr;
+namespace TrOCR.Controls;
 
 public class ColorItemX
 {

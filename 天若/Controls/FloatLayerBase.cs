@@ -9,60 +9,60 @@ namespace TrOCR;
 public class FloatLayerBase : Form
 {
     [DefaultValue(BorderStyle.Fixed3D)]
-    [Description("获取或设置边框类型。")]
+    [Description("获取或设置边框类型")]
     public BorderStyle BorderType
     {
-        get => _borderType;
+        get => borderType;
         set
         {
-            if (_borderType != value)
+            if (borderType != value)
             {
-                _borderType = value;
+                borderType = value;
                 Invalidate( );
             }
         }
     }
 
     [DefaultValue(Border3DStyle.RaisedInner)]
-    [Description("获取或设置三维边框样式。")]
+    [Description("获取或设置三维边框样式")]
     public Border3DStyle Border3DStyle
     {
-        get => _border3DStyle;
+        get => border3DStyle;
         set
         {
-            if (_border3DStyle != value)
+            if (border3DStyle != value)
             {
-                _border3DStyle = value;
+                border3DStyle = value;
                 Invalidate( );
             }
         }
     }
 
     [DefaultValue(ButtonBorderStyle.Solid)]
-    [Description("获取或设置线型边框样式。")]
+    [Description("获取或设置线型边框样式")]
     public ButtonBorderStyle BorderSingleStyle
     {
-        get => _borderSingleStyle;
+        get => borderSingleStyle;
         set
         {
-            if (_borderSingleStyle != value)
+            if (borderSingleStyle != value)
             {
-                _borderSingleStyle = value;
+                borderSingleStyle = value;
                 Invalidate( );
             }
         }
     }
 
     [DefaultValue(typeof(Color), "DarkGray")]
-    [Description("获取或设置边框颜色（仅当边框类型为线型时有效）。")]
+    [Description("获取或设置边框颜色（仅当边框类型为线型时有效）")]
     public Color BorderColor
     {
-        get => _borderColor;
+        get => borderColor;
         set
         {
-            if (!(_borderColor == value))
+            if (!(borderColor == value))
             {
-                _borderColor = value;
+                borderColor = value;
                 Invalidate( );
             }
         }
@@ -87,17 +87,17 @@ public class FloatLayerBase : Form
 
     public FloatLayerBase( )
     {
-        _mouseMsgFilter = new AppMouseMessageHandler(this);
+        mouseMsgFilter = new AppMouseMessageHandler(this);
         InitBaseProperties( );
-        _borderType = BorderStyle.Fixed3D;
-        _border3DStyle = Border3DStyle.RaisedInner;
-        _borderSingleStyle = ButtonBorderStyle.Solid;
-        _borderColor = Color.DarkGray;
+        borderType = BorderStyle.Fixed3D;
+        border3DStyle = Border3DStyle.RaisedInner;
+        borderSingleStyle = ButtonBorderStyle.Solid;
+        borderColor = Color.DarkGray;
     }
 
     protected override void OnLoad(EventArgs e)
     {
-        if (!_isShowDialogAgain)
+        if (!showDialogAgain)
         {
             if (!DesignMode)
             {
@@ -110,11 +110,11 @@ public class FloatLayerBase : Form
 
     protected override void OnShown(EventArgs e)
     {
-        if (!_isShowDialogAgain)
+        if (!showDialogAgain)
         {
             if (Modal)
             {
-                _isShowDialogAgain = true;
+                showDialogAgain = true;
             }
             Control control;
             if (!DesignMode && (control = GetNextControl(this, true)) != null)
@@ -145,12 +145,12 @@ public class FloatLayerBase : Form
     protected override void OnPaintBackground(PaintEventArgs e)
     {
         base.OnPaintBackground(e);
-        if (_borderType == BorderStyle.Fixed3D)
+        if (borderType == BorderStyle.Fixed3D)
         {
             ControlPaint.DrawBorder3D(e.Graphics, ClientRectangle, Border3DStyle);
             return;
         }
-        if (_borderType == BorderStyle.FixedSingle)
+        if (borderType == BorderStyle.FixedSingle)
         {
             ControlPaint.DrawBorder(e.Graphics, ClientRectangle, BorderColor, BorderSingleStyle);
         }
@@ -162,11 +162,11 @@ public class FloatLayerBase : Form
         {
             if (Visible)
             {
-                Application.AddMessageFilter(_mouseMsgFilter);
+                Application.AddMessageFilter(mouseMsgFilter);
             }
             else
             {
-                Application.RemoveMessageFilter(_mouseMsgFilter);
+                Application.RemoveMessageFilter(mouseMsgFilter);
             }
         }
         base.OnVisibleChanged(e);
@@ -264,182 +264,152 @@ public class FloatLayerBase : Form
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("请使用别的重载！", true)]
+    [Obsolete("请使用别的重载", true)]
     public new DialogResult ShowDialog( ) => throw new NotImplementedException( );
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("请使用别的重载！", true)]
+    [Obsolete("请使用别的重载", true)]
     public new DialogResult ShowDialog(IWin32Window owner) => throw new NotImplementedException( );
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("请使用别的重载！", true)]
+    [Obsolete("请使用别的重载", true)]
     public new void Show( ) => throw new NotImplementedException( );
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("请使用别的重载！", true)]
+    [Obsolete("请使用别的重载", true)]
     public new void Show(IWin32Window owner) => throw new NotImplementedException( );
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool ControlBox
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("设置边框请使用Border相关属性！", true)]
+    [Obsolete("设置边框请使用Border相关属性", true)]
     public new FormBorderStyle FormBorderStyle
     {
         get => FormBorderStyle.SizableToolWindow;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public sealed override string Text
     {
         get => string.Empty;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool HelpButton
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new Image Icon
     {
         get => null;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool IsMdiContainer
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool MaximizeBox
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool MinimizeBox
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool ShowIcon
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool ShowInTaskbar
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new FormStartPosition StartPosition
     {
         get => FormStartPosition.Manual;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new bool TopMost
     {
         get => false;
-        set
-        {
-        }
+        set { }
     }
 
     [Browsable(false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("禁用该属性！", true)]
+    [Obsolete("禁用该属性", true)]
     public new FormWindowState WindowState
     {
         get => FormWindowState.Normal;
-        set
-        {
-        }
+        set { }
     }
 
-    public readonly AppMouseMessageHandler _mouseMsgFilter;
-
-    public bool _isShowDialogAgain;
-
-    public BorderStyle _borderType;
-
-    public Border3DStyle _border3DStyle;
-
-    public ButtonBorderStyle _borderSingleStyle;
-
-    public Color _borderColor;
+    private readonly AppMouseMessageHandler mouseMsgFilter;
+    private bool showDialogAgain;
+    private BorderStyle borderType;
+    private Border3DStyle border3DStyle;
+    private ButtonBorderStyle borderSingleStyle;
+    private Color borderColor;
 
     public class AppMouseMessageHandler : IMessageFilter
     {
-        public AppMouseMessageHandler(FloatLayerBase layerForm) => _layerForm = layerForm;
+        public AppMouseMessageHandler(FloatLayerBase layerForm)
+            => _layerForm = layerForm;
 
         public bool PreFilterMessage(ref Message m)
         {
@@ -450,6 +420,6 @@ public class FloatLayerBase : Form
             return false;
         }
 
-        public readonly FloatLayerBase _layerForm;
+        private readonly FloatLayerBase _layerForm;
     }
 }
