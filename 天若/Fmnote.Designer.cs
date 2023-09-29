@@ -1,6 +1,6 @@
 ﻿namespace TrOCR
 {
-	public partial class Fmnote : global::System.Windows.Forms.Form
+	public partial class FmNote : global::System.Windows.Forms.Form
 	{
 		protected override void Dispose(bool disposing)
 		{

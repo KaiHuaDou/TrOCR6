@@ -21,8 +21,8 @@ using MSScriptControl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ShareX.ScreenCaptureLib;
-using TrOCR.Helper;
 using TrOCR.Controls;
+using TrOCR.Helper;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -37,28 +37,26 @@ public partial class FmMain : Form
         set_merge = false;
         set_split = false;
         set_split = false;
-        StaticValue.截图排斥 = false;
+        StaticValue.CaptureRejection = false;
         pinyin_flag = false;
         tranclick = false;
         are = new AutoResetEvent(false);
         imagelist = new List<Image>( );
-        StaticValue.v_notecount = Convert.ToInt32(IniHelp.GetValue("配置", "记录数目"));
+        StaticValue.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
         baidu_flags = "";
         esc = "";
         voice_count = 0;
-        fmnote = new Fmnote( );
+        fmnote = new FmNote( );
         fmflags = new FmFlags( );
-        pubnote = new string[StaticValue.v_notecount];
-        for (int i = 0; i < StaticValue.v_notecount; i++)
-        {
+        pubnote = new string[StaticValue.NoteCount];
+        for (int i = 0; i < StaticValue.NoteCount; i++)
             pubnote[i] = "";
-        }
-        StaticValue.v_note = pubnote;
+        StaticValue.Notes = pubnote;
         StaticValue.mainhandle = Handle;
         Font = new Font(Font.Name, 9f / StaticValue.Dpifactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         googleTranslate_txt = "";
         num_ok = 0;
-        F_factor = Program.factor;
+        F_factor = Program.DpiFactor;
         components = null;
         InitializeComponent( );
         nextClipboardViewer = (IntPtr) SetClipboardViewer((int) Handle);
@@ -92,7 +90,7 @@ public partial class FmMain : Form
         }
         if (m.Msg == 600 && (int) m.WParam == 725)
         {
-            if (IniHelp.GetValue("工具栏", "顶置") == "True")
+            if (Config.Get("工具栏", "顶置") == "True")
             {
                 TopMost = true;
                 return;
@@ -105,7 +103,7 @@ public partial class FmMain : Form
             if (m.Msg == 786 && m.WParam.ToInt32( ) == 530 && RichBoxBody.Text != null)
             {
                 p_note(RichBoxBody.Text);
-                StaticValue.v_note = pubnote;
+                StaticValue.Notes = pubnote;
                 if (fmnote.Created)
                 {
                     fmnote.TextNote = "";
@@ -140,9 +138,9 @@ public partial class FmMain : Form
                 Trans_close.PerformClick( );
                 Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
                 FormBorderStyle = FormBorderStyle.Sizable;
-                StaticValue.截图排斥 = true;
-                image_screen = StaticValue.image_OCR;
-                if (IniHelp.GetValue("工具栏", "分栏") == "True")
+                StaticValue.CaptureRejection = true;
+                image_screen = StaticValue.ImageOCR;
+                if (Config.Get("工具栏", "分栏") == "True")
                 {
                     minico.Visible = true;
                     thread = new Thread(new ThreadStart(ShowLoading));
@@ -223,9 +221,9 @@ public partial class FmMain : Form
                 {
                     try
                     {
-                        StaticValue.截图排斥 = false;
+                        StaticValue.CaptureRejection = false;
                         esc = "退出";
-                        fmloading.fml_close = "窗体已关闭";
+                        fmloading.FormClose = "窗体已关闭";
                         esc_thread.Abort( );
                     }
                     catch (Exception ex)
@@ -236,9 +234,9 @@ public partial class FmMain : Form
                     Visible = true;
                     Show( );
                     WindowState = FormWindowState.Normal;
-                    if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                    if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
-                        string value = IniHelp.GetValue("快捷键", "翻译文本");
+                        string value = Config.Get("快捷键", "翻译文本");
                         string text = "None";
                         string text2 = "F9";
                         SetHotkey(text, text2, value, 205);
@@ -277,7 +275,7 @@ public partial class FmMain : Form
                         WindowState = FormWindowState.Normal;
                         Visible = true;
                         Thread.Sleep(100);
-                        if (IniHelp.GetValue("工具栏", "顶置") == "False")
+                        if (Config.Get("工具栏", "顶置") == "False")
                         {
                             TopMost = false;
                             return;
@@ -347,7 +345,7 @@ public partial class FmMain : Form
         Activate( );
         Visible = true;
         WindowState = FormWindowState.Normal;
-        if (IniHelp.GetValue("工具栏", "顶置") == "True")
+        if (Config.Get("工具栏", "顶置") == "True")
         {
             TopMost = true;
             return;
@@ -365,7 +363,7 @@ public partial class FmMain : Form
     private void Main_copy_Click(object o, EventArgs e)
     {
         RichBoxBody.Focus( );
-        RichBoxBody.richTextBox1.Copy( );
+        RichBoxBody.EditBox.Copy( );
     }
 
     private static string PunctuationEnZh(string text)
@@ -385,13 +383,13 @@ public partial class FmMain : Form
     private void MainSelectAllClick(object o, EventArgs e)
     {
         RichBoxBody.Focus( );
-        RichBoxBody.richTextBox1.SelectAll( );
+        RichBoxBody.EditBox.SelectAll( );
     }
 
     private void MainPasteClick(object o, EventArgs e)
     {
         RichBoxBody.Focus( );
-        RichBoxBody.richTextBox1.Paste( );
+        RichBoxBody.EditBox.Paste( );
     }
 
     private void SplitClick(object o, EventArgs e)
@@ -755,15 +753,15 @@ public partial class FmMain : Form
     }
 
     private void SaveIniFile( )
-        => IniHelp.SetValue("配置", "接口", interface_flag);
+        => Config.Set("配置", "接口", interface_flag);
 
     private void ReadIniFile( )
     {
-        Proxy_flag = IniHelp.GetValue("代理", "代理类型");
-        Proxy_url = IniHelp.GetValue("代理", "服务器");
-        Proxy_port = IniHelp.GetValue("代理", "端口");
-        Proxy_name = IniHelp.GetValue("代理", "服务器账号");
-        Proxy_password = IniHelp.GetValue("代理", "服务器密码");
+        Proxy_flag = Config.Get("代理", "代理类型");
+        Proxy_url = Config.Get("代理", "服务器");
+        Proxy_port = Config.Get("代理", "端口");
+        Proxy_name = Config.Get("代理", "服务器账号");
+        Proxy_password = Config.Get("代理", "服务器密码");
         if (Proxy_flag == "不使用代理")
         {
             WebRequest.DefaultWebProxy = null;
@@ -789,53 +787,53 @@ public partial class FmMain : Form
                 MessageBox.Show("请检查代理设置！");
             }
         }
-        interface_flag = IniHelp.GetValue("配置", "接口");
-        if (interface_flag == "发生错误")
+        interface_flag = Config.Get("配置", "接口");
+        if (interface_flag == "__ERROR__")
         {
-            IniHelp.SetValue("配置", "接口", "搜狗");
+            Config.Set("配置", "接口", "搜狗");
             OcrForeach("搜狗");
         }
         else
         {
             OcrForeach(interface_flag);
         }
-        if (IniHelp.GetValue("快捷键", "文字识别") != "请按下快捷键")
+        if (Config.Get("快捷键", "文字识别") != "请按下快捷键")
         {
-            string value = IniHelp.GetValue("快捷键", "文字识别");
+            string value = Config.Get("快捷键", "文字识别");
             string text2 = "None";
             string text3 = "F4";
             SetHotkey(text2, text3, value, 200);
         }
-        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
         {
-            string value2 = IniHelp.GetValue("快捷键", "翻译文本");
+            string value2 = Config.Get("快捷键", "翻译文本");
             string text4 = "None";
             string text5 = "F7";
             SetHotkey(text4, text5, value2, 205);
         }
-        if (IniHelp.GetValue("快捷键", "记录界面") != "请按下快捷键")
+        if (Config.Get("快捷键", "记录界面") != "请按下快捷键")
         {
-            string value3 = IniHelp.GetValue("快捷键", "记录界面");
+            string value3 = Config.Get("快捷键", "记录界面");
             string text6 = "None";
             string text7 = "F8";
             SetHotkey(text6, text7, value3, 206);
         }
-        if (IniHelp.GetValue("快捷键", "识别界面") != "请按下快捷键")
+        if (Config.Get("快捷键", "识别界面") != "请按下快捷键")
         {
-            string value4 = IniHelp.GetValue("快捷键", "识别界面");
+            string value4 = Config.Get("快捷键", "识别界面");
             string text8 = "None";
             string text9 = "F11";
             SetHotkey(text8, text9, value4, 235);
         }
-        StaticValue.baiduAPI_ID = IniHelp.GetValue("密钥_百度", "secret_id");
-        if (IniHelp.GetValue("密钥_百度", "secret_id") == "发生错误")
+        StaticValue.BaiduApiId = Config.Get("密钥_百度", "secret_id");
+        if (Config.Get("密钥_百度", "secret_id") == "__ERROR__")
         {
-            StaticValue.baiduAPI_ID = "请输入secret_id";
+            StaticValue.BaiduApiId = "请输入secret_id";
         }
-        StaticValue.baiduAPI_key = IniHelp.GetValue("密钥_百度", "secret_key");
-        if (IniHelp.GetValue("密钥_百度", "secret_key") == "发生错误")
+        StaticValue.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
+        if (Config.Get("密钥_百度", "secret_key") == "__ERROR__")
         {
-            StaticValue.baiduAPI_key = "请输入secret_key";
+            StaticValue.BaiduApiKey = "请输入secret_key";
         }
     }
 
@@ -872,50 +870,50 @@ public partial class FmMain : Form
         fmSetting.ShowDialog( );
         if (fmSetting.DialogResult == DialogResult.OK)
         {
-            StaticValue.v_notecount = Convert.ToInt32(IniHelp.GetValue("配置", "记录数目"));
-            pubnote = new string[StaticValue.v_notecount];
-            for (int i = 0; i < StaticValue.v_notecount; i++)
+            StaticValue.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
+            pubnote = new string[StaticValue.NoteCount];
+            for (int i = 0; i < StaticValue.NoteCount; i++)
             {
                 pubnote[i] = "";
             }
-            StaticValue.v_note = pubnote;
+            StaticValue.Notes = pubnote;
             fmnote.TextNoteChange = "";
             fmnote.Location = new Point(Screen.AllScreens[0].WorkingArea.Width - fmnote.Width, Screen.AllScreens[0].WorkingArea.Height - fmnote.Height);
-            if (IniHelp.GetValue("快捷键", "文字识别") != "请按下快捷键")
+            if (Config.Get("快捷键", "文字识别") != "请按下快捷键")
             {
-                string value = IniHelp.GetValue("快捷键", "文字识别");
+                string value = Config.Get("快捷键", "文字识别");
                 string text2 = "None";
                 string text3 = "F4";
                 SetHotkey(text2, text3, value, 200);
             }
-            if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+            if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
             {
-                string value2 = IniHelp.GetValue("快捷键", "翻译文本");
+                string value2 = Config.Get("快捷键", "翻译文本");
                 string text4 = "None";
                 string text5 = "F9";
                 SetHotkey(text4, text5, value2, 205);
             }
-            if (IniHelp.GetValue("快捷键", "记录界面") != "请按下快捷键")
+            if (Config.Get("快捷键", "记录界面") != "请按下快捷键")
             {
-                string value3 = IniHelp.GetValue("快捷键", "记录界面");
+                string value3 = Config.Get("快捷键", "记录界面");
                 string text6 = "None";
                 string text7 = "F8";
                 SetHotkey(text6, text7, value3, 206);
             }
-            if (IniHelp.GetValue("快捷键", "识别界面") != "请按下快捷键")
+            if (Config.Get("快捷键", "识别界面") != "请按下快捷键")
             {
-                string value4 = IniHelp.GetValue("快捷键", "识别界面");
+                string value4 = Config.Get("快捷键", "识别界面");
                 string text8 = "None";
                 string text9 = "F11";
                 SetHotkey(text8, text9, value4, 235);
             }
-            Proxy_flag = IniHelp.GetValue("代理", "代理类型");
-            Proxy_url = IniHelp.GetValue("代理", "服务器");
-            Proxy_port = IniHelp.GetValue("代理", "端口");
-            Proxy_name = IniHelp.GetValue("代理", "服务器账号");
-            Proxy_password = IniHelp.GetValue("代理", "服务器密码");
-            StaticValue.baiduAPI_ID = IniHelp.GetValue("密钥_百度", "secret_id");
-            StaticValue.baiduAPI_key = IniHelp.GetValue("密钥_百度", "secret_key");
+            Proxy_flag = Config.Get("代理", "代理类型");
+            Proxy_url = Config.Get("代理", "服务器");
+            Proxy_port = Config.Get("代理", "端口");
+            Proxy_name = Config.Get("代理", "服务器账号");
+            Proxy_password = Config.Get("代理", "服务器密码");
+            StaticValue.BaiduApiId = Config.Get("密钥_百度", "secret_id");
+            StaticValue.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
             if (Proxy_flag == "不使用代理")
             {
                 WebRequest.DefaultWebProxy = null;
@@ -941,12 +939,12 @@ public partial class FmMain : Form
                     MessageBox.Show("请检查代理设置！");
                 }
             }
-            if (IniHelp.GetValue("更新", "更新间隔") == "True")
+            if (Config.Get("更新", "更新间隔") == "True")
             {
-                Program.checkTimer.Enabled = true;
-                Program.checkTimer.Interval = 3600000.0 * Convert.ToInt32(IniHelp.GetValue("更新", "间隔时间"));
-                Program.checkTimer.Elapsed += Program.CheckTimer_Elapsed;
-                Program.checkTimer.Start( );
+                Program.updateTimer.Enabled = true;
+                Program.updateTimer.Interval = 3600000.0 * Convert.ToInt32(Config.Get("更新", "间隔时间"));
+                Program.updateTimer.Elapsed += Program.CheckTimer_Elapsed;
+                Program.updateTimer.Start( );
             }
         }
     }
@@ -1032,19 +1030,19 @@ public partial class FmMain : Form
     private void Trans_copy_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
-        RichBoxBody_T.richTextBox1.Copy( );
+        RichBoxBody_T.EditBox.Copy( );
     }
 
     private void Trans_paste_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
-        RichBoxBody_T.richTextBox1.Paste( );
+        RichBoxBody_T.EditBox.Paste( );
     }
 
     private void Trans_SelectAll_Click(object o, EventArgs e)
     {
         RichBoxBody_T.Focus( );
-        RichBoxBody_T.richTextBox1.SelectAll( );
+        RichBoxBody_T.EditBox.SelectAll( );
     }
 
     private void trans_Calculate( )
@@ -1061,34 +1059,34 @@ public partial class FmMain : Form
         {
             if (interface_flag == "韩语")
             {
-                StaticValue.zh_en = false;
-                StaticValue.zh_jp = false;
-                StaticValue.zh_ko = true;
+                StaticValue.Zh2En = false;
+                StaticValue.Zh2Jp = false;
+                StaticValue.Zh2Ko = true;
                 RichBoxBody_T.set_language = "韩语";
             }
             if (interface_flag == "日语")
             {
-                StaticValue.zh_en = false;
-                StaticValue.zh_jp = true;
-                StaticValue.zh_ko = false;
+                StaticValue.Zh2En = false;
+                StaticValue.Zh2Jp = true;
+                StaticValue.Zh2Ko = false;
                 RichBoxBody_T.set_language = "日语";
             }
             if (interface_flag == "中英")
             {
-                StaticValue.zh_en = true;
-                StaticValue.zh_jp = false;
-                StaticValue.zh_ko = false;
+                StaticValue.Zh2En = true;
+                StaticValue.Zh2Jp = false;
+                StaticValue.Zh2Ko = false;
                 RichBoxBody_T.set_language = "中英";
             }
-            if (IniHelp.GetValue("配置", "翻译接口") == "谷歌")
+            if (Config.Get("配置", "翻译接口") == "谷歌")
             {
                 googleTranslate_txt = Translate_Google(typeset_txt);
             }
-            if (IniHelp.GetValue("配置", "翻译接口") == "百度")
+            if (Config.Get("配置", "翻译接口") == "百度")
             {
                 googleTranslate_txt = TranslateBaidu(typeset_txt);
             }
-            if (IniHelp.GetValue("配置", "翻译接口") == "腾讯")
+            if (Config.Get("配置", "翻译接口") == "腾讯")
             {
                 googleTranslate_txt = Translate_Tencent(typeset_txt);
             }
@@ -1118,7 +1116,7 @@ public partial class FmMain : Form
     {
         try
         {
-            fmloading = new Fmloading( );
+            fmloading = new FmLoading( );
             Application.Run(fmloading);
         }
         catch (ThreadAbortException)
@@ -1284,7 +1282,7 @@ public partial class FmMain : Form
         {
             string text3 = "zh-CN";
             string text4 = "en";
-            if (StaticValue.zh_en)
+            if (StaticValue.Zh2En)
             {
                 if (ch_count(text.Trim( )) > en_count(text.Trim( )) || (en_count(text.Trim( )) == 1 && ch_count(text.Trim( )) == 1))
                 {
@@ -1297,7 +1295,7 @@ public partial class FmMain : Form
                     text4 = "zh-CN";
                 }
             }
-            if (StaticValue.zh_jp)
+            if (StaticValue.Zh2Jp)
             {
                 if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(text.Trim( )))))
                 {
@@ -1310,7 +1308,7 @@ public partial class FmMain : Form
                     text4 = "ja";
                 }
             }
-            if (StaticValue.zh_ko)
+            if (StaticValue.Zh2Ko)
             {
                 if (TextUtils.ContainKor(text.Trim( )))
                 {
@@ -1511,11 +1509,11 @@ public partial class FmMain : Form
 
     private void p_note(string a)
     {
-        for (int i = 0; i < StaticValue.v_notecount; i++)
+        for (int i = 0; i < StaticValue.NoteCount; i++)
         {
-            if (i == StaticValue.v_notecount - 1)
+            if (i == StaticValue.NoteCount - 1)
             {
-                pubnote[StaticValue.v_notecount - 1] = a;
+                pubnote[StaticValue.NoteCount - 1] = a;
             }
             else
             {
@@ -1683,7 +1681,7 @@ public partial class FmMain : Form
 
     private void Main_OCR_Quickscreenshots( )
     {
-        if (!StaticValue.截图排斥)
+        if (!StaticValue.CaptureRejection)
         {
             try
             {
@@ -1705,13 +1703,13 @@ public partial class FmMain : Form
                 RichBoxBody_T.Text = "";
                 typeset_txt = "";
                 transtalate_fla = "关闭";
-                if (IniHelp.GetValue("工具栏", "翻译") == "False")
+                if (Config.Get("工具栏", "翻译") == "False")
                 {
                     Trans_close.PerformClick( );
                 }
                 Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
                 FormBorderStyle = FormBorderStyle.Sizable;
-                StaticValue.截图排斥 = true;
+                StaticValue.CaptureRejection = true;
                 image_screen = RegionCaptureTasks.GetRegionImage_Mo(new RegionCaptureOptions
                 {
                     ShowMagnifier = false,
@@ -1736,29 +1734,29 @@ public partial class FmMain : Form
                 {
                     Point point2 = new(point.X, point.Y);
                     new FmScreenPaste(image_screen, point2).Show( );
-                    if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                    if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
-                        string value = IniHelp.GetValue("快捷键", "翻译文本");
+                        string value = Config.Get("快捷键", "翻译文本");
                         string text = "None";
                         string text2 = "F9";
                         SetHotkey(text, text2, value, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    StaticValue.截图排斥 = false;
+                    StaticValue.CaptureRejection = false;
                 }
                 else if (mode_flag == "区域多选")
                 {
                     if (image_screen == null)
                     {
-                        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                         {
-                            string value2 = IniHelp.GetValue("快捷键", "翻译文本");
+                            string value2 = Config.Get("快捷键", "翻译文本");
                             string text3 = "None";
                             string text4 = "F9";
                             SetHotkey(text3, text4, value2, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        StaticValue.截图排斥 = false;
+                        StaticValue.CaptureRejection = false;
                     }
                     else
                     {
@@ -1771,29 +1769,29 @@ public partial class FmMain : Form
                 }
                 else if (mode_flag == "取色")
                 {
-                    if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                    if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
-                        string value3 = IniHelp.GetValue("快捷键", "翻译文本");
+                        string value3 = Config.Get("快捷键", "翻译文本");
                         string text5 = "None";
                         string text6 = "F9";
                         SetHotkey(text5, text6, value3, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    StaticValue.截图排斥 = false;
+                    StaticValue.CaptureRejection = false;
                     fmflags.Show( );
                     fmflags.DrawStr("已复制颜色");
                 }
                 else if (image_screen == null)
                 {
-                    if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                    if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
-                        string value4 = IniHelp.GetValue("快捷键", "翻译文本");
+                        string value4 = Config.Get("快捷键", "翻译文本");
                         string text7 = "None";
                         string text8 = "F9";
                         SetHotkey(text7, text8, value4, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    StaticValue.截图排斥 = false;
+                    StaticValue.CaptureRejection = false;
                 }
                 else
                 {
@@ -1814,41 +1812,41 @@ public partial class FmMain : Form
                     if (mode_flag == "截图")
                     {
                         Clipboard.SetImage(image_screen);
-                        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                         {
-                            string value5 = IniHelp.GetValue("快捷键", "翻译文本");
+                            string value5 = Config.Get("快捷键", "翻译文本");
                             string text9 = "None";
                             string text10 = "F9";
                             SetHotkey(text9, text10, value5, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        StaticValue.截图排斥 = false;
-                        if (IniHelp.GetValue("截图音效", "粘贴板") == "True")
+                        StaticValue.CaptureRejection = false;
+                        if (Config.Get("截图音效", "粘贴板") == "True")
                         {
-                            PlaySong(IniHelp.GetValue("截图音效", "音效路径"));
+                            PlaySong(Config.Get("截图音效", "音效路径"));
                         }
                         fmflags.Show( );
                         fmflags.DrawStr("已复制截图");
                     }
-                    else if (mode_flag == "自动保存" && IniHelp.GetValue("配置", "自动保存") == "True")
+                    else if (mode_flag == "自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
-                        string text11 = IniHelp.GetValue("配置", "截图位置") + "\\" + TextUtils.RenameFile(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
+                        string text11 = Config.Get("配置", "截图位置") + "\\" + TextUtils.RenameFile(Config.Get("配置", "截图位置"), "图片.Png");
                         image_screen.Save(text11, ImageFormat.Png);
-                        StaticValue.截图排斥 = false;
-                        if (IniHelp.GetValue("截图音效", "自动保存") == "True")
+                        StaticValue.CaptureRejection = false;
+                        if (Config.Get("截图音效", "自动保存") == "True")
                         {
-                            PlaySong(IniHelp.GetValue("截图音效", "音效路径"));
+                            PlaySong(Config.Get("截图音效", "音效路径"));
                         }
                         fmflags.Show( );
                         fmflags.DrawStr("已保存图片");
                     }
-                    else if (mode_flag == "多区域自动保存" && IniHelp.GetValue("配置", "自动保存") == "True")
+                    else if (mode_flag == "多区域自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
                         getSubPics(image_screen, array);
-                        StaticValue.截图排斥 = false;
-                        if (IniHelp.GetValue("截图音效", "自动保存") == "True")
+                        StaticValue.CaptureRejection = false;
+                        if (Config.Get("截图音效", "自动保存") == "True")
                         {
-                            PlaySong(IniHelp.GetValue("截图音效", "音效路径"));
+                            PlaySong(Config.Get("截图音效", "音效路径"));
                         }
                         fmflags.Show( );
                         fmflags.DrawStr("已保存图片");
@@ -1890,19 +1888,19 @@ public partial class FmMain : Form
                                 image_screen.Save(saveFileDialog.FileName, ImageFormat.Bmp);
                             }
                         }
-                        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+                        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                         {
-                            string value6 = IniHelp.GetValue("快捷键", "翻译文本");
+                            string value6 = Config.Get("快捷键", "翻译文本");
                             string text12 = "None";
                             string text13 = "F9";
                             SetHotkey(text12, text13, value6, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        StaticValue.截图排斥 = false;
+                        StaticValue.CaptureRejection = false;
                     }
                     else if (image_screen != null)
                     {
-                        if (IniHelp.GetValue("工具栏", "分栏") == "True")
+                        if (Config.Get("工具栏", "分栏") == "True")
                         {
                             minico.Visible = true;
                             thread = new Thread(new ThreadStart(ShowLoading));
@@ -1936,7 +1934,7 @@ public partial class FmMain : Form
             }
             catch
             {
-                StaticValue.截图排斥 = false;
+                StaticValue.CaptureRejection = false;
             }
         }
     }
@@ -1947,56 +1945,56 @@ public partial class FmMain : Form
         {
             typeset_txt = ScanQRCode( );
             RichBoxBody.Text = typeset_txt;
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
             return;
         }
         if (interface_flag == "搜狗")
         {
             OCR_sougou2( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
             return;
         }
         if (interface_flag == "腾讯")
         {
             OcrTencent( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
             return;
         }
         if (interface_flag == "有道")
         {
             OcrYoudao( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
             return;
         }
         if (interface_flag == "公式")
         {
             OCR_Math( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
             return;
         }
         if (interface_flag == "百度表格")
         {
             OCR_baidu_table( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_table));
             return;
         }
         if (interface_flag == "阿里表格")
         {
             OCR_ali_table( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_table));
             return;
         }
         if (interface_flag is "日语" or "中英" or "韩语")
         {
             OCR_baidu( );
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             Invoke(new ocr_thread(Main_OCR_Thread_last));
         }
         if (interface_flag is "从左向右" or "从右向左")
@@ -2027,7 +2025,7 @@ public partial class FmMain : Form
     {
         image_screen.Dispose( );
         GC.Collect( );
-        StaticValue.截图排斥 = false;
+        StaticValue.CaptureRejection = false;
         string text = typeset_txt;
         text = check_str(text);
         SplitedText = check_str(SplitedText);
@@ -2043,13 +2041,13 @@ public partial class FmMain : Form
         {
             RichBoxBody.Text = text;
         }
-        StaticValue.v_Split = SplitedText;
-        if (bool.Parse(IniHelp.GetValue("工具栏", "拆分")) || set_split)
+        StaticValue.Split = SplitedText;
+        if (bool.Parse(Config.Get("工具栏", "拆分")) || set_split)
         {
             set_split = false;
             RichBoxBody.Text = SplitedText;
         }
-        if (bool.Parse(IniHelp.GetValue("工具栏", "合并")) || set_merge)
+        if (bool.Parse(Config.Get("工具栏", "合并")) || set_merge)
         {
             set_merge = false;
             RichBoxBody.Text = text.Replace("\n", "").Replace("\r", "");
@@ -2066,13 +2064,13 @@ public partial class FmMain : Form
         if (RichBoxBody.Text != null)
         {
             p_note(RichBoxBody.Text);
-            StaticValue.v_note = pubnote;
+            StaticValue.Notes = pubnote;
             if (fmnote.Created)
             {
                 fmnote.TextNote = "";
             }
         }
-        TopMost = StaticValue.v_topmost;
+        TopMost = StaticValue.Topmost;
         Text = "耗时：" + text2;
         minico.Visible = true;
         if (interface_flag == "从右向左")
@@ -2093,9 +2091,9 @@ public partial class FmMain : Form
             Show( );
             Process.Start("https://www.baidu.com/s?wd=" + RichBoxBody.Text);
             baidu_flags = "";
-            if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+            if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
             {
-                string value = IniHelp.GetValue("快捷键", "翻译文本");
+                string value = Config.Get("快捷键", "翻译文本");
                 string text3 = "None";
                 string text4 = "F9";
                 SetHotkey(text3, text4, value, 205);
@@ -2103,7 +2101,7 @@ public partial class FmMain : Form
             UnregisterHotKey(Handle, 222);
             return;
         }
-        if (IniHelp.GetValue("配置", "识别弹窗") == "False")
+        if (Config.Get("配置", "识别弹窗") == "False")
         {
             FormBorderStyle = FormBorderStyle.Sizable;
             Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
@@ -2117,9 +2115,9 @@ public partial class FmMain : Form
             {
                 fmflags.DrawStr("已识别");
             }
-            if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+            if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
             {
-                string value2 = IniHelp.GetValue("快捷键", "翻译文本");
+                string value2 = Config.Get("快捷键", "翻译文本");
                 string text5 = "None";
                 string text6 = "F9";
                 SetHotkey(text5, text6, value2, 205);
@@ -2133,8 +2131,8 @@ public partial class FmMain : Form
         WindowState = FormWindowState.Normal;
         Size = new Size(form_width, form_height);
         SetForegroundWindow(Handle);
-        StaticValue.v_googleTranslate_txt = RichBoxBody.Text;
-        if (bool.Parse(IniHelp.GetValue("工具栏", "翻译")))
+        StaticValue.GoogleTransTxt = RichBoxBody.Text;
+        if (bool.Parse(Config.Get("工具栏", "翻译")))
         {
             try
             {
@@ -2145,7 +2143,7 @@ public partial class FmMain : Form
             {
             }
         }
-        if (bool.Parse(IniHelp.GetValue("工具栏", "检查")))
+        if (bool.Parse(Config.Get("工具栏", "检查")))
         {
             try
             {
@@ -2155,9 +2153,9 @@ public partial class FmMain : Form
             {
             }
         }
-        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
         {
-            string value3 = IniHelp.GetValue("快捷键", "翻译文本");
+            string value3 = Config.Get("快捷键", "翻译文本");
             string text7 = "None";
             string text8 = "F9";
             SetHotkey(text7, text8, value3, 205);
@@ -2209,7 +2207,7 @@ public partial class FmMain : Form
         SplitedText = "";
         try
         {
-            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.baiduAPI_ID + "&client_secret=" + StaticValue.baiduAPI_key));
+            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
             if (string.IsNullOrEmpty(baidu_vip))
             {
                 MessageBox.Show("请检查密钥输入是否正确！", "提醒");
@@ -2450,7 +2448,7 @@ public partial class FmMain : Form
             string text4 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
             responseStream.Close( );
             JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text4))["result"].ToString( ));
-            if (IniHelp.GetValue("工具栏", "分段") == "True")
+            if (Config.Get("工具栏", "分段") == "True")
             {
                 checked_location_sougou(jarray, 2, "content", "frame");
             }
@@ -2705,7 +2703,7 @@ public partial class FmMain : Form
             shupai.Text = "竖排√";
             righ_left.Text = "从右向左√";
         }
-        IniHelp.SetValue("配置", "接口", interface_flag);
+        Config.Set("配置", "接口", interface_flag);
     }
 
     private void OCR_shupai_Click(object o, EventArgs e)
@@ -2724,7 +2722,7 @@ public partial class FmMain : Form
         string text = "";
         try
         {
-            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.baiduAPI_ID + "&client_secret=" + StaticValue.baiduAPI_key));
+            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
             if (string.IsNullOrEmpty(baidu_vip))
             {
                 MessageBox.Show("请检查密钥输入是否正确！", "提醒");
@@ -2764,9 +2762,9 @@ public partial class FmMain : Form
         catch
         {
             MessageBox.Show(text, "提醒");
-            StaticValue.截图排斥 = false;
+            StaticValue.CaptureRejection = false;
             esc = "退出";
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             esc_thread.Abort( );
         }
     }
@@ -3160,7 +3158,7 @@ public partial class FmMain : Form
             }
             shupai_Left_txt = text2;
         }
-        fmloading.fml_close = "窗体已关闭";
+        fmloading.FormClose = "窗体已关闭";
         Invoke(new ocr_thread(Main_OCR_Thread_last));
         try
         {
@@ -3646,9 +3644,9 @@ public partial class FmMain : Form
     {
         try
         {
-            StaticValue.截图排斥 = false;
+            StaticValue.CaptureRejection = false;
             esc = "退出";
-            fmloading.fml_close = "窗体已关闭";
+            fmloading.FormClose = "窗体已关闭";
             esc_thread.Abort( );
         }
         catch
@@ -3658,9 +3656,9 @@ public partial class FmMain : Form
         Visible = true;
         Show( );
         WindowState = FormWindowState.Normal;
-        if (IniHelp.GetValue("快捷键", "翻译文本") != "请按下快捷键")
+        if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
         {
-            string value = IniHelp.GetValue("快捷键", "翻译文本");
+            string value = Config.Get("快捷键", "翻译文本");
             string text = "None";
             string text2 = "F9";
             SetHotkey(text, text2, value, 205);
@@ -3753,21 +3751,21 @@ public partial class FmMain : Form
 
     private void 翻译文本( )
     {
-        if (IniHelp.GetValue("配置", "快速翻译") == "True")
+        if (Config.Get("配置", "快速翻译") == "True")
         {
             string text = "";
             try
             {
                 trans_hotkey = TextUtils.GetTextFromClipboard( );
-                if (IniHelp.GetValue("配置", "翻译接口") == "谷歌")
+                if (Config.Get("配置", "翻译接口") == "谷歌")
                 {
                     text = Translate_Google(trans_hotkey);
                 }
-                if (IniHelp.GetValue("配置", "翻译接口") == "百度")
+                if (Config.Get("配置", "翻译接口") == "百度")
                 {
                     text = TranslateBaidu(trans_hotkey);
                 }
-                if (IniHelp.GetValue("配置", "翻译接口") == "腾讯")
+                if (Config.Get("配置", "翻译接口") == "腾讯")
                 {
                     text = Translate_Tencent(trans_hotkey);
                 }
@@ -3791,7 +3789,7 @@ public partial class FmMain : Form
         SetForegroundWindow(StaticValue.mainhandle);
         Show( );
         WindowState = FormWindowState.Normal;
-        if (IniHelp.GetValue("工具栏", "顶置") == "True")
+        if (Config.Get("工具栏", "顶置") == "True")
         {
             TopMost = true;
             return;
@@ -3837,7 +3835,7 @@ public partial class FmMain : Form
         for (int i = 0; i < buildRects.Length; i++)
         {
             array[i] = GetRect(buildPic, buildRects[i]);
-            string text = IniHelp.GetValue("配置", "截图位置") + "\\" + TextUtils.RenameFile(IniHelp.GetValue("配置", "截图位置"), "图片.Png");
+            string text = Config.Get("配置", "截图位置") + "\\" + TextUtils.RenameFile(Config.Get("配置", "截图位置"), "图片.Png");
             array[i].Save(text, ImageFormat.Png);
         }
         return array;
@@ -4039,7 +4037,7 @@ public partial class FmMain : Form
                 }
                 messageload.Dispose( );
             }
-            if (IniHelp.GetValue("工具栏", "分栏") == "True")
+            if (Config.Get("工具栏", "分栏") == "True")
             {
                 if (paragraph)
                 {
@@ -4065,7 +4063,7 @@ public partial class FmMain : Form
         }
         typeset_txt = text.Replace("\r\n\r\n", "\r\n");
         SplitedText = text2.Replace("\r\n\r\n", "\r\n");
-        fmloading.fml_close = "窗体已关闭";
+        fmloading.FormClose = "窗体已关闭";
         Invoke(new ocr_thread(Main_OCR_Thread_last));
         return array;
     }
@@ -4451,21 +4449,21 @@ public partial class FmMain : Form
             trans_baidu.Text = "百度√";
             trans_google.Text = "谷歌";
             trans_tencent.Text = "腾讯";
-            IniHelp.SetValue("配置", "翻译接口", "百度");
+            Config.Set("配置", "翻译接口", "百度");
         }
         if (name == "谷歌")
         {
             trans_baidu.Text = "百度";
             trans_google.Text = "谷歌√";
             trans_tencent.Text = "腾讯";
-            IniHelp.SetValue("配置", "翻译接口", "谷歌");
+            Config.Set("配置", "翻译接口", "谷歌");
         }
         if (name == "腾讯")
         {
             trans_google.Text = "谷歌";
             trans_baidu.Text = "百度";
             trans_tencent.Text = "腾讯√";
-            IniHelp.SetValue("配置", "翻译接口", "腾讯");
+            Config.Set("配置", "翻译接口", "腾讯");
         }
     }
 
@@ -4508,7 +4506,7 @@ public partial class FmMain : Form
             new CookieContainer( );
             string text2 = "zh";
             string text3 = "en";
-            if (StaticValue.zh_en)
+            if (StaticValue.Zh2En)
             {
                 if (ch_count(Text.Trim( )) > en_count(Text.Trim( )) || (en_count(text.Trim( )) == 1 && ch_count(text.Trim( )) == 1))
                 {
@@ -4521,7 +4519,7 @@ public partial class FmMain : Form
                     text3 = "zh";
                 }
             }
-            if (StaticValue.zh_jp)
+            if (StaticValue.Zh2Jp)
             {
                 if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(Text.Trim( )))))
                 {
@@ -4534,7 +4532,7 @@ public partial class FmMain : Form
                     text3 = "jp";
                 }
             }
-            if (StaticValue.zh_ko)
+            if (StaticValue.Zh2Ko)
             {
                 if (TextUtils.ContainKor(Text.Trim( )))
                 {
@@ -4638,7 +4636,7 @@ public partial class FmMain : Form
         {
             string text2 = "zh";
             string text3 = "en";
-            if (StaticValue.zh_en)
+            if (StaticValue.Zh2En)
             {
                 if (ch_count(strtrans.Trim( )) > en_count(strtrans.Trim( )) || (en_count(text.Trim( )) == 1 && ch_count(text.Trim( )) == 1))
                 {
@@ -4651,7 +4649,7 @@ public partial class FmMain : Form
                     text3 = "zh";
                 }
             }
-            if (StaticValue.zh_jp)
+            if (StaticValue.Zh2Jp)
             {
                 if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(strtrans.Trim( )))))
                 {
@@ -4664,7 +4662,7 @@ public partial class FmMain : Form
                     text3 = "jp";
                 }
             }
-            if (StaticValue.zh_ko)
+            if (StaticValue.Zh2Ko)
             {
                 if (TextUtils.ContainKor(strtrans.Trim( )))
                 {
@@ -4769,7 +4767,7 @@ public partial class FmMain : Form
         SplitedText = "";
         try
         {
-            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.baiduAPI_ID + "&client_secret=" + StaticValue.baiduAPI_key));
+            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
             if (string.IsNullOrEmpty(baidu_vip))
             {
                 MessageBox.Show("请检查密钥输入是否正确！", "提醒");
@@ -4902,7 +4900,7 @@ public partial class FmMain : Form
                 Convert.ToInt32(timeSpan2.TotalMilliseconds).ToString(),
                 "秒"
         });
-        TopMost = StaticValue.v_topmost;
+        TopMost = StaticValue.Topmost;
         Text = "耗时：" + text;
         if (interface_flag == "百度表格")
         {
@@ -4914,7 +4912,7 @@ public partial class FmMain : Form
         }
         image_screen.Dispose( );
         GC.Collect( );
-        StaticValue.截图排斥 = false;
+        StaticValue.CaptureRejection = false;
         FormBorderStyle = FormBorderStyle.Sizable;
         Visible = true;
         Show( );
@@ -4928,7 +4926,7 @@ public partial class FmMain : Form
                 SplitedText = "";
                 ailibaba.TopMost = true;
                 ailibaba.GetCookie = "";
-                IniHelp.SetValue("特殊", "ali_cookie", ailibaba.GetCookie);
+                Config.Set("特殊", "ali_cookie", ailibaba.GetCookie);
                 ailibaba.ShowDialog( );
                 SetForegroundWindow(ailibaba.Handle);
                 return;
@@ -4973,7 +4971,7 @@ public partial class FmMain : Form
         {
             string text3 = "zh-CN";
             string text4 = "en";
-            if (StaticValue.zh_en)
+            if (StaticValue.Zh2En)
             {
                 if (ch_count(typeset_txt.Trim( )) > en_count(typeset_txt.Trim( )))
                 {
@@ -4986,7 +4984,7 @@ public partial class FmMain : Form
                     text4 = "zh-CN";
                 }
             }
-            if (StaticValue.zh_jp)
+            if (StaticValue.Zh2Jp)
             {
                 if (TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(typeset_txt.Trim( )))))
                 {
@@ -4999,7 +4997,7 @@ public partial class FmMain : Form
                     text4 = "ja";
                 }
             }
-            if (StaticValue.zh_ko)
+            if (StaticValue.Zh2Ko)
             {
                 if (TextUtils.ContainKor(typeset_txt.Trim( )))
                 {
@@ -5067,7 +5065,7 @@ public partial class FmMain : Form
         SplitedText = "";
         try
         {
-            string value = IniHelp.GetValue("特殊", "ali_cookie");
+            string value = Config.Get("特殊", "ali_cookie");
             Stream stream = BytesToStream(ImageToByteArray(BWPic((Bitmap) image_screen)));
             string text2 = Convert.ToBase64String(new BinaryReader(stream).ReadBytes(Convert.ToInt32(stream.Length)));
             stream.Close( );
@@ -5216,7 +5214,7 @@ public partial class FmMain : Form
     private string SplitedText;
     private string transtalate_fla;
 
-    private Fmloading fmloading;
+    private FmLoading fmloading;
 
     private Thread thread;
     private string googleTranslate_txt;
@@ -5236,7 +5234,7 @@ public partial class FmMain : Form
 
     private string[] pubnote;
 
-    private Fmnote fmnote;
+    private FmNote fmnote;
 
     private Image image_screen;
 

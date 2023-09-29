@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
-
 using Microsoft.Win32;
-
 using Newtonsoft.Json.Linq;
 
 using TrOCR.Helper;
@@ -18,20 +15,25 @@ namespace TrOCR;
 
 internal static class Program
 {
-    public static void ProgramStart( ) => ProgramStarted = new EventWaitHandle(false, EventResetMode.AutoReset, "天若", out createNew);
+    public static EventWaitHandle ProgramStarted;
+    public static float DpiFactor;
+    public static bool createNew;
+    public static System.Timers.Timer updateTimer;
+
+    public static void ProgramStart( )
+        => ProgramStarted = new EventWaitHandle(false, EventResetMode.AutoReset, "天若", out createNew);
 
     [STAThread]
     public static void Main(string[] args)
     {
-        SetConfig( );
-        bool_error( );
-        checkTimer = new System.Timers.Timer( );
+        InitConfig( );
+        CheckConfig( );
+        updateTimer = new System.Timers.Timer( );
         Application.EnableVisualStyles( );
         Application.SetCompatibleTextRenderingDefault(false);
-        Version version = Environment.OSVersion.Version;
-        Version version2 = new("6.1");
-        factor = GetDpiFactor( );
-        if (version.CompareTo(version2) >= 0)
+        Version OsVersion = Environment.OSVersion.Version;
+        DpiFactor = GetDpiFactor( );
+        if (OsVersion.CompareTo(new Version("6.1")) >= 0)
         {
             SetProcessDPIAware( );
         }
@@ -46,65 +48,52 @@ internal static class Program
         }
         if (args.Length != 0 && args[0] == "更新")
         {
-            new FmSetting
-            {
-                Start_set = ""
-            }.ShowDialog( );
+            new FmSetting { Start_set = "" }.ShowDialog( );
         }
-        if (IniHelp.GetValue("更新", "检测更新") is "True" or "发生错误")
+        if (Config.Get("更新", "检测更新") is "True" or "__ERROR__")
         {
-            new Thread(new ThreadStart(CheckUpdate)).Start( );
-            if (IniHelp.GetValue("更新", "更新间隔") == "True")
+            new Thread(CheckUpdate).Start( );
+            if (Config.Get("更新", "更新间隔") == "True")
             {
-                checkTimer.Enabled = true;
-                checkTimer.Interval = 3600000.0 * Convert.ToInt32(IniHelp.GetValue("更新", "间隔时间"));
-                checkTimer.Elapsed += CheckTimer_Elapsed;
-                checkTimer.Start( );
+                updateTimer.Enabled = true;
+                updateTimer.Interval = 3600000.0 * Convert.ToInt32(Config.Get("更新", "间隔时间"));
+                updateTimer.Elapsed += CheckTimer_Elapsed;
+                updateTimer.Start( );
             }
         }
         else
         {
-            FmFlags fmFlags2 = new( );
-            fmFlags2.Show( );
-            fmFlags2.DrawStr("天若");
+            FmFlags fmFlags = new( );
+            fmFlags.Show( );
+            fmFlags.DrawStr("天若");
         }
         Application.Run(new FmMain( ));
     }
 
-    public static void CheckTimer_Elapsed(object sender, ElapsedEventArgs e)
-    {
-    }
-
-    public static bool IsConnectedInternet( ) => InternetGetConnectedState(out _, 0);
-
-    public static int GetPidByProcessName(string processName)
-    {
-        Process[] processesByName = Process.GetProcessesByName(processName);
-        int num = 0;
-        int num2 = num >= processesByName.Length ? 0 : processesByName[num].Id;
-        return num2;
-    }
+    public static void CheckTimer_Elapsed(object o, ElapsedEventArgs e)
+        => CheckUpdate( );
 
     public static float GetDpiFactor( )
     {
-        float num;
+        float factor;
         try
         {
-            string text = "AppliedDPI";
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop\\WindowMetrics", true);
-            string text2 = registryKey.GetValue(text).ToString( );
+            string dpi = registryKey.GetValue("AppliedDPI").ToString( );
             registryKey.Close( );
-            num = Convert.ToSingle(text2) / 96f;
+            factor = Convert.ToSingle(dpi) / 96f;
         }
         catch
         {
-            num = 1f;
+            factor = 1f;
         }
-        return num;
+        return factor;
     }
 
     public static void CheckUpdate( )
     {
+#pragma warning disable
+        return; //TODO: CheckUpdate
         string htmlContent = WebHelper.GetHtmlContent("https://www.jianshu.com/p/3afe79471cb9");
         if (string.IsNullOrEmpty(htmlContent))
         {
@@ -134,21 +123,22 @@ internal static class Program
             }
             Process.Start("Data\\update.exe", string.Concat(new string[]
             {
-                    " ",
-                    jobject["main_url"].Value<string>(),
-                    " ",
-                    jobject["pan_url"].Value<string>(),
-                    " ",
-                    Path.Combine(Application.ExecutablePath, "天若.exe")
+                " ",
+                jobject["main_url"].Value<string>(),
+                " ",
+                jobject["pan_url"].Value<string>(),
+                " ",
+                Path.Combine(Application.ExecutablePath, "天若.exe")
             }));
             Environment.Exit(0);
         }
+#pragma warning restore
     }
 
-    private static bool CheckVersion(string newVersion, string curVersion)
+    private static bool CheckVersion(string version, string current)
     {
-        string[] array = newVersion.Split(new char[] { '.' });
-        string[] array2 = curVersion.Split(new char[] { '.' });
+        string[] array = version.Split(new char[] { '.' });
+        string[] array2 = current.Split(new char[] { '.' });
         for (int i = 0; i < array.Length; i++)
         {
             if (Convert.ToInt32(array[i]) > Convert.ToInt32(array2[i]))
@@ -159,217 +149,130 @@ internal static class Program
         return false;
     }
 
-    public static void SetConfig( )
+    public static void InitConfig( )
     {
         string text = AppDomain.CurrentDomain.BaseDirectory + "Data\\config.ini";
         if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "Data"))
         {
             Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "Data");
         }
-        if (!File.Exists(text))
-        {
-            using (File.Create(text))
-            {
-            }
-            IniHelp.SetValue("配置", "接口", "搜狗");
-            IniHelp.SetValue("配置", "开机自启", "True");
-            IniHelp.SetValue("配置", "快速翻译", "True");
-            IniHelp.SetValue("配置", "识别弹窗", "True");
-            IniHelp.SetValue("配置", "窗体动画", "窗体");
-            IniHelp.SetValue("配置", "记录数目", "20");
-            IniHelp.SetValue("配置", "自动保存", "True");
-            IniHelp.SetValue("配置", "截图位置", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
-            IniHelp.SetValue("配置", "翻译接口", "谷歌");
-            IniHelp.SetValue("快捷键", "文字识别", "F4");
-            IniHelp.SetValue("快捷键", "翻译文本", "F9");
-            IniHelp.SetValue("快捷键", "记录界面", "请按下快捷键");
-            IniHelp.SetValue("快捷键", "识别界面", "请按下快捷键");
-            IniHelp.SetValue("密钥_百度", "secret_id", "YsZKG1wha34PlDOPYaIrIIKO");
-            IniHelp.SetValue("密钥_百度", "secret_key", "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD");
-            IniHelp.SetValue("代理", "代理类型", "系统代理");
-            IniHelp.SetValue("代理", "服务器", "");
-            IniHelp.SetValue("代理", "端口", "");
-            IniHelp.SetValue("代理", "需要密码", "False");
-            IniHelp.SetValue("代理", "服务器账号", "");
-            IniHelp.SetValue("代理", "服务器密码", "");
-            IniHelp.SetValue("更新", "检测更新", "True");
-            IniHelp.SetValue("更新", "更新间隔", "True");
-            IniHelp.SetValue("更新", "间隔时间", "24");
-            IniHelp.SetValue("截图音效", "自动保存", "True");
-            IniHelp.SetValue("截图音效", "音效路径", "Data\\screenshot.wav");
-            IniHelp.SetValue("截图音效", "粘贴板", "False");
-            IniHelp.SetValue("工具栏", "合并", "False");
-            IniHelp.SetValue("工具栏", "分段", "False");
-            IniHelp.SetValue("工具栏", "分栏", "False");
-            IniHelp.SetValue("工具栏", "拆分", "False");
-            IniHelp.SetValue("工具栏", "检查", "False");
-            IniHelp.SetValue("工具栏", "翻译", "False");
-            IniHelp.SetValue("工具栏", "顶置", "True");
-            IniHelp.SetValue("取色器", "类型", "RGB");
-        }
+        if (File.Exists(text))
+            return;
+        File.Create(text);
+        Config.Set("配置", "接口", "搜狗");
+        Config.Set("配置", "开机自启", "True");
+        Config.Set("配置", "快速翻译", "True");
+        Config.Set("配置", "识别弹窗", "True");
+        Config.Set("配置", "窗体动画", "窗体");
+        Config.Set("配置", "记录数目", "20");
+        Config.Set("配置", "自动保存", "True");
+        Config.Set("配置", "截图位置", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
+        Config.Set("配置", "翻译接口", "谷歌");
+        Config.Set("快捷键", "文字识别", "F4");
+        Config.Set("快捷键", "翻译文本", "F9");
+        Config.Set("快捷键", "记录界面", "请按下快捷键");
+        Config.Set("快捷键", "识别界面", "请按下快捷键");
+        Config.Set("密钥_百度", "secret_id", "YsZKG1wha34PlDOPYaIrIIKO");
+        Config.Set("密钥_百度", "secret_key", "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD");
+        Config.Set("代理", "代理类型", "系统代理");
+        Config.Set("代理", "服务器", "");
+        Config.Set("代理", "端口", "");
+        Config.Set("代理", "需要密码", "False");
+        Config.Set("代理", "服务器账号", "");
+        Config.Set("代理", "服务器密码", "");
+        Config.Set("更新", "检测更新", "True");
+        Config.Set("更新", "更新间隔", "True");
+        Config.Set("更新", "间隔时间", "24");
+        Config.Set("截图音效", "自动保存", "True");
+        Config.Set("截图音效", "音效路径", "Data\\screenshot.wav");
+        Config.Set("截图音效", "粘贴板", "False");
+        Config.Set("工具栏", "合并", "False");
+        Config.Set("工具栏", "分段", "False");
+        Config.Set("工具栏", "分栏", "False");
+        Config.Set("工具栏", "拆分", "False");
+        Config.Set("工具栏", "检查", "False");
+        Config.Set("工具栏", "翻译", "False");
+        Config.Set("工具栏", "顶置", "True");
+        Config.Set("取色器", "类型", "RGB");
     }
 
-    public static void bool_error( )
+    public static void CheckConfig( )
     {
-        if (IniHelp.GetValue("配置", "接口") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "接口", "搜狗");
-        }
-        if (IniHelp.GetValue("配置", "开机自启") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "开机自启", "True");
-        }
-        if (IniHelp.GetValue("配置", "快速翻译") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "快速翻译", "True");
-        }
-        if (IniHelp.GetValue("配置", "识别弹窗") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "识别弹窗", "True");
-        }
-        if (IniHelp.GetValue("配置", "窗体动画") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "窗体动画", "窗体");
-        }
-        if (IniHelp.GetValue("配置", "记录数目") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "记录数目", "20");
-        }
-        if (IniHelp.GetValue("配置", "自动保存") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "自动保存", "True");
-        }
-        if (IniHelp.GetValue("配置", "翻译接口") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "翻译接口", "谷歌");
-        }
-        if (IniHelp.GetValue("配置", "截图位置") == "发生错误")
-        {
-            IniHelp.SetValue("配置", "截图位置", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
-        }
-        if (IniHelp.GetValue("快捷键", "文字识别") == "发生错误")
-        {
-            IniHelp.SetValue("快捷键", "文字识别", "F4");
-        }
-        if (IniHelp.GetValue("快捷键", "翻译文本") == "发生错误")
-        {
-            IniHelp.SetValue("快捷键", "翻译文本", "F9");
-        }
-        if (IniHelp.GetValue("快捷键", "记录界面") == "发生错误")
-        {
-            IniHelp.SetValue("快捷键", "记录界面", "请按下快捷键");
-        }
-        if (IniHelp.GetValue("快捷键", "识别界面") == "发生错误")
-        {
-            IniHelp.SetValue("快捷键", "识别界面", "请按下快捷键");
-        }
-        if (IniHelp.GetValue("密钥_百度", "secret_id") == "发生错误")
-        {
-            IniHelp.SetValue("密钥_百度", "secret_id", "YsZKG1wha34PlDOPYaIrIIKO");
-        }
-        if (IniHelp.GetValue("密钥_百度", "secret_key") == "发生错误")
-        {
-            IniHelp.SetValue("密钥_百度", "secret_key", "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD");
-        }
-        if (IniHelp.GetValue("代理", "代理类型") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "代理类型", "系统代理");
-        }
-        if (IniHelp.GetValue("代理", "服务器") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "服务器", "");
-        }
-        if (IniHelp.GetValue("代理", "端口") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "端口", "");
-        }
-        if (IniHelp.GetValue("代理", "需要密码") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "需要密码", "False");
-        }
-        if (IniHelp.GetValue("代理", "服务器账号") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "服务器账号", "");
-        }
-        if (IniHelp.GetValue("代理", "服务器密码") == "发生错误")
-        {
-            IniHelp.SetValue("代理", "服务器密码", "");
-        }
-        if (IniHelp.GetValue("更新", "检测更新") == "发生错误")
-        {
-            IniHelp.SetValue("更新", "检测更新", "True");
-        }
-        if (IniHelp.GetValue("更新", "更新间隔") == "发生错误")
-        {
-            IniHelp.SetValue("更新", "更新间隔", "True");
-        }
-        if (IniHelp.GetValue("更新", "间隔时间") == "发生错误")
-        {
-            IniHelp.SetValue("更新", "间隔时间", "24");
-        }
-        if (IniHelp.GetValue("截图音效", "自动保存") == "发生错误")
-        {
-            IniHelp.SetValue("截图音效", "自动保存", "True");
-        }
-        if (IniHelp.GetValue("截图音效", "音效路径") == "发生错误")
-        {
-            IniHelp.SetValue("截图音效", "音效路径", "Data\\screenshot.wav");
-        }
-        if (IniHelp.GetValue("截图音效", "粘贴板") == "发生错误")
-        {
-            IniHelp.SetValue("截图音效", "粘贴板", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "合并") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "合并", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "拆分") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "拆分", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "检查") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "检查", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "翻译") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "翻译", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "分段") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "分段", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "分栏") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "分栏", "False");
-        }
-        if (IniHelp.GetValue("工具栏", "顶置") == "发生错误")
-        {
-            IniHelp.SetValue("工具栏", "顶置", "True");
-        }
-        if (IniHelp.GetValue("取色器", "类型") == "发生错误")
-        {
-            IniHelp.SetValue("取色器", "类型", "RGB");
-        }
-        if (IniHelp.GetValue("特殊", "ali_cookie") == "发生错误")
-        {
-            IniHelp.SetValue("特殊", "ali_cookie", "cna=noXhE38FHGkCAXDve7YaZ8Tn; cnz=noXhE4/VhB8CAbZ773ApeV14; isg=BGJi2c2YTeeP6FG7S_Re8kveu-jEs2bNwToQnKz7jlWAfwL5lEO23eh9q3km9N5l; ");
-        }
-        if (IniHelp.GetValue("特殊", "ali_account") == "发生错误")
-        {
-            IniHelp.SetValue("特殊", "ali_account", "");
-        }
-        if (IniHelp.GetValue("特殊", "ali_password") == "发生错误")
-        {
-            IniHelp.SetValue("特殊", "ali_password", "");
-        }
+        if (Config.Get("配置", "接口") == "__ERROR__")
+            Config.Set("配置", "接口", "搜狗");
+        if (Config.Get("配置", "开机自启") == "__ERROR__")
+            Config.Set("配置", "开机自启", "True");
+        if (Config.Get("配置", "快速翻译") == "__ERROR__")
+            Config.Set("配置", "快速翻译", "True");
+        if (Config.Get("配置", "识别弹窗") == "__ERROR__")
+            Config.Set("配置", "识别弹窗", "True");
+        if (Config.Get("配置", "窗体动画") == "__ERROR__")
+            Config.Set("配置", "窗体动画", "窗体");
+        if (Config.Get("配置", "记录数目") == "__ERROR__")
+            Config.Set("配置", "记录数目", "20");
+        if (Config.Get("配置", "自动保存") == "__ERROR__")
+            Config.Set("配置", "自动保存", "True");
+        if (Config.Get("配置", "翻译接口") == "__ERROR__")
+            Config.Set("配置", "翻译接口", "谷歌");
+        if (Config.Get("配置", "截图位置") == "__ERROR__")
+            Config.Set("配置", "截图位置", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
+        if (Config.Get("快捷键", "文字识别") == "__ERROR__")
+            Config.Set("快捷键", "文字识别", "F4");
+        if (Config.Get("快捷键", "翻译文本") == "__ERROR__")
+            Config.Set("快捷键", "翻译文本", "F9");
+        if (Config.Get("快捷键", "记录界面") == "__ERROR__")
+            Config.Set("快捷键", "记录界面", "请按下快捷键");
+        if (Config.Get("快捷键", "识别界面") == "__ERROR__")
+            Config.Set("快捷键", "识别界面", "请按下快捷键");
+        if (Config.Get("密钥_百度", "secret_id") == "__ERROR__")
+            Config.Set("密钥_百度", "secret_id", "YsZKG1wha34PlDOPYaIrIIKO");
+        if (Config.Get("密钥_百度", "secret_key") == "__ERROR__")
+            Config.Set("密钥_百度", "secret_key", "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD");
+        if (Config.Get("代理", "代理类型") == "__ERROR__")
+            Config.Set("代理", "代理类型", "系统代理");
+        if (Config.Get("代理", "服务器") == "__ERROR__")
+            Config.Set("代理", "服务器", "");
+        if (Config.Get("代理", "端口") == "__ERROR__")
+            Config.Set("代理", "端口", "");
+        if (Config.Get("代理", "需要密码") == "__ERROR__")
+            Config.Set("代理", "需要密码", "False");
+        if (Config.Get("代理", "服务器账号") == "__ERROR__")
+            Config.Set("代理", "服务器账号", "");
+        if (Config.Get("代理", "服务器密码") == "__ERROR__")
+            Config.Set("代理", "服务器密码", "");
+        if (Config.Get("更新", "检测更新") == "__ERROR__")
+            Config.Set("更新", "检测更新", "True");
+        if (Config.Get("更新", "更新间隔") == "__ERROR__")
+            Config.Set("更新", "更新间隔", "True");
+        if (Config.Get("更新", "间隔时间") == "__ERROR__")
+            Config.Set("更新", "间隔时间", "24");
+        if (Config.Get("截图音效", "自动保存") == "__ERROR__")
+            Config.Set("截图音效", "自动保存", "True");
+        if (Config.Get("截图音效", "音效路径") == "__ERROR__")
+            Config.Set("截图音效", "音效路径", "Data\\screenshot.wav");
+        if (Config.Get("截图音效", "粘贴板") == "__ERROR__")
+            Config.Set("截图音效", "粘贴板", "False");
+        if (Config.Get("工具栏", "合并") == "__ERROR__")
+            Config.Set("工具栏", "合并", "False");
+        if (Config.Get("工具栏", "拆分") == "__ERROR__")
+            Config.Set("工具栏", "拆分", "False");
+        if (Config.Get("工具栏", "检查") == "__ERROR__")
+            Config.Set("工具栏", "检查", "False");
+        if (Config.Get("工具栏", "翻译") == "__ERROR__")
+            Config.Set("工具栏", "翻译", "False");
+        if (Config.Get("工具栏", "分段") == "__ERROR__")
+            Config.Set("工具栏", "分段", "False");
+        if (Config.Get("工具栏", "分栏") == "__ERROR__")
+            Config.Set("工具栏", "分栏", "False");
+        if (Config.Get("工具栏", "顶置") == "__ERROR__")
+            Config.Set("工具栏", "顶置", "True");
+        if (Config.Get("取色器", "类型") == "__ERROR__")
+            Config.Set("取色器", "类型", "RGB");
+        if (Config.Get("特殊", "ali_cookie") == "__ERROR__")
+            Config.Set("特殊", "ali_cookie", "cna=noXhE38FHGkCAXDve7YaZ8Tn; cnz=noXhE4/VhB8CAbZ773ApeV14; isg=BGJi2c2YTeeP6FG7S_Re8kveu-jEs2bNwToQnKz7jlWAfwL5lEO23eh9q3km9N5l; ");
+        if (Config.Get("特殊", "ali_account") == "__ERROR__")
+            Config.Set("特殊", "ali_account", "");
+        if (Config.Get("特殊", "ali_password") == "__ERROR__")
+            Config.Set("特殊", "ali_password", "");
     }
-
-    public static EventWaitHandle ProgramStarted;
-
-    public static float factor;
-
-    public static bool createNew;
-
-    public static System.Timers.Timer checkTimer;
 }

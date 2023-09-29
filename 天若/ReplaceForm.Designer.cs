@@ -13,7 +13,7 @@
 
 		private void InitializeComponent()
 		{
-			this.findtextbox = new global::System.Windows.Forms.TextBox();
+			this.FindTextBox = new global::System.Windows.Forms.TextBox();
 			this.label1 = new global::System.Windows.Forms.Label();
 			this.replacetextBox = new global::System.Windows.Forms.TextBox();
 			this.label2 = new global::System.Windows.Forms.Label();
@@ -22,11 +22,11 @@
 			this.replaceallbutton = new global::System.Windows.Forms.Button();
 			this.canclebutton = new global::System.Windows.Forms.Button();
 			base.SuspendLayout();
-			this.findtextbox.Location = new global::System.Drawing.Point(77, 7);
-			this.findtextbox.Name = "findtextbox";
-			this.findtextbox.Size = new global::System.Drawing.Size(280, 21);
-			this.findtextbox.TabIndex = 3;
-			this.findtextbox.ImeMode = global::System.Windows.Forms.ImeMode.HangulFull;
+			this.FindTextBox.Location = new global::System.Drawing.Point(77, 7);
+			this.FindTextBox.Name = "findtextbox";
+			this.FindTextBox.Size = new global::System.Drawing.Size(280, 21);
+			this.FindTextBox.TabIndex = 3;
+			this.FindTextBox.ImeMode = global::System.Windows.Forms.ImeMode.HangulFull;
 			this.label1.AutoSize = true;
 			this.label1.Font = new global::System.Drawing.Font("宋体", 9f, global::System.Drawing.FontStyle.Regular, global::System.Drawing.GraphicsUnit.Point, 134);
 			this.label1.Location = new global::System.Drawing.Point(12, 11);
@@ -52,28 +52,28 @@
 			this.findbutton.TabIndex = 6;
 			this.findbutton.Text = "查找下一个";
 			this.findbutton.UseVisualStyleBackColor = false;
-			this.findbutton.Click += new global::System.EventHandler(this.findbutton_Click);
+			this.findbutton.Click += new global::System.EventHandler(this.FindButtonClick);
 			this.replacebutton.Location = new global::System.Drawing.Point(100, 75);
 			this.replacebutton.Name = "replacebutton";
 			this.replacebutton.Size = new global::System.Drawing.Size(75, 23);
 			this.replacebutton.TabIndex = 7;
 			this.replacebutton.Text = "替换";
 			this.replacebutton.UseVisualStyleBackColor = false;
-			this.replacebutton.Click += new global::System.EventHandler(this.replacebutton_Click);
+			this.replacebutton.Click += new global::System.EventHandler(this.ReplaceButtonClick);
 			this.replaceallbutton.Location = new global::System.Drawing.Point(191, 75);
 			this.replaceallbutton.Name = "replaceallbutton";
 			this.replaceallbutton.Size = new global::System.Drawing.Size(75, 23);
 			this.replaceallbutton.TabIndex = 8;
 			this.replaceallbutton.Text = "全部替换";
 			this.replaceallbutton.UseVisualStyleBackColor = false;
-			this.replaceallbutton.Click += new global::System.EventHandler(this.replaceallbutton_Click);
+			this.replaceallbutton.Click += new global::System.EventHandler(this.ReplaceAllClick);
 			this.canclebutton.Location = new global::System.Drawing.Point(282, 75);
 			this.canclebutton.Name = "canclebutton";
 			this.canclebutton.Size = new global::System.Drawing.Size(75, 23);
 			this.canclebutton.TabIndex = 9;
 			this.canclebutton.Text = "取消";
 			this.canclebutton.UseVisualStyleBackColor = false;
-			this.canclebutton.Click += new global::System.EventHandler(this.canclebutton_Click);
+			this.canclebutton.Click += new global::System.EventHandler(this.CancelClick);
 			base.AutoScaleDimensions = new global::System.Drawing.SizeF(6f, 12f);
 			base.AutoScaleMode = global::System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = global::System.Drawing.Color.White;
@@ -84,7 +84,7 @@
 			base.Controls.Add(this.findbutton);
 			base.Controls.Add(this.replacetextBox);
 			base.Controls.Add(this.label2);
-			base.Controls.Add(this.findtextbox);
+			base.Controls.Add(this.FindTextBox);
 			base.Controls.Add(this.label1);
 			base.FormBorderStyle = global::System.Windows.Forms.FormBorderStyle.FixedSingle;
 			base.MaximizeBox = false;
@@ -92,7 +92,7 @@
 			base.Name = "ReplaceForm";
 			this.Text = "替换";
 			base.TopMost = true;
-			base.FormClosing += new global::System.Windows.Forms.FormClosingEventHandler(this.ReplaceForm_FormClosing);
+			base.FormClosing += new global::System.Windows.Forms.FormClosingEventHandler(this.ReplaceFormClosing);
 			base.Load += new global::System.EventHandler(this.Form2_Load);
 			base.ResumeLayout(false);
 			base.PerformLayout();
@@ -100,7 +100,7 @@
 
 		private global::System.ComponentModel.IContainer components;
 
-		private global::System.Windows.Forms.TextBox findtextbox;
+		private global::System.Windows.Forms.TextBox FindTextBox;
 
 		private global::System.Windows.Forms.Label label1;
 

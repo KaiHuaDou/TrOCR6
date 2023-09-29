@@ -78,7 +78,7 @@ public partial class AliTable : Form
         if (CookiesBox.Text.Contains("login_aliyunid=\""))
         {
             webBrowser1.Url = new Uri("https://data.aliyun.com/ai/ocr-other#/ocr-other");
-            IniHelp.SetValue("特殊", "ali_cookie", CookiesBox.Text);
+            Config.Set("特殊", "ali_cookie", CookiesBox.Text);
             Hide( );
         }
     }
@@ -113,10 +113,10 @@ public partial class AliTable : Form
     {
         try
         {
-            if (!string.IsNullOrEmpty(IniHelp.GetValue("特殊", "ali_account").Trim( )) && !string.IsNullOrEmpty(IniHelp.GetValue("特殊", "ali_password").Trim( )))
+            if (!string.IsNullOrEmpty(Config.Get("特殊", "ali_account").Trim( )) && !string.IsNullOrEmpty(Config.Get("特殊", "ali_password").Trim( )))
             {
-                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-id").setAttribute("value", IniHelp.GetValue("特殊", "ali_account"), 1);
-                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-password").setAttribute("value", IniHelp.GetValue("特殊", "ali_password"), 1);
+                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-id").setAttribute("value", Config.Get("特殊", "ali_account"), 1);
+                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-password").setAttribute("value", Config.Get("特殊", "ali_password"), 1);
             }
         }
         catch { }

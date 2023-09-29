@@ -5,67 +5,36 @@ namespace TrOCR;
 
 public static class StaticValue
 {
-    public static string v_Split;
-
-    public static string v_Restore;
-
-    public static string v_Merge;
-
-    public static string v_googleTranslate_txt;
-
-    public static string v_googleTranslate_back;
-
-    public static int image_h;
-
-    public static int image_w;
-
-    public static string v_single;
-
-    public static Image image_OCR;
-
-    public static string current_v = "5.0.0";
-
-    public static string copy_f = "无格式";
-
-    public static string content = "天若OCR更新";
-
-    public static bool zh_en = true;
-
-    public static bool zh_jp;
-
-    public static bool zh_ko;
-
-    public static bool set_默认 = true;
-
-    public static bool set_拆分;
-
-    public static bool set_合并;
-
-    public static bool set_翻译;
-
-    public static bool set_记录;
-
-    public static bool set_截图;
-
+    public static string BaiduApiId = "";
+    public static string BaiduApiKey = "";
+    public static bool CaptureRejection;
+    public static string CopyFormat = "无格式";
+    public static string DateNow = "2023-10-01";
     public static float Dpifactor = 1f;
-
+    public static string GoogleTransBack;
+    public static string GoogleTransTxt;
+    public static int ImageHeight;
+    public static Image ImageOCR;
+    public static int ImageWidth;
     public static IntPtr mainhandle;
-
-    public static string note = "";
-
-    public static string[] v_note;
-
-    public static int v_notecount = 40;
-
-    public static string baiduAPI_ID = "";
-
-    public static string baiduAPI_key = "";
-
-    public static bool 截图排斥;
-
-    public static bool v_topmost;
-
-    public static Image v_screenimage;
-
-    public static string v_date = "2019-02-22";
+    public static string Merge;
+    public static string Note = "";
+    public static int NoteCount = 40;
+    public static string[] Notes;
+    public static string Restore;
+    public static Image ScreenImage;
+    public static bool SetCapture;
+    public static bool SetDefault = true;
+    public static bool SetMerge;
+    public static bool SetRecord;
+    public static bool SetSpilt;
+    public static bool SetTrans;
+    public static string Single_;
+    public static string Split;
+    public static bool Topmost;
+    public static string UpdateText = "天若 OCR 更新";
+    public static string Version = "6.0.0";
+    public static bool Zh2En = true;
+    public static bool Zh2Jp;
+    public static bool Zh2Ko;
 }

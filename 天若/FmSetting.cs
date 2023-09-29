@@ -25,10 +25,10 @@ public sealed partial class FmSetting : Form
         InitializeComponent( );
     }
 
-    public void readIniFile( )
+    public void ReadConfig( )
     {
-        string value = IniHelp.GetValue("配置", "开机自启");
-        if (value == "发生错误")
+        string value = Config.Get("配置", "开机自启");
+        if (value == "__ERROR__")
         {
             cbBox_开机.Checked = true;
         }
@@ -40,8 +40,8 @@ public sealed partial class FmSetting : Form
         {
             cbBox_开机.Checked = true;
         }
-        string value2 = IniHelp.GetValue("配置", "快速翻译");
-        if (value2 == "发生错误")
+        string value2 = Config.Get("配置", "快速翻译");
+        if (value2 == "__ERROR__")
         {
             cbBox_翻译.Checked = true;
         }
@@ -53,8 +53,8 @@ public sealed partial class FmSetting : Form
         {
             cbBox_翻译.Checked = true;
         }
-        string value3 = IniHelp.GetValue("配置", "识别弹窗");
-        if (value3 == "发生错误")
+        string value3 = Config.Get("配置", "识别弹窗");
+        if (value3 == "__ERROR__")
         {
             cbBox_弹窗.Checked = true;
         }
@@ -66,20 +66,20 @@ public sealed partial class FmSetting : Form
         {
             cbBox_弹窗.Checked = true;
         }
-        string value4 = IniHelp.GetValue("配置", "窗体动画");
+        string value4 = Config.Get("配置", "窗体动画");
         cobBox_动画.Text = value4;
-        if (value4 == "发生错误")
+        if (value4 == "__ERROR__")
         {
             cobBox_动画.Text = "窗体";
         }
-        string value5 = IniHelp.GetValue("配置", "记录数目");
+        string value5 = Config.Get("配置", "记录数目");
         numbox_记录.Value = Convert.ToInt32(value5);
-        if (value5 == "发生错误")
+        if (value5 == "__ERROR__")
         {
             numbox_记录.Value = 20m;
         }
-        string value6 = IniHelp.GetValue("配置", "自动保存");
-        if (value6 == "发生错误")
+        string value6 = Config.Get("配置", "自动保存");
+        if (value6 == "__ERROR__")
         {
             cbBox_保存.Checked = false;
         }
@@ -101,33 +101,33 @@ public sealed partial class FmSetting : Form
             textBox_path.Enabled = false;
             btn_浏览.Enabled = false;
         }
-        string value7 = IniHelp.GetValue("配置", "截图位置");
+        string value7 = Config.Get("配置", "截图位置");
         textBox_path.Text = value7;
-        if (value7 == "发生错误")
+        if (value7 == "__ERROR__")
         {
             textBox_path.Text = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
         }
-        string value8 = IniHelp.GetValue("快捷键", "文字识别");
+        string value8 = Config.Get("快捷键", "文字识别");
         txtBox_文字识别.Text = value8;
-        if (value8 == "发生错误")
+        if (value8 == "__ERROR__")
         {
             txtBox_文字识别.Text = "F4";
         }
-        string value9 = IniHelp.GetValue("快捷键", "翻译文本");
+        string value9 = Config.Get("快捷键", "翻译文本");
         txtBox_翻译文本.Text = value9;
-        if (value9 == "发生错误")
+        if (value9 == "__ERROR__")
         {
             txtBox_翻译文本.Text = "F9";
         }
-        string value10 = IniHelp.GetValue("快捷键", "记录界面");
+        string value10 = Config.Get("快捷键", "记录界面");
         txtBox_记录界面.Text = value10;
-        if (value10 == "发生错误")
+        if (value10 == "__ERROR__")
         {
             txtBox_记录界面.Text = "请按下快捷键";
         }
-        string value11 = IniHelp.GetValue("快捷键", "识别界面");
+        string value11 = Config.Get("快捷键", "识别界面");
         txtBox_识别界面.Text = value11;
-        if (value11 == "发生错误")
+        if (value11 == "__ERROR__")
         {
             txtBox_识别界面.Text = "请按下快捷键";
         }
@@ -135,21 +135,21 @@ public sealed partial class FmSetting : Form
         pictureBox_翻译文本.Image = (txtBox_翻译文本.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
         pictureBox_记录界面.Image = (txtBox_记录界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
         pictureBox_识别界面.Image = (txtBox_识别界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
-        string value12 = IniHelp.GetValue("密钥_百度", "secret_id");
+        string value12 = Config.Get("密钥_百度", "secret_id");
         text_baiduaccount.Text = value12;
-        if (value12 == "发生错误")
+        if (value12 == "__ERROR__")
         {
             text_baiduaccount.Text = "YsZKG1wha34PlDOPYaIrIIKO";
         }
-        string value13 = IniHelp.GetValue("密钥_百度", "secret_key");
+        string value13 = Config.Get("密钥_百度", "secret_key");
         text_baidupassword.Text = value13;
-        if (value13 == "发生错误")
+        if (value13 == "__ERROR__")
         {
             text_baidupassword.Text = "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD";
         }
-        string value14 = IniHelp.GetValue("代理", "代理类型");
+        string value14 = Config.Get("代理", "代理类型");
         combox_代理.Text = value14;
-        if (value14 == "发生错误")
+        if (value14 == "__ERROR__")
         {
             combox_代理.Text = "系统代理";
         }
@@ -166,20 +166,20 @@ public sealed partial class FmSetting : Form
             text_端口.Enabled = true;
             text_服务器.Enabled = true;
         }
-        string value15 = IniHelp.GetValue("代理", "服务器");
+        string value15 = Config.Get("代理", "服务器");
         text_服务器.Text = value15;
-        if (value15 == "发生错误")
+        if (value15 == "__ERROR__")
         {
             text_服务器.Text = "127.0.0.1";
         }
-        string value16 = IniHelp.GetValue("代理", "端口");
+        string value16 = Config.Get("代理", "端口");
         text_端口.Text = value16;
-        if (value16 == "发生错误")
+        if (value16 == "__ERROR__")
         {
             text_端口.Text = "1080";
         }
-        string value17 = IniHelp.GetValue("代理", "需要密码");
-        if (value17 == "发生错误")
+        string value17 = Config.Get("代理", "需要密码");
+        if (value17 == "__ERROR__")
         {
             chbox_代理服务器.Checked = false;
         }
@@ -191,15 +191,15 @@ public sealed partial class FmSetting : Form
         {
             chbox_代理服务器.Checked = false;
         }
-        string value18 = IniHelp.GetValue("代理", "服务器账号");
+        string value18 = Config.Get("代理", "服务器账号");
         text_账号.Text = value18;
-        if (value18 == "发生错误")
+        if (value18 == "__ERROR__")
         {
             text_账号.Text = "";
         }
-        string value19 = IniHelp.GetValue("代理", "服务器密码");
+        string value19 = Config.Get("代理", "服务器密码");
         text_密码.Text = value19;
-        if (value19 == "发生错误")
+        if (value19 == "__ERROR__")
         {
             text_密码.Text = "";
         }
@@ -213,8 +213,8 @@ public sealed partial class FmSetting : Form
             text_账号.Enabled = false;
             text_密码.Enabled = false;
         }
-        string value20 = IniHelp.GetValue("更新", "检测更新");
-        if (value20 == "发生错误")
+        string value20 = Config.Get("更新", "检测更新");
+        if (value20 == "__ERROR__")
         {
             check_检查更新.Checked = false;
         }
@@ -235,8 +235,8 @@ public sealed partial class FmSetting : Form
             checkBox_更新间隔.Enabled = false;
             numbox_间隔时间.Enabled = false;
         }
-        string value21 = IniHelp.GetValue("更新", "更新间隔");
-        if (value21 == "发生错误")
+        string value21 = Config.Get("更新", "更新间隔");
+        if (value21 == "__ERROR__")
         {
             checkBox_更新间隔.Checked = false;
         }
@@ -256,14 +256,14 @@ public sealed partial class FmSetting : Form
         {
             numbox_间隔时间.Enabled = false;
         }
-        string value22 = IniHelp.GetValue("更新", "间隔时间");
+        string value22 = Config.Get("更新", "间隔时间");
         numbox_间隔时间.Value = Convert.ToInt32(value22);
-        if (value5 == "发生错误")
+        if (value5 == "__ERROR__")
         {
             numbox_间隔时间.Value = 24m;
         }
-        string value23 = IniHelp.GetValue("截图音效", "粘贴板");
-        if (value23 == "发生错误")
+        string value23 = Config.Get("截图音效", "粘贴板");
+        if (value23 == "__ERROR__")
         {
             chbox_copy.Checked = false;
         }
@@ -275,8 +275,8 @@ public sealed partial class FmSetting : Form
         {
             chbox_copy.Checked = false;
         }
-        string value24 = IniHelp.GetValue("截图音效", "自动保存");
-        if (value24 == "发生错误")
+        string value24 = Config.Get("截图音效", "自动保存");
+        if (value24 == "__ERROR__")
         {
             chbox_save.Checked = true;
         }
@@ -288,14 +288,14 @@ public sealed partial class FmSetting : Form
         {
             chbox_save.Checked = true;
         }
-        string value25 = IniHelp.GetValue("截图音效", "音效路径");
+        string value25 = Config.Get("截图音效", "音效路径");
         text_音效path.Text = value25;
-        if (value25 == "发生错误")
+        if (value25 == "__ERROR__")
         {
             text_音效path.Text = "Data\\screenshot.wav";
         }
-        string value26 = IniHelp.GetValue("取色器", "类型");
-        if (value26 == "发生错误")
+        string value26 = Config.Get("取色器", "类型");
+        if (value26 == "__ERROR__")
         {
             chbox_取色.Checked = false;
         }
@@ -337,13 +337,13 @@ public sealed partial class FmSetting : Form
         int[] array6 = new int[4];
         array6[0] = 1;
         numericUpDown6.Value = new decimal(array6);
-        tab_标签.Height = (int) (350.0 * Program.factor);
+        tab_标签.Height = (int) (350.0 * Program.DpiFactor);
         base.Height = tab_标签.Height + 50;
-        readIniFile( );
+        ReadConfig( );
         chbox_代理服务器.CheckedChanged += chbox_代理服务器_CheckedChanged;
         更新Button_check.Click += 更新Button_check_Click;
-        label_更新日期.Text = "更新时间：" + StaticValue.v_date;
-        label_版本号.Text = "当前版本：" + StaticValue.current_v;
+        label_更新日期.Text = "更新时间：" + StaticValue.DateNow;
+        label_版本号.Text = "当前版本：" + StaticValue.Version;
         txt_更新说明.Text = (string) componentResourceManager.GetObject("更新说明");
         txt_更新说明.ReadOnly = true;
         txt_更新说明.WordWrap = true;
@@ -380,42 +380,42 @@ public sealed partial class FmSetting : Form
     {
         if (tab_标签.SelectedTab == page_常规)
         {
-            tab_标签.Height = (int) (350.0 * Program.factor);
+            tab_标签.Height = (int) (350.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_快捷键)
         {
-            tab_标签.Height = (int) (225.0 * Program.factor);
+            tab_标签.Height = (int) (225.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_密钥)
         {
-            tab_标签.Height = (int) (190.0 * Program.factor);
+            tab_标签.Height = (int) (190.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_代理)
         {
-            tab_标签.Height = (int) (245.0 * Program.factor);
+            tab_标签.Height = (int) (245.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_更新)
         {
-            tab_标签.Height = (int) (135.0 * Program.factor);
+            tab_标签.Height = (int) (135.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_关于)
         {
-            tab_标签.Height = (int) (340.0 * Program.factor);
+            tab_标签.Height = (int) (340.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_赞助)
         {
-            tab_标签.Height = (int) (225.0 * Program.factor);
+            tab_标签.Height = (int) (225.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
         if (tab_标签.SelectedTab == Page_反馈)
         {
-            tab_标签.Height = (int) (200.0 * Program.factor);
+            tab_标签.Height = (int) (200.0 * Program.DpiFactor);
             base.Height = tab_标签.Height + 50;
         }
     }
@@ -508,19 +508,19 @@ public sealed partial class FmSetting : Form
             pictureBox.Image = Resources.快捷键_0;
             if (textBox.Name.Contains("文字识别"))
             {
-                IniHelp.SetValue("快捷键", "文字识别", txtBox_文字识别.Text);
+                Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
             }
             if (textBox.Name.Contains("翻译文本"))
             {
-                IniHelp.SetValue("快捷键", "翻译文本", txtBox_翻译文本.Text);
+                Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
             }
             if (textBox.Name.Contains("记录界面"))
             {
-                IniHelp.SetValue("快捷键", "记录界面", txtBox_记录界面.Text);
+                Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
             }
             if (textBox.Name.Contains("识别界面"))
             {
-                IniHelp.SetValue("快捷键", "识别界面", txtBox_识别界面.Text);
+                Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
                 return;
             }
         }
@@ -541,19 +541,19 @@ public sealed partial class FmSetting : Form
             {
                 if (textBox.Name.Contains("文字识别"))
                 {
-                    IniHelp.SetValue("快捷键", "文字识别", txtBox_文字识别.Text);
+                    Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
                 }
                 if (textBox.Name.Contains("翻译文本"))
                 {
-                    IniHelp.SetValue("快捷键", "翻译文本", txtBox_翻译文本.Text);
+                    Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
                 }
                 if (textBox.Name.Contains("记录界面"))
                 {
-                    IniHelp.SetValue("快捷键", "记录界面", txtBox_记录界面.Text);
+                    Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
                 }
                 if (textBox.Name.Contains("识别界面"))
                 {
-                    IniHelp.SetValue("快捷键", "识别界面", txtBox_识别界面.Text);
+                    Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
                 }
             }
         }
@@ -735,38 +735,38 @@ public sealed partial class FmSetting : Form
 
     private void Form1_FormClosed(object sender, FormClosedEventArgs e)
     {
-        IniHelp.SetValue("配置", "开机自启", cbBox_开机.Checked.ToString( ));
-        IniHelp.SetValue("配置", "快速翻译", cbBox_翻译.Checked.ToString( ));
-        IniHelp.SetValue("配置", "识别弹窗", cbBox_弹窗.Checked.ToString( ));
-        IniHelp.SetValue("配置", "窗体动画", cobBox_动画.Text);
-        IniHelp.SetValue("配置", "记录数目", numbox_记录.Text);
-        IniHelp.SetValue("配置", "自动保存", cbBox_保存.Checked.ToString( ));
-        IniHelp.SetValue("配置", "截图位置", textBox_path.Text);
-        IniHelp.SetValue("快捷键", "文字识别", txtBox_文字识别.Text);
-        IniHelp.SetValue("快捷键", "翻译文本", txtBox_翻译文本.Text);
-        IniHelp.SetValue("快捷键", "记录界面", txtBox_记录界面.Text);
-        IniHelp.SetValue("快捷键", "识别界面", txtBox_识别界面.Text);
-        IniHelp.SetValue("密钥_百度", "secret_id", text_baiduaccount.Text);
-        IniHelp.SetValue("密钥_百度", "secret_key", text_baidupassword.Text);
-        IniHelp.SetValue("代理", "代理类型", combox_代理.Text);
-        IniHelp.SetValue("代理", "服务器", text_服务器.Text);
-        IniHelp.SetValue("代理", "端口", text_端口.Text);
-        IniHelp.SetValue("代理", "需要密码", chbox_代理服务器.Checked.ToString( ));
-        IniHelp.SetValue("代理", "服务器账号", text_账号.Text);
-        IniHelp.SetValue("代理", "服务器密码", text_密码.Text);
-        IniHelp.SetValue("更新", "检测更新", check_检查更新.Checked.ToString( ));
-        IniHelp.SetValue("更新", "更新间隔", checkBox_更新间隔.Checked.ToString( ));
-        IniHelp.SetValue("更新", "间隔时间", numbox_间隔时间.Value.ToString( ));
-        IniHelp.SetValue("截图音效", "自动保存", chbox_save.Checked.ToString( ));
-        IniHelp.SetValue("截图音效", "音效路径", text_音效path.Text);
-        IniHelp.SetValue("截图音效", "粘贴板", chbox_copy.Checked.ToString( ));
+        Config.Set("配置", "开机自启", cbBox_开机.Checked.ToString( ));
+        Config.Set("配置", "快速翻译", cbBox_翻译.Checked.ToString( ));
+        Config.Set("配置", "识别弹窗", cbBox_弹窗.Checked.ToString( ));
+        Config.Set("配置", "窗体动画", cobBox_动画.Text);
+        Config.Set("配置", "记录数目", numbox_记录.Text);
+        Config.Set("配置", "自动保存", cbBox_保存.Checked.ToString( ));
+        Config.Set("配置", "截图位置", textBox_path.Text);
+        Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
+        Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
+        Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
+        Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
+        Config.Set("密钥_百度", "secret_id", text_baiduaccount.Text);
+        Config.Set("密钥_百度", "secret_key", text_baidupassword.Text);
+        Config.Set("代理", "代理类型", combox_代理.Text);
+        Config.Set("代理", "服务器", text_服务器.Text);
+        Config.Set("代理", "端口", text_端口.Text);
+        Config.Set("代理", "需要密码", chbox_代理服务器.Checked.ToString( ));
+        Config.Set("代理", "服务器账号", text_账号.Text);
+        Config.Set("代理", "服务器密码", text_密码.Text);
+        Config.Set("更新", "检测更新", check_检查更新.Checked.ToString( ));
+        Config.Set("更新", "更新间隔", checkBox_更新间隔.Checked.ToString( ));
+        Config.Set("更新", "间隔时间", numbox_间隔时间.Value.ToString( ));
+        Config.Set("截图音效", "自动保存", chbox_save.Checked.ToString( ));
+        Config.Set("截图音效", "音效路径", text_音效path.Text);
+        Config.Set("截图音效", "粘贴板", chbox_copy.Checked.ToString( ));
         if (!chbox_取色.Checked)
         {
-            IniHelp.SetValue("取色器", "类型", "RGB");
+            Config.Set("取色器", "类型", "RGB");
         }
         if (chbox_取色.Checked)
         {
-            IniHelp.SetValue("取色器", "类型", "HEX");
+            Config.Set("取色器", "类型", "HEX");
         }
         base.DialogResult = DialogResult.OK;
     }
@@ -803,7 +803,7 @@ public sealed partial class FmSetting : Form
     {
         if (txt_问题反馈.Text != "")
         {
-            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.current_v + "&nr=";
+            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.Version + "&nr=";
             Post_Html("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(txt_问题反馈.Text));
             txt_问题反馈.Text = "";
             FmFlags fmFlags = new( );

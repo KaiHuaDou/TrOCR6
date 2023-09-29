@@ -81,7 +81,7 @@ public partial class FmFlags : Form
         Rectangle rectangle = new(0, 3, FmWidth, 50);
         g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, FmWidth - 2, 48);
         g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 2, 2, FmWidth - 2 - 2, 46);
-        g.DrawString(str, new Font("微软雅黑", 24f / Program.factor), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
+        g.DrawString(str, new Font("微软雅黑", 24f / Program.DpiFactor), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
         SetBits(image);
         g.Dispose( );
         image.Dispose( );

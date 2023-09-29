@@ -10,26 +10,26 @@ public partial class ReplaceForm : Form
     public ReplaceForm(AdvRichTextBox mm)
     {
         InitializeComponent( );
-        Fmok = mm;
+        FmOK = mm;
         ComponentResourceManager componentResourceManager = new(typeof(FmMain));
-        base.Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
-        base.StartPosition = FormStartPosition.Manual;
+        Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
+        StartPosition = FormStartPosition.Manual;
     }
 
     private void Form2_Load(object sender, EventArgs e)
     {
     }
 
-    private void findbutton_Click(object sender, EventArgs e)
+    private void FindButtonClick(object sender, EventArgs e)
     {
         try
         {
-            if (Fmok.richTextBox1.Text != "")
+            if (!string.IsNullOrEmpty(FmOK.EditBox.Text))
             {
-                p = Fmok.richTextBox1.Text.IndexOf(findtextbox.Text, p);
+                p = FmOK.EditBox.Text.IndexOf(FindTextBox.Text, p);
                 if (p != -1)
                 {
-                    Fmok.richTextBox1.Select(p, findtextbox.Text.Length);
+                    FmOK.EditBox.Select(p, FindTextBox.Text.Length);
                     p++;
                 }
                 else
@@ -46,16 +46,16 @@ public partial class ReplaceForm : Form
         }
     }
 
-    private void replacebutton_Click(object sender, EventArgs e)
+    private void ReplaceButtonClick(object sender, EventArgs e)
     {
-        if (Fmok.richTextBox1.Text != "")
+        if (!string.IsNullOrEmpty(FmOK.EditBox.Text))
         {
             p = 0;
-            p = Fmok.richTextBox1.Text.IndexOf(findtextbox.Text, p);
+            p = FmOK.EditBox.Text.IndexOf(FindTextBox.Text, p);
             if (p != -1)
             {
-                Fmok.richTextBox1.Select(p, findtextbox.Text.Length);
-                Fmok.richTextBox1.SelectedText = replacetextBox.Text;
+                FmOK.EditBox.Select(p, FindTextBox.Text.Length);
+                FmOK.EditBox.SelectedText = replacetextBox.Text;
                 p++;
                 return;
             }
@@ -64,17 +64,17 @@ public partial class ReplaceForm : Form
         }
     }
 
-    private void replaceallbutton_Click(object sender, EventArgs e)
+    private void ReplaceAllClick(object sender, EventArgs e)
     {
-        if (Fmok.richTextBox1.Text != "" && findtextbox.Text != "")
+        if (!string.IsNullOrEmpty(FmOK.EditBox.Text) && !string.IsNullOrEmpty(FindTextBox.Text))
         {
             p = 0;
-            p = Fmok.richTextBox1.Text.IndexOf(findtextbox.Text, p);
+            p = FmOK.EditBox.Text.IndexOf(FindTextBox.Text, p);
             while (p != -1)
             {
-                Fmok.richTextBox1.Select(p, findtextbox.Text.Length);
-                Fmok.richTextBox1.SelectedText = replacetextBox.Text;
-                p = Fmok.richTextBox1.Text.IndexOf(findtextbox.Text, p);
+                FmOK.EditBox.Select(p, FindTextBox.Text.Length);
+                FmOK.EditBox.SelectedText = replacetextBox.Text;
+                p = FmOK.EditBox.Text.IndexOf(FindTextBox.Text, p);
                 flag = true;
             }
             if (flag)
@@ -84,24 +84,24 @@ public partial class ReplaceForm : Form
             }
             if (MessageBox.Show("替换内容不存在，请重新输入！", "提醒") == DialogResult.OK)
             {
-                findtextbox.Text = "";
+                FindTextBox.Text = "";
             }
         }
     }
 
-    private void canclebutton_Click(object sender, EventArgs e)
+    private void CancelClick(object sender, EventArgs e)
     {
-        base.Hide( );
-        Fmok.Focus( );
+        Hide( );
+        FmOK.Focus( );
     }
 
-    private void ReplaceForm_FormClosing(object sender, FormClosingEventArgs e)
+    private void ReplaceFormClosing(object sender, FormClosingEventArgs e)
     {
-        base.Hide( );
-        Fmok.Focus( );
+        Hide( );
+        FmOK.Focus( );
     }
 
-    public AdvRichTextBox Fmok;
+    public AdvRichTextBox FmOK;
 
     private int p;
 

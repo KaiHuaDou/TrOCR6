@@ -7,9 +7,9 @@ using static TrOCR.External.NativeMethods;
 
 namespace TrOCR;
 
-public partial class Fmloading : Form
+public partial class FmLoading : Form
 {
-    public Fmloading( ) => InitializeComponent( );
+    public FmLoading( ) => InitializeComponent( );
 
     protected override CreateParams CreateParams
     {
@@ -59,13 +59,13 @@ public partial class Fmloading : Form
                 DeleteDC(intPtr3);
             }
         }
-        throw new ApplicationException("图片必须是32位带Alhpa通道的图片。");
+        throw new ApplicationException("图片必须是32位带Alhpa通道的图片");
     }
 
     public void InitializeComponent( )
     {
         timer = new Timer( );
-        fm_close = "窗体已开启";
+        FormClose = "窗体已开启";
         SuspendLayout( );
         ShowInTaskbar = false;
         AutoScaleDimensions = new SizeF(6f, 12f);
@@ -78,25 +78,25 @@ public partial class Fmloading : Form
         ClientSize = new Size(120, 120);
         Location = (Point) new Size(500, 500);
         StartPosition = FormStartPosition.CenterScreen;
-        Set_png( );
+        SetPng( );
         ResumeLayout(false);
     }
 
-    private void timer1_Tick(object sender, EventArgs e)
+    private void TimerTick(object o, EventArgs e)
     {
         try
         {
-            if (fm_close != "窗体已开启")
+            if (FormClose != "窗体已开启")
             {
                 Close( );
             }
-            if (i_c >= fla_1)
+            if (count >= flag1)
             {
-                i_c = 0;
+                count = 0;
             }
-            bgImg = (Image) new ComponentResourceManager(typeof(Fmloading)).GetObject(i_c + fla_2 + ".png");
-            SetBits((Bitmap) bgImg);
-            i_c++;
+            backgrond = (Image) new ComponentResourceManager(typeof(FmLoading)).GetObject(count + windowType + ".png");
+            SetBits((Bitmap) backgrond);
+            count++;
         }
         catch
         {
@@ -104,12 +104,12 @@ public partial class Fmloading : Form
         }
     }
 
-    public void Set_png( )
+    public void SetPng( )
     {
         string text;
         try
         {
-            text = IniHelp.GetValue("配置", "窗体动画");
+            text = Config.Get("配置", "窗体动画");
         }
         catch
         {
@@ -118,44 +118,33 @@ public partial class Fmloading : Form
         if (text == "少女")
         {
             timer.Interval = 50;
-            fla_1 = 27;
-            fla_2 = "";
+            flag1 = 27;
+            windowType = "";
         }
         else if (text == "罗小黑")
         {
             timer.Interval = 18;
-            fla_1 = 46;
-            fla_2 = "_luo";
+            flag1 = 46;
+            windowType = "_luo";
         }
         else
         {
             timer.Interval = 80;
-            fla_1 = 4;
-            fla_2 = "_load";
+            flag1 = 4;
+            windowType = "_load";
         }
-        bgImg = null;
-        i_c = 0;
-        timer.Tick += timer1_Tick;
+        backgrond = null;
+        count = 0;
+        timer.Tick += TimerTick;
         timer.Start( );
     }
 
-    public string fml_close
-    {
-        get => fm_close;
-        set => fm_close = value;
-    }
+    public string FormClose { get; set; }
 
-    public int i_c;
+    public int count;
 
-    private Image bgImg;
-
-    public Timer timer;
-
-    public int fla_1;
-
-    public string fla_2;
-
-    public string str;
-
-    public string fm_close;
+    private Image backgrond;
+    private Timer timer;
+    private int flag1;
+    private string windowType;
 }
