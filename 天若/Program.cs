@@ -48,7 +48,7 @@ internal static class Program
         }
         if (args.Length != 0 && args[0] == "更新")
         {
-            new FmSetting { Start_set = "" }.ShowDialog( );
+            new FmSetting { InnerSelectedIndex = FmSettingTab.更新 }.ShowDialog( );
         }
         if (Config.Get("更新", "检测更新") is "True" or "__ERROR__")
         {

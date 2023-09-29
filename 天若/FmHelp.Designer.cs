@@ -32,8 +32,8 @@
 			this.listBox1.Name = "listBox1";
 			this.listBox1.Size = new global::System.Drawing.Size(87, 454);
 			this.listBox1.TabIndex = 1;
-			this.listBox1.DrawItem += new global::System.Windows.Forms.DrawItemEventHandler(this.listBox1_DrawItem);
-			this.listBox1.SelectedIndexChanged += new global::System.EventHandler(this.listBox1_SelectedIndexChanged);
+			this.listBox1.DrawItem += new global::System.Windows.Forms.DrawItemEventHandler(this.ListBoxDrawItem);
+			this.listBox1.SelectedIndexChanged += new global::System.EventHandler(this.ListBoxSelectedChanged);
 			this.panel_快捷键.BorderStyle = global::System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panel_快捷键.Controls.Add(this.webBrowser3);
 			this.panel_快捷键.Location = new global::System.Drawing.Point(30, 186);
@@ -65,7 +65,7 @@
 			this.webBrowser2.Name = "webBrowser2";
 			this.webBrowser2.Size = new global::System.Drawing.Size(484, 452);
 			this.webBrowser2.TabIndex = 4;
-			this.webBrowser2.NewWindow += new global::System.ComponentModel.CancelEventHandler(this.webBrowser_NewWindow);
+			this.webBrowser2.NewWindow += new global::System.ComponentModel.CancelEventHandler(this.browserNewWindow);
 			this.webBrowser3.Dock = global::System.Windows.Forms.DockStyle.Fill;
 			this.webBrowser3.Location = new global::System.Drawing.Point(0, 0);
 			this.webBrowser3.MinimumSize = new global::System.Drawing.Size(20, 20);
@@ -86,7 +86,7 @@
 			this.Text = "帮助";
 			base.TopMost = true;
 			base.AutoScaleMode = global::System.Windows.Forms.AutoScaleMode.None;
-			base.Load += new global::System.EventHandler(this.FmHelp_Load);
+			base.Load += new global::System.EventHandler(this.FmHelpLoad);
 			this.panel_快捷键.ResumeLayout(false);
 			this.panel_常见问题.ResumeLayout(false);
 			this.panel_识别说明.ResumeLayout(false);

@@ -9,8 +9,15 @@ namespace TrOCR;
 
 public partial class FmLoading : Form
 {
+    private int count;
+    private Image backgrond;
+    private int flag1;
+    private Timer timer;
+    private string windowType;
+
     public FmLoading( ) => InitializeComponent( );
 
+    public string FormClose { get; set; }
     protected override CreateParams CreateParams
     {
         get
@@ -23,6 +30,26 @@ public partial class FmLoading : Form
             }
             return createParams;
         }
+    }
+
+    public void InitializeComponent( )
+    {
+        timer = new Timer( );
+        FormClose = "窗体已开启";
+        SuspendLayout( );
+        ShowInTaskbar = false;
+        AutoScaleDimensions = new SizeF(6f, 12f);
+        AutoScaleMode = AutoScaleMode.Font;
+        ForeColor = Color.Aqua;
+        FormBorderStyle = FormBorderStyle.None;
+        Name = "Form1";
+        Text = "Form1";
+        TopMost = true;
+        ClientSize = new Size(120, 120);
+        Location = (Point) new Size(500, 500);
+        StartPosition = FormStartPosition.CenterScreen;
+        SetPng( );
+        ResumeLayout(false);
     }
 
     public void SetBits(Bitmap bitmap)
@@ -61,49 +88,6 @@ public partial class FmLoading : Form
         }
         throw new ApplicationException("图片必须是32位带Alhpa通道的图片");
     }
-
-    public void InitializeComponent( )
-    {
-        timer = new Timer( );
-        FormClose = "窗体已开启";
-        SuspendLayout( );
-        ShowInTaskbar = false;
-        AutoScaleDimensions = new SizeF(6f, 12f);
-        AutoScaleMode = AutoScaleMode.Font;
-        ForeColor = Color.Aqua;
-        FormBorderStyle = FormBorderStyle.None;
-        Name = "Form1";
-        Text = "Form1";
-        TopMost = true;
-        ClientSize = new Size(120, 120);
-        Location = (Point) new Size(500, 500);
-        StartPosition = FormStartPosition.CenterScreen;
-        SetPng( );
-        ResumeLayout(false);
-    }
-
-    private void TimerTick(object o, EventArgs e)
-    {
-        try
-        {
-            if (FormClose != "窗体已开启")
-            {
-                Close( );
-            }
-            if (count >= flag1)
-            {
-                count = 0;
-            }
-            backgrond = (Image) new ComponentResourceManager(typeof(FmLoading)).GetObject(count + windowType + ".png");
-            SetBits((Bitmap) backgrond);
-            count++;
-        }
-        catch
-        {
-            MessageBox.Show("加载窗体关闭报错");
-        }
-    }
-
     public void SetPng( )
     {
         string text;
@@ -139,12 +123,25 @@ public partial class FmLoading : Form
         timer.Start( );
     }
 
-    public string FormClose { get; set; }
-
-    public int count;
-
-    private Image backgrond;
-    private Timer timer;
-    private int flag1;
-    private string windowType;
+    private void TimerTick(object o, EventArgs e)
+    {
+        try
+        {
+            if (FormClose != "窗体已开启")
+            {
+                Close( );
+            }
+            if (count >= flag1)
+            {
+                count = 0;
+            }
+            backgrond = (Image) new ComponentResourceManager(typeof(FmLoading)).GetObject(count + windowType + ".png");
+            SetBits((Bitmap) backgrond);
+            count++;
+        }
+        catch
+        {
+            MessageBox.Show("加载窗体关闭报错");
+        }
+    }
 }

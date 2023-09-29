@@ -17,12 +17,110 @@ using static TrOCR.External.NativeMethods;
 
 namespace TrOCR;
 
+public enum FmSettingTab
+{
+    常规, 快捷键, 密钥, 代理, 更新, 关于, 赞助, 反馈,
+}
+
 public sealed partial class FmSetting : Form
 {
     public FmSetting( )
     {
         Font = new Font(Font.Name, 9f / StaticValue.Dpifactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         InitializeComponent( );
+    }
+
+    public FmSettingTab InnerSelectedIndex
+    {
+        get => (FmSettingTab) tabControl.SelectedIndex;
+        set => tabControl.SelectedIndex = (int) value;
+    }
+
+    public static void AutoStart(bool isAuto)
+    {
+        try
+        {
+            string text = Application.ExecutablePath.Replace("/", "\\");
+            if (isAuto)
+            {
+                RegistryKey currentUser = Registry.CurrentUser;
+                RegistryKey registryKey = currentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+                registryKey.SetValue("tianruoOCR", text);
+                registryKey.Close( );
+                currentUser.Close( );
+            }
+            else
+            {
+                RegistryKey currentUser2 = Registry.CurrentUser;
+                RegistryKey registryKey2 = currentUser2.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+                registryKey2.DeleteValue("tianruoOCR", false);
+                registryKey2.Close( );
+                currentUser2.Close( );
+            }
+        }
+        catch (Exception)
+        {
+            MessageBox.Show("您需要管理员权限修改", "提示");
+        }
+    }
+
+    public static string GetHtml(string url)
+    {
+        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
+        httpWebRequest.Method = "POST";
+        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+        string text;
+        try
+        {
+            using (HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse( ))
+            {
+                using StreamReader streamReader = new(httpWebResponse.GetResponseStream( ), Encoding.UTF8);
+                text = streamReader.ReadToEnd( );
+                streamReader.Close( );
+                httpWebResponse.Close( );
+            }
+            httpWebRequest.Abort( );
+        }
+        catch
+        {
+            text = "";
+        }
+        return text;
+    }
+
+    public static string PostHtml(string url, string postStr)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(postStr);
+        string text = "";
+        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
+        httpWebRequest.Method = "POST";
+        httpWebRequest.Timeout = 6000;
+        httpWebRequest.Proxy = null;
+        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+        try
+        {
+            using (Stream requestStream = httpWebRequest.GetRequestStream( ))
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+            }
+            Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
+            StreamReader streamReader = new(responseStream, Encoding.GetEncoding("utf-8"));
+            text = streamReader.ReadToEnd( );
+            responseStream.Close( );
+            streamReader.Close( );
+            httpWebRequest.Abort( );
+        }
+        catch
+        {
+        }
+        return text;
+    }
+
+    public void PlaySong(string file)
+    {
+        mciSendString("close media", null, 0, IntPtr.Zero);
+        mciSendString("open \"" + file + "\" type mpegvideo alias media", null, 0, IntPtr.Zero);
+        mciSendString("play media notify", null, 0, Handle);
     }
 
     public void ReadConfig( )
@@ -309,10 +407,188 @@ public sealed partial class FmSetting : Form
         }
     }
 
-    private void Form1_Load(object sender, EventArgs e)
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        => (keyData == Keys.Tab && txtBox_文字识别.Focused) || (keyData == Keys.Tab && txtBox_翻译文本.Focused) || (keyData == Keys.Tab && txtBox_记录界面.Focused) || (keyData == Keys.Tab && txtBox_识别界面.Focused);
+
+    private void btn_浏览_Click(object o, EventArgs e)
+    {
+        FolderBrowserDialog folderBrowserDialog = new( );
+        if (folderBrowserDialog.ShowDialog( ) == DialogResult.OK)
+        {
+            textBox_path.Text = folderBrowserDialog.SelectedPath;
+        }
+    }
+
+    private void btn_音效_Click(object o, EventArgs e)
+        => PlaySong(text_音效path.Text);
+
+    private void btn_音效路径_Click(object o, EventArgs e)
+    {
+        OpenFileDialog openFileDialog = new( )
+        {
+            Title = "请选择音效文件",
+            Filter = "All files（*.*）|*.*|All files(*.*)|*.* ",
+            RestoreDirectory = true
+        };
+        if (openFileDialog.ShowDialog( ) == DialogResult.OK)
+        {
+            text_音效path.Text = Path.GetFullPath(openFileDialog.FileName);
+        }
+    }
+
+    private void cbBox_保存_CheckedChanged(object o, EventArgs e)
+    {
+        if (cbBox_保存.Checked)
+        {
+            textBox_path.Enabled = true;
+            btn_浏览.Enabled = true;
+        }
+        if (!cbBox_保存.Checked)
+        {
+            textBox_path.Enabled = false;
+            btn_浏览.Enabled = false;
+        }
+    }
+
+    private void cbBox_弹窗_CheckedChanged(object o, EventArgs e)
+    {
+    }
+
+    private void cbBox_翻译_CheckedChanged(object o, EventArgs e)
+    {
+    }
+
+    private void cbBox_开机_CheckedChanged(object o, EventArgs e)
+        => AutoStart(cbBox_开机.Checked);
+
+    private void chbox_copy_CheckedChanged(object o, EventArgs e)
+    {
+    }
+
+    private void chbox_save_CheckedChanged(object o, EventArgs e)
+    {
+    }
+
+    private void chbox_代理服务器_CheckedChanged(object o, EventArgs e)
+    {
+        if (chbox_代理服务器.Checked)
+        {
+            text_账号.Enabled = true;
+            text_密码.Enabled = true;
+        }
+        if (!chbox_代理服务器.Checked)
+        {
+            text_账号.Enabled = false;
+            text_密码.Enabled = false;
+        }
+    }
+
+    private void chbox_取色_CheckedChanged(object o, EventArgs e)
+    {
+    }
+
+    private void check_检查更新_CheckedChanged(object o, EventArgs e)
+    {
+        if (check_检查更新.Checked)
+        {
+            checkBox_更新间隔.Enabled = true;
+            checkBox_更新间隔.Checked = true;
+            numbox_间隔时间.Enabled = true;
+        }
+        if (!check_检查更新.Checked)
+        {
+            checkBox_更新间隔.Checked = false;
+            checkBox_更新间隔.Enabled = false;
+            numbox_间隔时间.Enabled = false;
+        }
+    }
+
+    private void checkBox_更新间隔_CheckedChanged(object o, EventArgs e)
+    {
+        if (checkBox_更新间隔.Checked)
+        {
+            numbox_间隔时间.Enabled = true;
+        }
+        if (!checkBox_更新间隔.Checked)
+        {
+            numbox_间隔时间.Enabled = false;
+        }
+    }
+
+    private void cobBox_动画_SelectedIndexChanged(object o, EventArgs e)
+    {
+    }
+
+    private void combox_代理_SelectedIndexChanged(object o, EventArgs e)
+    {
+        if (combox_代理.Text is "不使用代理" or "系统代理")
+        {
+            text_账号.Enabled = false;
+            text_密码.Enabled = false;
+            chbox_代理服务器.Enabled = false;
+            text_端口.Enabled = false;
+            chbox_代理服务器.Checked = false;
+            text_服务器.Enabled = false;
+            text_服务器.Text = "";
+            text_端口.Text = "";
+            text_服务器.Text = "";
+            text_账号.Text = "";
+            text_密码.Text = "";
+        }
+        if (combox_代理.Text == "自定义代理")
+        {
+            text_端口.Enabled = true;
+            text_服务器.Enabled = true;
+            chbox_代理服务器.Enabled = true;
+        }
+    }
+
+    private void folderBrowserDialog1_HelpRequest(object o, EventArgs e)
+    {
+    }
+
+    private void Form1_FormClosed(object o, FormClosedEventArgs e)
+    {
+        Config.Set("配置", "开机自启", cbBox_开机.Checked.ToString( ));
+        Config.Set("配置", "快速翻译", cbBox_翻译.Checked.ToString( ));
+        Config.Set("配置", "识别弹窗", cbBox_弹窗.Checked.ToString( ));
+        Config.Set("配置", "窗体动画", cobBox_动画.Text);
+        Config.Set("配置", "记录数目", numbox_记录.Text);
+        Config.Set("配置", "自动保存", cbBox_保存.Checked.ToString( ));
+        Config.Set("配置", "截图位置", textBox_path.Text);
+        Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
+        Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
+        Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
+        Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
+        Config.Set("密钥_百度", "secret_id", text_baiduaccount.Text);
+        Config.Set("密钥_百度", "secret_key", text_baidupassword.Text);
+        Config.Set("代理", "代理类型", combox_代理.Text);
+        Config.Set("代理", "服务器", text_服务器.Text);
+        Config.Set("代理", "端口", text_端口.Text);
+        Config.Set("代理", "需要密码", chbox_代理服务器.Checked.ToString( ));
+        Config.Set("代理", "服务器账号", text_账号.Text);
+        Config.Set("代理", "服务器密码", text_密码.Text);
+        Config.Set("更新", "检测更新", check_检查更新.Checked.ToString( ));
+        Config.Set("更新", "更新间隔", checkBox_更新间隔.Checked.ToString( ));
+        Config.Set("更新", "间隔时间", numbox_间隔时间.Value.ToString( ));
+        Config.Set("截图音效", "自动保存", chbox_save.Checked.ToString( ));
+        Config.Set("截图音效", "音效路径", text_音效path.Text);
+        Config.Set("截图音效", "粘贴板", chbox_copy.Checked.ToString( ));
+        if (!chbox_取色.Checked)
+        {
+            Config.Set("取色器", "类型", "RGB");
+        }
+        if (chbox_取色.Checked)
+        {
+            Config.Set("取色器", "类型", "HEX");
+        }
+        DialogResult = DialogResult.OK;
+    }
+
+    private void Form1_Load(object o, EventArgs e)
     {
         ComponentResourceManager componentResourceManager = new(typeof(FmMain));
-        base.Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
+        Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
         NumericUpDown numericUpDown = numbox_记录;
         int[] array = new int[4];
         array[0] = 99;
@@ -337,8 +613,8 @@ public sealed partial class FmSetting : Form
         int[] array6 = new int[4];
         array6[0] = 1;
         numericUpDown6.Value = new decimal(array6);
-        tab_标签.Height = (int) (350.0 * Program.DpiFactor);
-        base.Height = tab_标签.Height + 50;
+        tabControl.Height = (int) (350.0 * Program.DpiFactor);
+        Height = tabControl.Height + 50;
         ReadConfig( );
         chbox_代理服务器.CheckedChanged += chbox_代理服务器_CheckedChanged;
         更新Button_check.Click += 更新Button_check_Click;
@@ -350,149 +626,93 @@ public sealed partial class FmSetting : Form
         txt_更新说明.ScrollBars = ScrollBars.Vertical;
     }
 
-    private void 百度申请_Click(object sender, EventArgs e) => Process.Start("https://console.bce.baidu.com/ai/");
-
-    public static string Get_html(string url)
-    {
-        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
-        httpWebRequest.Method = "POST";
-        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-        string text;
-        try
-        {
-            using (HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse( ))
-            {
-                using StreamReader streamReader = new(httpWebResponse.GetResponseStream( ), Encoding.UTF8);
-                text = streamReader.ReadToEnd( );
-                streamReader.Close( );
-                httpWebResponse.Close( );
-            }
-            httpWebRequest.Abort( );
-        }
-        catch
-        {
-            text = "";
-        }
-        return text;
-    }
-
-    private void tab_标签_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (tab_标签.SelectedTab == page_常规)
-        {
-            tab_标签.Height = (int) (350.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_快捷键)
-        {
-            tab_标签.Height = (int) (225.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_密钥)
-        {
-            tab_标签.Height = (int) (190.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_代理)
-        {
-            tab_标签.Height = (int) (245.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_更新)
-        {
-            tab_标签.Height = (int) (135.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_关于)
-        {
-            tab_标签.Height = (int) (340.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_赞助)
-        {
-            tab_标签.Height = (int) (225.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-        if (tab_标签.SelectedTab == Page_反馈)
-        {
-            tab_标签.Height = (int) (200.0 * Program.DpiFactor);
-            base.Height = tab_标签.Height + 50;
-        }
-    }
-
-    private void pic_help_Click(object sender, EventArgs e) => new FmHelp( ).Show( );
-
-    private void cbBox_开机_CheckedChanged(object sender, EventArgs e) => FmSetting.AutoStart(cbBox_开机.Checked);
-
-    private void cbBox_翻译_CheckedChanged(object sender, EventArgs e)
+    private void numbox_记录_ValueChanged(object o, EventArgs e)
     {
     }
 
-    private void cbBox_弹窗_CheckedChanged(object sender, EventArgs e)
+    private void numbox_间隔时间_ValueChanged(object o, EventArgs e)
     {
     }
 
-    private void cobBox_动画_SelectedIndexChanged(object sender, EventArgs e)
-    {
-    }
+    private void pic_help_Click(object o, EventArgs e) => new FmHelp( ).Show( );
 
-    private void numbox_记录_ValueChanged(object sender, EventArgs e)
+    private void tab_标签_SelectedIndexChanged(object o, EventArgs e)
     {
-    }
-
-    private void cbBox_保存_CheckedChanged(object sender, EventArgs e)
-    {
-        if (cbBox_保存.Checked)
+        if (tabControl.SelectedTab == page_常规)
         {
-            textBox_path.Enabled = true;
-            btn_浏览.Enabled = true;
+            tabControl.Height = (int) (350.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
         }
-        if (!cbBox_保存.Checked)
+        if (tabControl.SelectedTab == Page_快捷键)
         {
-            textBox_path.Enabled = false;
-            btn_浏览.Enabled = false;
+            tabControl.Height = (int) (225.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
         }
-    }
-
-    private void btn_浏览_Click(object sender, EventArgs e)
-    {
-        FolderBrowserDialog folderBrowserDialog = new( );
-        if (folderBrowserDialog.ShowDialog( ) == DialogResult.OK)
+        if (tabControl.SelectedTab == Page_密钥)
         {
-            textBox_path.Text = folderBrowserDialog.SelectedPath;
+            tabControl.Height = (int) (190.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
+        }
+        if (tabControl.SelectedTab == Page_代理)
+        {
+            tabControl.Height = (int) (245.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
+        }
+        if (tabControl.SelectedTab == Page_更新)
+        {
+            tabControl.Height = (int) (135.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
+        }
+        if (tabControl.SelectedTab == Page_关于)
+        {
+            tabControl.Height = (int) (340.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
+        }
+        if (tabControl.SelectedTab == Page_赞助)
+        {
+            tabControl.Height = (int) (225.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
+        }
+        if (tabControl.SelectedTab == Page_反馈)
+        {
+            tabControl.Height = (int) (200.0 * Program.DpiFactor);
+            Height = tabControl.Height + 50;
         }
     }
 
-    private void 密钥Button_Click(object sender, EventArgs e)
-    {
-        text_baiduaccount.Text = "YsZKG1wha34PlDOPYaIrIIKO";
-        text_baidupassword.Text = "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD";
-    }
-
-    private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
+    private void text_baiduaccount_TextChanged(object o, EventArgs e)
     {
     }
 
-    private void 常规Button_Click(object sender, EventArgs e)
+    private void text_baidupassword_TextChanged(object o, EventArgs e)
     {
-        cbBox_开机.Checked = true;
-        cbBox_翻译.Checked = true;
-        cbBox_弹窗.Checked = true;
-        cobBox_动画.SelectedIndex = 0;
-        numbox_记录.Value = 20m;
-        cbBox_保存.Checked = true;
-        textBox_path.Enabled = true;
-        textBox_path.Text = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-        btn_浏览.Enabled = true;
-        chbox_save.Checked = true;
-        text_音效path.Text = "Data\\screenshot.wav";
-        chbox_copy.Checked = false;
-        chbox_取色.Checked = false;
     }
 
-    private void txtBox_KeyUp(object sender, KeyEventArgs e)
+    private void text_端口_MaskInputRejected(object o, MaskInputRejectedEventArgs e)
     {
-        TextBox textBox = sender as TextBox;
+    }
+
+    private void text_端口_TextChanged(object o, EventArgs e)
+    {
+    }
+
+    private void text_服务器_TextChanged(object o, EventArgs e)
+    {
+    }
+
+    private void text_密码_TextChanged(object o, EventArgs e)
+    {
+    }
+
+    private void text_账号_TextChanged(object o, EventArgs e)
+    {
+    }
+
+    private void txtBox_KeyDown(object o, KeyEventArgs e) => e.SuppressKeyPress = true;
+
+    private void txtBox_KeyUp(object o, KeyEventArgs e)
+    {
+        TextBox textBox = o as TextBox;
         Regex regex = new("[一-龥]+");
         string text = "";
         foreach (object obj in regex.Matches(textBox.Name))
@@ -500,7 +720,7 @@ public sealed partial class FmSetting : Form
             text = ((Match) obj).ToString( );
         }
         string text2 = "pictureBox_" + text;
-        PictureBox pictureBox = (PictureBox) base.Controls.Find(text2, true)[0];
+        PictureBox pictureBox = (PictureBox) Controls.Find(text2, true)[0];
         new ComponentResourceManager(typeof(FmSetting));
         if (e.KeyData == Keys.Back)
         {
@@ -559,11 +779,75 @@ public sealed partial class FmSetting : Form
         }
     }
 
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData) => (keyData == Keys.Tab && txtBox_文字识别.Focused) || (keyData == Keys.Tab && txtBox_翻译文本.Focused) || (keyData == Keys.Tab && txtBox_记录界面.Focused) || (keyData == Keys.Tab && txtBox_识别界面.Focused);
+    private void 百度_btn_Click(object o, EventArgs e)
+    {
+        if (!string.IsNullOrEmpty(GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + text_baiduaccount.Text + "&client_secret=" + text_baidupassword.Text))))
+        {
+            MessageBox.Show("密钥正确!", "提醒");
+            return;
+        }
+        MessageBox.Show("请确保密钥正确!", "提醒");
+    }
 
-    private void txtBox_KeyDown(object sender, KeyEventArgs e) => e.SuppressKeyPress = true;
+    private void 百度申请_Click(object o, EventArgs e)
+        => Process.Start("https://console.bce.baidu.com/ai/");
+    private void 常规Button_Click(object o, EventArgs e)
+    {
+        cbBox_开机.Checked = true;
+        cbBox_翻译.Checked = true;
+        cbBox_弹窗.Checked = true;
+        cobBox_动画.SelectedIndex = 0;
+        numbox_记录.Value = 20m;
+        cbBox_保存.Checked = true;
+        textBox_path.Enabled = true;
+        textBox_path.Text = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        btn_浏览.Enabled = true;
+        chbox_save.Checked = true;
+        text_音效path.Text = "Data\\screenshot.wav";
+        chbox_copy.Checked = false;
+        chbox_取色.Checked = false;
+    }
 
-    private void 快捷键Button_Click(object sender, EventArgs e)
+    private void 代理Button_Click(object o, EventArgs e)
+    {
+        combox_代理.Text = "系统代理";
+        text_账号.Enabled = false;
+        text_密码.Enabled = false;
+        chbox_代理服务器.Enabled = false;
+        text_端口.Enabled = false;
+        text_服务器.Enabled = false;
+    }
+
+    private void 反馈Button_Click(object o, EventArgs e)
+        => new Thread(new ThreadStart(反馈send)).Start( );
+
+    private void 反馈send( )
+    {
+        if (!string.IsNullOrEmpty(txt_问题反馈.Text))
+        {
+            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.Version + "&nr=";
+            PostHtml("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(txt_问题反馈.Text));
+            txt_问题反馈.Text = "";
+            FmFlags fmFlags = new( );
+            fmFlags.Show( );
+            fmFlags.DrawStr("感谢您的反馈！");
+            return;
+        }
+        FmFlags fmFlags2 = new( );
+        fmFlags2.Show( );
+        fmFlags2.DrawStr("反馈文本不能为空");
+    }
+
+    private void 更新Button_check_Click(object o, EventArgs e) => new Thread(new ThreadStart(Program.CheckUpdate)).Start( );
+
+    private void 更新Button_Click(object o, EventArgs e)
+    {
+        numbox_间隔时间.Value = 24m;
+        check_检查更新.Checked = true;
+        checkBox_更新间隔.Checked = true;
+    }
+
+    private void 快捷键Button_Click(object o, EventArgs e)
     {
         new ComponentResourceManager(typeof(FmSetting));
         txtBox_文字识别.Text = "F4";
@@ -576,283 +860,9 @@ public sealed partial class FmSetting : Form
         pictureBox_识别界面.Image = Resources.快捷键_0;
     }
 
-    private void 百度_btn_Click(object sender, EventArgs e)
+    private void 密钥Button_Click(object o, EventArgs e)
     {
-        if (FmSetting.Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + text_baiduaccount.Text + "&client_secret=" + text_baidupassword.Text)) != "")
-        {
-            MessageBox.Show("密钥正确!", "提醒");
-            return;
-        }
-        MessageBox.Show("请确保密钥正确!", "提醒");
-    }
-
-    private void combox_代理_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (combox_代理.Text is "不使用代理" or "系统代理")
-        {
-            text_账号.Enabled = false;
-            text_密码.Enabled = false;
-            chbox_代理服务器.Enabled = false;
-            text_端口.Enabled = false;
-            chbox_代理服务器.Checked = false;
-            text_服务器.Enabled = false;
-            text_服务器.Text = "";
-            text_端口.Text = "";
-            text_服务器.Text = "";
-            text_账号.Text = "";
-            text_密码.Text = "";
-        }
-        if (combox_代理.Text == "自定义代理")
-        {
-            text_端口.Enabled = true;
-            text_服务器.Enabled = true;
-            chbox_代理服务器.Enabled = true;
-        }
-    }
-
-    private void text_端口_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
-    {
-    }
-
-    private void text_baiduaccount_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void text_baidupassword_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void text_服务器_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void text_端口_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void chbox_代理服务器_CheckedChanged(object sender, EventArgs e)
-    {
-        if (chbox_代理服务器.Checked)
-        {
-            text_账号.Enabled = true;
-            text_密码.Enabled = true;
-        }
-        if (!chbox_代理服务器.Checked)
-        {
-            text_账号.Enabled = false;
-            text_密码.Enabled = false;
-        }
-    }
-
-    private void text_账号_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void text_密码_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void 代理Button_Click(object sender, EventArgs e)
-    {
-        combox_代理.Text = "系统代理";
-        text_账号.Enabled = false;
-        text_密码.Enabled = false;
-        chbox_代理服务器.Enabled = false;
-        text_端口.Enabled = false;
-        text_服务器.Enabled = false;
-    }
-
-    private void check_检查更新_CheckedChanged(object sender, EventArgs e)
-    {
-        if (check_检查更新.Checked)
-        {
-            checkBox_更新间隔.Enabled = true;
-            checkBox_更新间隔.Checked = true;
-            numbox_间隔时间.Enabled = true;
-        }
-        if (!check_检查更新.Checked)
-        {
-            checkBox_更新间隔.Checked = false;
-            checkBox_更新间隔.Enabled = false;
-            numbox_间隔时间.Enabled = false;
-        }
-    }
-
-    private void checkBox_更新间隔_CheckedChanged(object sender, EventArgs e)
-    {
-        if (checkBox_更新间隔.Checked)
-        {
-            numbox_间隔时间.Enabled = true;
-        }
-        if (!checkBox_更新间隔.Checked)
-        {
-            numbox_间隔时间.Enabled = false;
-        }
-    }
-
-    private void numbox_间隔时间_ValueChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void 更新Button_Click(object sender, EventArgs e)
-    {
-        numbox_间隔时间.Value = 24m;
-        check_检查更新.Checked = true;
-        checkBox_更新间隔.Checked = true;
-    }
-
-    private void 更新Button_check_Click(object sender, EventArgs e) => new Thread(new ThreadStart(Program.CheckUpdate)).Start( );
-
-    private void 反馈Button_Click(object sender, EventArgs e) => new Thread(new ThreadStart(反馈send)).Start( );
-
-    public static string Post_Html(string url, string post_str)
-    {
-        byte[] bytes = Encoding.UTF8.GetBytes(post_str);
-        string text = "";
-        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
-        httpWebRequest.Method = "POST";
-        httpWebRequest.Timeout = 6000;
-        httpWebRequest.Proxy = null;
-        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-        try
-        {
-            using (Stream requestStream = httpWebRequest.GetRequestStream( ))
-            {
-                requestStream.Write(bytes, 0, bytes.Length);
-            }
-            Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
-            StreamReader streamReader = new(responseStream, Encoding.GetEncoding("utf-8"));
-            text = streamReader.ReadToEnd( );
-            responseStream.Close( );
-            streamReader.Close( );
-            httpWebRequest.Abort( );
-        }
-        catch
-        {
-        }
-        return text;
-    }
-
-    private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-    {
-        Config.Set("配置", "开机自启", cbBox_开机.Checked.ToString( ));
-        Config.Set("配置", "快速翻译", cbBox_翻译.Checked.ToString( ));
-        Config.Set("配置", "识别弹窗", cbBox_弹窗.Checked.ToString( ));
-        Config.Set("配置", "窗体动画", cobBox_动画.Text);
-        Config.Set("配置", "记录数目", numbox_记录.Text);
-        Config.Set("配置", "自动保存", cbBox_保存.Checked.ToString( ));
-        Config.Set("配置", "截图位置", textBox_path.Text);
-        Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
-        Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
-        Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
-        Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
-        Config.Set("密钥_百度", "secret_id", text_baiduaccount.Text);
-        Config.Set("密钥_百度", "secret_key", text_baidupassword.Text);
-        Config.Set("代理", "代理类型", combox_代理.Text);
-        Config.Set("代理", "服务器", text_服务器.Text);
-        Config.Set("代理", "端口", text_端口.Text);
-        Config.Set("代理", "需要密码", chbox_代理服务器.Checked.ToString( ));
-        Config.Set("代理", "服务器账号", text_账号.Text);
-        Config.Set("代理", "服务器密码", text_密码.Text);
-        Config.Set("更新", "检测更新", check_检查更新.Checked.ToString( ));
-        Config.Set("更新", "更新间隔", checkBox_更新间隔.Checked.ToString( ));
-        Config.Set("更新", "间隔时间", numbox_间隔时间.Value.ToString( ));
-        Config.Set("截图音效", "自动保存", chbox_save.Checked.ToString( ));
-        Config.Set("截图音效", "音效路径", text_音效path.Text);
-        Config.Set("截图音效", "粘贴板", chbox_copy.Checked.ToString( ));
-        if (!chbox_取色.Checked)
-        {
-            Config.Set("取色器", "类型", "RGB");
-        }
-        if (chbox_取色.Checked)
-        {
-            Config.Set("取色器", "类型", "HEX");
-        }
-        base.DialogResult = DialogResult.OK;
-    }
-
-    public static void AutoStart(bool isAuto)
-    {
-        try
-        {
-            string text = Application.ExecutablePath.Replace("/", "\\");
-            if (isAuto)
-            {
-                RegistryKey currentUser = Registry.CurrentUser;
-                RegistryKey registryKey = currentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-                registryKey.SetValue("tianruoOCR", text);
-                registryKey.Close( );
-                currentUser.Close( );
-            }
-            else
-            {
-                RegistryKey currentUser2 = Registry.CurrentUser;
-                RegistryKey registryKey2 = currentUser2.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-                registryKey2.DeleteValue("tianruoOCR", false);
-                registryKey2.Close( );
-                currentUser2.Close( );
-            }
-        }
-        catch (Exception)
-        {
-            MessageBox.Show("您需要管理员权限修改", "提示");
-        }
-    }
-
-    private void 反馈send( )
-    {
-        if (txt_问题反馈.Text != "")
-        {
-            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.Version + "&nr=";
-            Post_Html("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(txt_问题反馈.Text));
-            txt_问题反馈.Text = "";
-            FmFlags fmFlags = new( );
-            fmFlags.Show( );
-            fmFlags.DrawStr("感谢您的反馈！");
-            return;
-        }
-        FmFlags fmFlags2 = new( );
-        fmFlags2.Show( );
-        fmFlags2.DrawStr("反馈文本不能为空");
-    }
-
-    public void PlaySong(string file)
-    {
-        mciSendString("close media", null, 0, IntPtr.Zero);
-        mciSendString("open \"" + file + "\" type mpegvideo alias media", null, 0, IntPtr.Zero);
-        mciSendString("play media notify", null, 0, base.Handle);
-    }
-
-    private void btn_音效_Click(object sender, EventArgs e) => PlaySong(text_音效path.Text);
-
-    private void btn_音效路径_Click(object sender, EventArgs e)
-    {
-        OpenFileDialog openFileDialog = new( )
-        {
-            Title = "请选择音效文件",
-            Filter = "All files（*.*）|*.*|All files(*.*)|*.* ",
-            RestoreDirectory = true
-        };
-        if (openFileDialog.ShowDialog( ) == DialogResult.OK)
-        {
-            text_音效path.Text = Path.GetFullPath(openFileDialog.FileName);
-        }
-    }
-
-    private void chbox_copy_CheckedChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void chbox_save_CheckedChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void chbox_取色_CheckedChanged(object sender, EventArgs e)
-    {
-    }
-
-    public string Start_set
-    {
-        set => tab_标签.SelectedIndex = 5;
+        text_baiduaccount.Text = "YsZKG1wha34PlDOPYaIrIIKO";
+        text_baidupassword.Text = "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD";
     }
 }

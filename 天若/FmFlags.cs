@@ -10,6 +10,10 @@ namespace TrOCR;
 
 public partial class FmFlags : Form
 {
+    private int fmWidth;
+    private Graphics g;
+    private Bitmap image;
+
     public FmFlags( ) => InitializeComponent( );
 
     protected override CreateParams CreateParams
@@ -24,6 +28,57 @@ public partial class FmFlags : Form
             }
             return createParams;
         }
+    }
+
+    public void DrawStr(string str)
+    {
+        fmWidth = 50 * str.Length;
+        ClientSize = new Size(fmWidth, 50);
+        Location = new Point((Screen.PrimaryScreen.Bounds.Width - Width) / 2, (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2 / 3 * 5);
+        image = new Bitmap(fmWidth, 50);
+        g = Graphics.FromImage(image);
+        g.InterpolationMode = InterpolationMode.Bilinear;
+        g.SmoothingMode = SmoothingMode.HighQuality;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        g.Clear(Color.Transparent);
+        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
+        StringFormat stringFormat = new( )
+        {
+            Alignment = StringAlignment.Center
+        };
+        Rectangle rectangle = new(0, 3, fmWidth, 50);
+        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, fmWidth - 2, 48);
+        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 2, 2, fmWidth - 2 - 2, 46);
+        g.DrawString(str, new Font("微软雅黑", 24f / Program.DpiFactor), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
+        SetBits(image);
+        g.Dispose( );
+        image.Dispose( );
+        Delay(600U);
+        Hide( );
+    }
+
+    public void DrawStrUpdate(string str)
+    {
+        fmWidth = 28 * str.Length;
+        ClientSize = new Size(fmWidth, 50);
+        image = new Bitmap(fmWidth, 50);
+        g = Graphics.FromImage(image);
+        g.InterpolationMode = InterpolationMode.Bilinear;
+        g.SmoothingMode = SmoothingMode.HighQuality;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        g.Clear(Color.Transparent);
+        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
+        StringFormat stringFormat = new( )
+        {
+            Alignment = StringAlignment.Center
+        };
+        Rectangle rectangle = new(0, 10, fmWidth, 48);
+        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, fmWidth - 2, 48);
+        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 1, 1, fmWidth - 2, 48);
+        g.DrawString(str, new Font("微软雅黑", 18f), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
+        SetBitsUpdate(image);
+        Delay(2000U);
+        Hide( );
     }
 
     public void SetBits(Bitmap bitmap)
@@ -61,68 +116,6 @@ public partial class FmFlags : Form
             DeleteDC(intPtr3);
         }
     }
-
-    public void DrawStr(string str)
-    {
-        FmWidth = 50 * str.Length;
-        ClientSize = new Size(FmWidth, 50);
-        Location = new Point((Screen.PrimaryScreen.Bounds.Width - Width) / 2, (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2 / 3 * 5);
-        image = new Bitmap(FmWidth, 50);
-        g = Graphics.FromImage(image);
-        g.InterpolationMode = InterpolationMode.Bilinear;
-        g.SmoothingMode = SmoothingMode.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.Clear(Color.Transparent);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
-        StringFormat stringFormat = new( )
-        {
-            Alignment = StringAlignment.Center
-        };
-        Rectangle rectangle = new(0, 3, FmWidth, 50);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, FmWidth - 2, 48);
-        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 2, 2, FmWidth - 2 - 2, 46);
-        g.DrawString(str, new Font("微软雅黑", 24f / Program.DpiFactor), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
-        SetBits(image);
-        g.Dispose( );
-        image.Dispose( );
-        Delay(600U);
-        Hide( );
-    }
-
-    private static void Delay(uint ms)
-    {
-        uint tickCount = GetTickCount( );
-        while (GetTickCount( ) - tickCount < ms)
-        {
-            Thread.Sleep(1);
-            Application.DoEvents( );
-        }
-    }
-
-    public void DrawStrUpdate(string str)
-    {
-        FmWidth = 28 * str.Length;
-        ClientSize = new Size(FmWidth, 50);
-        image = new Bitmap(FmWidth, 50);
-        g = Graphics.FromImage(image);
-        g.InterpolationMode = InterpolationMode.Bilinear;
-        g.SmoothingMode = SmoothingMode.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.Clear(Color.Transparent);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
-        StringFormat stringFormat = new( )
-        {
-            Alignment = StringAlignment.Center
-        };
-        Rectangle rectangle = new(0, 10, FmWidth, 48);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, FmWidth - 2, 48);
-        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 1, 1, FmWidth - 2, 48);
-        g.DrawString(str, new Font("微软雅黑", 18f), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
-        SetBitsUpdate(image);
-        Delay(2000U);
-        Hide( );
-    }
-
     public void SetBitsUpdate(Bitmap bitmap)
     {
         if (!Image.IsCanonicalPixelFormat(bitmap.PixelFormat) || !Image.IsAlphaPixelFormat(bitmap.PixelFormat))
@@ -159,9 +152,13 @@ public partial class FmFlags : Form
         }
     }
 
-    private Bitmap image;
-
-    private Graphics g;
-
-    public int FmWidth;
+    private static void Delay(uint ms)
+    {
+        uint tickCount = GetTickCount( );
+        while (GetTickCount( ) - tickCount < ms)
+        {
+            Thread.Sleep(1);
+            Application.DoEvents( );
+        }
+    }
 }

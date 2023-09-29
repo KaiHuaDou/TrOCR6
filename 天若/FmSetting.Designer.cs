@@ -79,7 +79,7 @@
 			this.cbBox_弹窗 = new global::System.Windows.Forms.CheckBox();
 			this.cbBox_翻译 = new global::System.Windows.Forms.CheckBox();
 			this.cbBox_开机 = new global::System.Windows.Forms.CheckBox();
-			this.tab_标签 = new global::System.Windows.Forms.TabControl();
+			this.tabControl = new global::System.Windows.Forms.TabControl();
 			this.Page_更新 = new global::System.Windows.Forms.TabPage();
 			this.更新Button_check = new global::System.Windows.Forms.Button();
 			this.更新Button = new global::System.Windows.Forms.Button();
@@ -122,7 +122,7 @@
 			this.groupBox2.SuspendLayout();
 			((global::System.ComponentModel.ISupportInitialize)this.numbox_记录).BeginInit();
 			this.groupBox1.SuspendLayout();
-			this.tab_标签.SuspendLayout();
+			this.tabControl.SuspendLayout();
 			this.Page_更新.SuspendLayout();
 			this.groupBox5.SuspendLayout();
 			((global::System.ComponentModel.ISupportInitialize)this.numbox_间隔时间).BeginInit();
@@ -649,20 +649,20 @@
 			this.cbBox_开机.Text = "开机启动";
 			this.cbBox_开机.UseVisualStyleBackColor = true;
 			this.cbBox_开机.CheckedChanged += new global::System.EventHandler(this.cbBox_开机_CheckedChanged);
-			this.tab_标签.Controls.Add(this.page_常规);
-			this.tab_标签.Controls.Add(this.Page_快捷键);
-			this.tab_标签.Controls.Add(this.Page_密钥);
-			this.tab_标签.Controls.Add(this.Page_代理);
-			this.tab_标签.Controls.Add(this.Page_更新);
-			this.tab_标签.Controls.Add(this.Page_关于);
-			this.tab_标签.Controls.Add(this.Page_赞助);
-			this.tab_标签.Controls.Add(this.Page_反馈);
-			this.tab_标签.Location = new global::System.Drawing.Point(10, 2);
-			this.tab_标签.Name = "tab_标签";
-			this.tab_标签.SelectedIndex = 0;
-			this.tab_标签.Size = new global::System.Drawing.Size(398, 355);
-			this.tab_标签.TabIndex = 0;
-			this.tab_标签.SelectedIndexChanged += new global::System.EventHandler(this.tab_标签_SelectedIndexChanged);
+			this.tabControl.Controls.Add(this.page_常规);
+			this.tabControl.Controls.Add(this.Page_快捷键);
+			this.tabControl.Controls.Add(this.Page_密钥);
+			this.tabControl.Controls.Add(this.Page_代理);
+			this.tabControl.Controls.Add(this.Page_更新);
+			this.tabControl.Controls.Add(this.Page_关于);
+			this.tabControl.Controls.Add(this.Page_赞助);
+			this.tabControl.Controls.Add(this.Page_反馈);
+			this.tabControl.Location = new global::System.Drawing.Point(10, 2);
+			this.tabControl.Name = "tab_标签";
+			this.tabControl.SelectedIndex = 0;
+			this.tabControl.Size = new global::System.Drawing.Size(398, 355);
+			this.tabControl.TabIndex = 0;
+			this.tabControl.SelectedIndexChanged += new global::System.EventHandler(this.tab_标签_SelectedIndexChanged);
 			this.Page_更新.Controls.Add(this.更新Button_check);
 			this.Page_更新.Controls.Add(this.更新Button);
 			this.Page_更新.Controls.Add(this.groupBox5);
@@ -849,7 +849,7 @@
 			base.AutoScaleMode = global::System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = global::System.Drawing.Color.White;
 			base.ClientSize = new global::System.Drawing.Size(417, 368);
-			base.Controls.Add(this.tab_标签);
+			base.Controls.Add(this.tabControl);
 			base.FormBorderStyle = global::System.Windows.Forms.FormBorderStyle.FixedSingle;
 			base.MaximizeBox = false;
 			base.MinimizeBox = false;
@@ -884,7 +884,7 @@
 			((global::System.ComponentModel.ISupportInitialize)this.numbox_记录).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
-			this.tab_标签.ResumeLayout(false);
+			this.tabControl.ResumeLayout(false);
 			this.Page_更新.ResumeLayout(false);
 			this.groupBox5.ResumeLayout(false);
 			this.groupBox5.PerformLayout();
@@ -932,7 +932,7 @@
 
 		private global::System.Windows.Forms.CheckBox cbBox_开机;
 
-		private global::System.Windows.Forms.TabControl tab_标签;
+		private global::System.Windows.Forms.TabControl tabControl;
 
 		private global::System.Windows.Forms.TabPage Page_更新;
 

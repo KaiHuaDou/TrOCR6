@@ -121,91 +121,48 @@ internal static class NativeMethods
     #endregion
 
     public const byte AC_SRC_ALPHA = 1;
-
     public const byte AC_SRC_OVER = 0;
-
     public const int AW_ACTIVATE = 131072;
-
     public const int AW_BLEND = 524288;
-
     public const int AW_CENTER = 16;
-
     public const int AW_HIDE = 65536;
-
     public const int AW_HOR_NEGATIVE = 2;
-
     public const int AW_HOR_POSITIVE = 1;
-
     public const int AW_SLIDE = 262144;
-
     public const int AW_VER_NEGATIVE = 8;
-
     public const int AW_VER_POSITIVE = 4;
-
     public const int CS_DROPSHADOW = 131072;
-
     public const int EM_GETSEL = 176;
-
     public const int EM_LINEFROMCHAR = 201;
-
     public const int EM_LINEINDEX = 187;
-
     public const int EM_POSFROMCHAR = 214;
-
     public const int GWL_EXSTYLE = -20;
-
     public const int HTCAPTION = 2;
-
     public const int HTCLIENT = 1;
-
     public const long PRF_CHECKVISIBLE = 1L;
-
     public const long PRF_CHILDREN = 16L;
-
     public const long PRF_CLIENT = 4L;
-
     public const long PRF_ERASEBKGND = 8L;
-
     public const long PRF_NONCLIENT = 2L;
-
     public const long PRF_OWNED = 32L;
-
     public const int ULW_ALPHA = 2;
-
     public const int WM_ACTIVATEAPP = 28;
-
     public const int WM_CONTEXTMENU = 123;
-
     public const int WM_ERASEBKGND = 20;
-
     public const int WM_HSCROLL = 276;
-
     public const int WM_LBUTTONDBLCLK = 515;
-
     public const int WM_LBUTTONDOWN = 513;
-
     public const int WM_LBUTTONUP = 514;
-
     public const int WM_MOUSELEAVE = 675;
-
     public const int WM_MOUSEMOVE = 512;
-
     public const int WM_NCHITTEST = 132;
-
     public const int WM_NCPAINT = 133;
-
     public const int WM_PAINT = 15;
-
     public const int WM_PRINT = 791;
-
     public const int WM_PRINTCLIENT = 792;
-
     public const int WM_RBUTTONDOWN = 516;
-
     public const int WM_VSCROLL = 277;
-
     public const int WS_EX_LAYERED = 524288;
-
     public const int WS_EX_TRANSPARENT = 32;
 
     [Flags]

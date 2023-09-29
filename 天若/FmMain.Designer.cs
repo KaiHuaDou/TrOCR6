@@ -1,8 +1,11 @@
-﻿using static TrOCR.External.NativeMethods;
+﻿using System.Drawing;
+using System.Windows.Forms;
+using TrOCR.Controls;
+using static TrOCR.External.NativeMethods;
 
 namespace TrOCR
 {
-    public partial class FmMain : global::System.Windows.Forms.Form
+    public partial class FmMain : Form
     {
         protected override void Dispose(bool disposing)
         {
@@ -17,84 +20,84 @@ namespace TrOCR
         private void InitializeComponent()
         {
             this.components = new global::System.ComponentModel.Container();
-            global::System.ComponentModel.ComponentResourceManager componentResourceManager = new global::System.ComponentModel.ComponentResourceManager(typeof(global::TrOCR.FmMain));
-            this.minico = new global::System.Windows.Forms.NotifyIcon(this.components);
-            this.toolStripSeparator1 = new global::System.Windows.Forms.ToolStripSeparator();
-            this.toolStrip = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.trans_input = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.trans_google = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.trans_baidu = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.trans_tencent = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.baidu_table = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.ali_table = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.ocr_table = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.menu = new global::System.Windows.Forms.ContextMenuStrip();
-            this.menu.Renderer = new global::TrOCR.MenuItemRendererT();
-            this.ch_en = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.jap = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.kor = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.pinyin = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.customize_Proxy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.null_Proxy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.system_Proxy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Proxy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.left_right = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.righ_left = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_copy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_paste = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_selectall = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_jiekou = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_exit = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Main_change = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.zh_tra = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.tra_zh = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.str_Upper = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Upper_str = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.speak = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Trans_copy = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Trans_paste = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Trans_SelectAll = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Trans_close = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Trans_Voice = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.sougou = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Mathfuntion = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.tencent = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.baidu = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.shupai = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.write = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.tencent_v = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.baidu_s = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.baidu_v = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.tencent = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.baidu = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.youdao = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Chinese = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.English = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Split = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.Restore = new global::System.Windows.Forms.ToolStripMenuItem();
-            this.menu_copy = new global::System.Windows.Forms.ContextMenuStrip();
-            this.menu_copy.Renderer = new global::TrOCR.MenuItemRendererT();
-            this.PictureBox1 = new global::System.Windows.Forms.PictureBox();
-            this.RichBoxBody = new global::TrOCR.AdvRichTextBox();
-            this.RichBoxBody_T = new global::TrOCR.AdvRichTextBox();
-            this.minico.BalloonTipIcon = global::System.Windows.Forms.ToolTipIcon.Info;
+            global::System.ComponentModel.ComponentResourceManager componentResourceManager = new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain));
+            this.minico = new NotifyIcon(this.components);
+            this.toolStripSeparator1 = new ToolStripSeparator();
+            this.toolStrip = new ToolStripMenuItem();
+            this.trans_input = new ToolStripMenuItem();
+            this.trans_google = new ToolStripMenuItem();
+            this.trans_baidu = new ToolStripMenuItem();
+            this.trans_tencent = new ToolStripMenuItem();
+            this.baidu_table = new ToolStripMenuItem();
+            this.ali_table = new ToolStripMenuItem();
+            this.ocr_table = new ToolStripMenuItem();
+            this.menu = new ContextMenuStrip();
+            this.menu.Renderer = new MenuItemRendererT();
+            this.ch_en = new ToolStripMenuItem();
+            this.jap = new ToolStripMenuItem();
+            this.kor = new ToolStripMenuItem();
+            this.pinyin = new ToolStripMenuItem();
+            this.customize_Proxy = new ToolStripMenuItem();
+            this.null_Proxy = new ToolStripMenuItem();
+            this.system_Proxy = new ToolStripMenuItem();
+            this.Proxy = new ToolStripMenuItem();
+            this.left_right = new ToolStripMenuItem();
+            this.righ_left = new ToolStripMenuItem();
+            this.Main_copy = new ToolStripMenuItem();
+            this.Main_paste = new ToolStripMenuItem();
+            this.Main_selectall = new ToolStripMenuItem();
+            this.Main_jiekou = new ToolStripMenuItem();
+            this.Main_exit = new ToolStripMenuItem();
+            this.Main_change = new ToolStripMenuItem();
+            this.zh_tra = new ToolStripMenuItem();
+            this.tra_zh = new ToolStripMenuItem();
+            this.str_Upper = new ToolStripMenuItem();
+            this.Upper_str = new ToolStripMenuItem();
+            this.speak = new ToolStripMenuItem();
+            this.Trans_copy = new ToolStripMenuItem();
+            this.Trans_paste = new ToolStripMenuItem();
+            this.Trans_SelectAll = new ToolStripMenuItem();
+            this.Trans_close = new ToolStripMenuItem();
+            this.Trans_Voice = new ToolStripMenuItem();
+            this.sougou = new ToolStripMenuItem();
+            this.Mathfuntion = new ToolStripMenuItem();
+            this.tencent = new ToolStripMenuItem();
+            this.baidu = new ToolStripMenuItem();
+            this.shupai = new ToolStripMenuItem();
+            this.write = new ToolStripMenuItem();
+            this.tencent_v = new ToolStripMenuItem();
+            this.baidu_s = new ToolStripMenuItem();
+            this.baidu_v = new ToolStripMenuItem();
+            this.tencent = new ToolStripMenuItem();
+            this.baidu = new ToolStripMenuItem();
+            this.youdao = new ToolStripMenuItem();
+            this.Chinese = new ToolStripMenuItem();
+            this.English = new ToolStripMenuItem();
+            this.Split = new ToolStripMenuItem();
+            this.Restore = new ToolStripMenuItem();
+            this.menu_copy = new ContextMenuStrip();
+            this.menu_copy.Renderer = new MenuItemRendererT();
+            this.PictureBox1 = new PictureBox();
+            this.RichBoxBody = new AdvRichTextBox();
+            this.RichBoxBody_T = new AdvRichTextBox();
+            this.minico.BalloonTipIcon = ToolTipIcon.Info;
             this.minico.BalloonTipText = "最小化到任务栏";
             this.minico.BalloonTipTitle = "提示";
-            this.minico.Icon = (global::System.Drawing.Icon)componentResourceManager.GetObject("minico.Icon");
+            this.minico.Icon = (Icon)componentResourceManager.GetObject("minico.Icon");
             this.minico.Text = "双击开始截图识别";
             this.minico.Visible = true;
-            this.minico.MouseDoubleClick += new global::System.Windows.Forms.MouseEventHandler(this.tray_double_Click);
+            this.minico.MouseDoubleClick += new MouseEventHandler(this.tray_double_Click);
             this.font_base.Width = 18f * this.F_factor;
             this.font_base.Height = 17f * this.F_factor;
             this.RichBoxBody_T.Visible = false;
-            this.RichBoxBody.Dock = global::System.Windows.Forms.DockStyle.Fill;
-            this.RichBoxBody.BorderStyle = global::System.Windows.Forms.BorderStyle.Fixed3D;
-            this.RichBoxBody.Location = new global::System.Drawing.Point(0, 0);
+            this.RichBoxBody.Dock = DockStyle.Fill;
+            this.RichBoxBody.BorderStyle = BorderStyle.Fixed3D;
+            this.RichBoxBody.Location = new Point(0, 0);
             this.RichBoxBody.Name = "htmlTextBoxBody";
-            this.RichBoxBody.ImeMode = global::System.Windows.Forms.ImeMode.HangulFull;
+            this.RichBoxBody.ImeMode = ImeMode.HangulFull;
             this.RichBoxBody.TabIndex = 200;
-            this.RichBoxBody.Text_flag = "天若幽心";
-            this.RichBoxBody_T.ImeMode = global::System.Windows.Forms.ImeMode.HangulFull;
+            this.RichBoxBody.SetTextFlag("天若幽心");
+            this.RichBoxBody_T.ImeMode = ImeMode.HangulFull;
             this.Trans_copy.Text = "复制";
             this.Trans_copy.Click += new global::System.EventHandler(this.Trans_copy_Click);
             this.Trans_paste.Text = "粘贴";
@@ -113,9 +116,9 @@ namespace TrOCR
             this.trans_baidu.Click += new global::System.EventHandler(this.Trans_baidu_Click);
             this.trans_tencent.Text = "腾讯";
             this.trans_tencent.Click += new global::System.EventHandler(this.Trans_tencent_Click);
-            this.menu_copy.Items.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.Trans_copy, this.Trans_paste, this.Trans_SelectAll, this.Trans_Voice, this.trans_input, this.Trans_close });
-            this.trans_input.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.trans_google, this.trans_baidu, this.trans_tencent });
-            this.menu_copy.Font = new global::System.Drawing.Font("微软雅黑", 9f / global::TrOCR.StaticValue.Dpifactor, global::System.Drawing.FontStyle.Regular);
+            this.menu_copy.Items.AddRange(new ToolStripItem[] { this.Trans_copy, this.Trans_paste, this.Trans_SelectAll, this.Trans_Voice, this.trans_input, this.Trans_close });
+            this.trans_input.DropDownItems.AddRange(new ToolStripItem[] { this.trans_google, this.trans_baidu, this.trans_tencent });
+            this.menu_copy.Font = new Font("微软雅黑", 9f / StaticValue.Dpifactor, FontStyle.Regular);
             this.Main_copy.Text = "复制";
             this.Main_copy.Click += new global::System.EventHandler(this.Main_copy_Click);
             this.Main_paste.Text = "粘贴";
@@ -130,8 +133,8 @@ namespace TrOCR
             this.Main_jiekou.Text = "接口";
             this.Main_exit.Text = "退出";
             this.Main_exit.Click += new global::System.EventHandler(this.TrayExitClick);
-            this.menu.Items.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.Main_copy, this.Main_paste, this.Main_selectall, this.speak, this.baidu_s, this.Main_change, this.Main_jiekou, this.Main_exit });
-            this.menu.Font = new global::System.Drawing.Font("微软雅黑", 9f / global::TrOCR.StaticValue.Dpifactor, global::System.Drawing.FontStyle.Regular);
+            this.menu.Items.AddRange(new ToolStripItem[] { this.Main_copy, this.Main_paste, this.Main_selectall, this.speak, this.baidu_s, this.Main_change, this.Main_jiekou, this.Main_exit });
+            this.menu.Font = new Font("微软雅黑", 9f / StaticValue.Dpifactor, FontStyle.Regular);
             this.sougou.Text = "搜狗√";
             this.sougou.Click += new global::System.EventHandler(this.OcrSogouClick);
             this.Mathfuntion.Text = "公式";
@@ -147,7 +150,7 @@ namespace TrOCR
             this.baidu_table.Click += new global::System.EventHandler(this.OCR_baidutable_Click);
             this.ali_table.Text = "阿里";
             this.ali_table.Click += new global::System.EventHandler(this.OCR_ailitable_Click);
-            this.ocr_table.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.baidu_table, this.ali_table });
+            this.ocr_table.DropDownItems.AddRange(new ToolStripItem[] { this.baidu_table, this.ali_table });
             this.shupai.Text = "竖排";
             this.shupai.Click += new global::System.EventHandler(this.OCR_shupai_Click);
             this.write.Text = "手写";
@@ -167,10 +170,10 @@ namespace TrOCR
             this.pinyin.Text = "汉语拼音";
             this.pinyin.Click += new global::System.EventHandler(this.change_pinyin_Click);
             this.change_button = this.Main_change;
-            this.change_button.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.Chinese, this.English, this.zh_tra, this.tra_zh, this.str_Upper, this.Upper_str, this.pinyin });
+            this.change_button.DropDownItems.AddRange(new ToolStripItem[] { this.Chinese, this.English, this.zh_tra, this.tra_zh, this.str_Upper, this.Upper_str, this.pinyin });
             this.interface_button = this.Main_jiekou;
-            this.interface_button.DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.sougou, this.tencent, this.youdao, this.baidu, this.toolStripSeparator1, this.Mathfuntion, this.ocr_table, this.shupai });
-            if (global::TrOCR.Helper.Config.Get("配置", "接口") == "百度")
+            this.interface_button.DropDownItems.AddRange(new ToolStripItem[] { this.sougou, this.tencent, this.youdao, this.baidu, this.toolStripSeparator1, this.Mathfuntion, this.ocr_table, this.shupai });
+            if (Helper.Config.Get("配置", "接口") == "百度")
             {
                 this.ch_en.Text = "中英√";
             }
@@ -183,23 +186,23 @@ namespace TrOCR
             this.jap.Click += new global::System.EventHandler(this.OCR_baidu_Jap_Click);
             this.kor.Text = "韩语";
             this.kor.Click += new global::System.EventHandler(this.OCR_baidu_Kor_Click);
-            ((global::System.Windows.Forms.ToolStripDropDownItem)this.baidu).DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.ch_en, this.jap, this.kor });
+            ((ToolStripDropDownItem)this.baidu).DropDownItems.AddRange(new ToolStripItem[] { this.ch_en, this.jap, this.kor });
             this.left_right.Text = "从左向右";
             this.left_right.Click += new global::System.EventHandler(this.OCR_lefttoright_Click);
             this.righ_left.Text = "从右向左";
             this.righ_left.Click += new global::System.EventHandler(this.OCR_righttoleft_Click);
-            ((global::System.Windows.Forms.ToolStripDropDownItem)this.shupai).DropDownItems.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.left_right, this.righ_left });
-            this.RichBoxBody.ContextMenuStrip1 = this.menu;
-            this.RichBoxBody_T.ContextMenuStrip1 = this.menu_copy;
-            this.PictureBox1.Image = (global::System.Drawing.Image)new global::System.ComponentModel.ComponentResourceManager(typeof(global::TrOCR.FmMain)).GetObject("loadcat.gif");
-            this.PictureBox1.Size = new global::System.Drawing.Size(85, 85);
-            this.PictureBox1.Location = (global::System.Drawing.Point)new global::System.Drawing.Size((int)this.font_base.Width * 34 - this.PictureBox1.Size.Width / 2, (int)(110f * this.F_factor));
-            this.PictureBox1.BackColor = global::System.Drawing.Color.White;
+            ((ToolStripDropDownItem)this.shupai).DropDownItems.AddRange(new ToolStripItem[] { this.left_right, this.righ_left });
+            this.RichBoxBody.InnerContextMenuStrip = this.menu;
+            this.RichBoxBody_T.InnerContextMenuStrip = this.menu_copy;
+            this.PictureBox1.Image = (Image)new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain)).GetObject("loadcat.gif");
+            this.PictureBox1.Size = new Size(85, 85);
+            this.PictureBox1.Location = (Point)new Size((int)this.font_base.Width * 34 - this.PictureBox1.Size.Width / 2, (int)(110f * this.F_factor));
+            this.PictureBox1.BackColor = Color.White;
             this.PictureBox1.Visible = false;
             base.SuspendLayout();
-            base.StartPosition = global::System.Windows.Forms.FormStartPosition.Manual;
-            base.Location = (global::System.Drawing.Point)new global::System.Drawing.Size(global::System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / 2 - global::System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / 10, global::System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / 2 - global::System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / 6);
-            base.Size = new global::System.Drawing.Size((int)this.font_base.Width * 23, (int)this.font_base.Height * 24);
+            base.StartPosition = FormStartPosition.Manual;
+            base.Location = (Point)new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
+            base.Size = new Size((int)this.font_base.Width * 23, (int)this.font_base.Height * 24);
             base.Controls.Add(this.RichBoxBody_T);
             base.Controls.Add(this.PictureBox1);
             base.Controls.Add(this.RichBoxBody);
@@ -207,7 +210,7 @@ namespace TrOCR
             base.Resize += new global::System.EventHandler(this.Form_Resize);
             base.Name = "Form1";
             this.Text = "耗时：";
-            if (global::TrOCR.Helper.Config.Get("工具栏", "顶置") == "True")
+            if (Helper.Config.Get("工具栏", "顶置") == "True")
             {
                 base.TopMost = true;
             }
@@ -215,131 +218,131 @@ namespace TrOCR
             {
                 base.TopMost = false;
             }
-            base.Icon = (global::System.Drawing.Icon)componentResourceManager.GetObject("minico.Icon");
+            base.Icon = (Icon)componentResourceManager.GetObject("minico.Icon");
             base.ResumeLayout(false);
             base.PerformLayout();
         }
 
         private global::System.ComponentModel.IContainer components;
 
-        public global::System.Windows.Forms.NotifyIcon minico;
+        public NotifyIcon minico;
 
-        public global::System.Windows.Forms.ContextMenuStrip menu;
+        public ContextMenuStrip menu;
 
-        private global::System.Windows.Forms.ToolStripMenuItem toolStrip;
+        private ToolStripMenuItem toolStrip;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_copy;
+        public ToolStripMenuItem Main_copy;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_paste;
+        public ToolStripMenuItem Main_paste;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_selectall;
+        public ToolStripMenuItem Main_selectall;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_exit;
+        public ToolStripMenuItem Main_exit;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_jiekou;
+        public ToolStripMenuItem Main_jiekou;
 
-        public global::System.Windows.Forms.ToolStripItem sougou;
+        public ToolStripItem sougou;
 
-        public global::System.Windows.Forms.ToolStripItem tencent;
+        public ToolStripItem tencent;
 
-        public global::System.Windows.Forms.ToolStripItem baidu;
+        public ToolStripItem baidu;
 
-        public global::System.Windows.Forms.ToolStripItem youdao;
+        public ToolStripItem youdao;
 
-        public global::System.Windows.Forms.ToolStripDropDownItem interface_button;
+        public ToolStripDropDownItem interface_button;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Main_change;
+        public ToolStripMenuItem Main_change;
 
-        public global::System.Windows.Forms.ToolStripDropDownItem change_button;
+        public ToolStripDropDownItem change_button;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Chinese;
+        public ToolStripMenuItem Chinese;
 
-        public global::System.Windows.Forms.ToolStripMenuItem English;
+        public ToolStripMenuItem English;
 
-        public global::TrOCR.AdvRichTextBox RichBoxBody_T;
+        public AdvRichTextBox RichBoxBody_T;
 
-        public global::System.Windows.Forms.ContextMenuStrip menu_copy;
+        public ContextMenuStrip menu_copy;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Trans_copy;
+        public ToolStripMenuItem Trans_copy;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Trans_paste;
+        public ToolStripMenuItem Trans_paste;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Trans_SelectAll;
+        public ToolStripMenuItem Trans_SelectAll;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Trans_close;
+        public ToolStripMenuItem Trans_close;
 
-        public global::System.Drawing.SizeF font_base;
+        public SizeF font_base;
 
-        public global::System.Windows.Forms.PictureBox PictureBox1;
+        public PictureBox PictureBox1;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Split;
+        public ToolStripMenuItem Split;
 
-        public global::System.Windows.Forms.ToolStripMenuItem Restore;
+        public ToolStripMenuItem Restore;
 
         public float F_factor;
 
-        private global::TrOCR.AdvRichTextBox RichBoxBody;
+        private AdvRichTextBox RichBoxBody;
 
         private global::System.IntPtr nextClipboardViewer;
 
-        public global::System.Windows.Forms.ToolStripMenuItem baidu_v;
+        public ToolStripMenuItem baidu_v;
 
-        public global::System.Windows.Forms.ToolStripMenuItem tencent_v;
+        public ToolStripMenuItem tencent_v;
 
-        public global::System.Windows.Forms.ToolStripMenuItem baidu_s;
+        public ToolStripMenuItem baidu_s;
 
-        private global::System.Windows.Forms.ToolStripMenuItem speak;
+        private ToolStripMenuItem speak;
 
-        private global::System.Windows.Forms.ToolStripMenuItem Trans_Voice;
+        private ToolStripMenuItem Trans_Voice;
 
-        private global::System.Windows.Forms.ToolStripMenuItem zh_tra;
+        private ToolStripMenuItem zh_tra;
 
-        private global::System.Windows.Forms.ToolStripMenuItem tra_zh;
+        private ToolStripMenuItem tra_zh;
 
-        private global::System.Windows.Forms.ToolStripMenuItem str_Upper;
+        private ToolStripMenuItem str_Upper;
 
-        private global::System.Windows.Forms.ToolStripMenuItem Upper_str;
+        private ToolStripMenuItem Upper_str;
 
-        private global::System.Windows.Forms.ToolStripMenuItem ch_en;
+        private ToolStripMenuItem ch_en;
 
-        private global::System.Windows.Forms.ToolStripMenuItem jap;
+        private ToolStripMenuItem jap;
 
-        private global::System.Windows.Forms.ToolStripMenuItem kor;
+        private ToolStripMenuItem kor;
 
-        public global::System.Windows.Forms.ToolStripItem shupai;
+        public ToolStripItem shupai;
 
-        public global::System.Windows.Forms.ToolStripItem write;
+        public ToolStripItem write;
 
-        private global::System.Windows.Forms.ToolStripMenuItem left_right;
+        private ToolStripMenuItem left_right;
 
-        private global::System.Windows.Forms.ToolStripMenuItem righ_left;
+        private ToolStripMenuItem righ_left;
 
-        private global::System.Windows.Forms.ToolStripMenuItem customize_Proxy;
+        private ToolStripMenuItem customize_Proxy;
 
-        private global::System.Windows.Forms.ToolStripMenuItem null_Proxy;
+        private ToolStripMenuItem null_Proxy;
 
-        private global::System.Windows.Forms.ToolStripMenuItem system_Proxy;
+        private ToolStripMenuItem system_Proxy;
 
-        private global::System.Windows.Forms.ToolStripMenuItem Proxy;
+        private ToolStripMenuItem Proxy;
 
-        private global::System.Windows.Forms.ToolStripMenuItem pinyin;
+        private ToolStripMenuItem pinyin;
 
-        private global::System.Windows.Forms.ToolStripMenuItem trans_input;
+        private ToolStripMenuItem trans_input;
 
-        private global::System.Windows.Forms.ToolStripMenuItem trans_google;
+        private ToolStripMenuItem trans_google;
 
-        private global::System.Windows.Forms.ToolStripMenuItem trans_baidu;
+        private ToolStripMenuItem trans_baidu;
 
-        private global::System.Windows.Forms.ToolStripMenuItem trans_tencent;
+        private ToolStripMenuItem trans_tencent;
 
-        private global::System.Windows.Forms.ToolStripMenuItem ocr_table;
+        private ToolStripMenuItem ocr_table;
 
-        private global::System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private ToolStripSeparator toolStripSeparator1;
 
-        private global::System.Windows.Forms.ToolStripMenuItem baidu_table;
+        private ToolStripMenuItem baidu_table;
 
-        private global::System.Windows.Forms.ToolStripMenuItem ali_table;
+        private ToolStripMenuItem ali_table;
 
-        public global::System.Windows.Forms.ToolStripItem Mathfuntion;
+        public ToolStripItem Mathfuntion;
     }
 }
