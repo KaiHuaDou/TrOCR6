@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -33,7 +32,6 @@ public partial class FmMain : Form
 {
     private static bool speakCopy;
     private readonly AutoResetEvent autoResetEvent;
-    private readonly FmFlags flagForm;
     private AliTable ailibaba;
     private string autoFlag;
     private string baiduFlags;
@@ -99,7 +97,6 @@ public partial class FmMain : Form
         esc = "";
         voice_count = 0;
         fmNote = new FmNote( );
-        flagForm = new FmFlags( );
         pubnote = new string[StaticValue.NoteCount];
         for (int i = 0; i < StaticValue.NoteCount; i++)
             pubnote[i] = "";
@@ -108,7 +105,7 @@ public partial class FmMain : Form
         Font = new Font(Font.Name, 9f / StaticValue.Dpifactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         googleTransText = "";
         num_ok = 0;
-        F_factor = Program.DpiFactor;
+        F_factor = Helper.System.DpiFactor;
         components = null;
         InitializeComponent( );
         nextClipboardViewer = (IntPtr) SetClipboardViewer((int) Handle);
@@ -145,7 +142,8 @@ public partial class FmMain : Form
         mciSendString("play media notify", null, 0, Handle);
     }
 
-    public void TrayUpdateClick(object o, EventArgs e) => Program.CheckUpdate( );
+    public void TrayUpdateClick(object o, EventArgs e)
+        => new FmSetting( ) { SelectedTab = FmSettingTab.更新 }.Show( );
 
     protected override void WndProc(ref Message m)
     {
@@ -232,7 +230,7 @@ public partial class FmMain : Form
                     thread = new Thread(new ThreadStart(ShowLoading));
                     thread.Start( );
                     ts = new TimeSpan(DateTime.Now.Ticks);
-                    Messageload messageload = new( );
+                    MessageLoad messageload = new( );
                     messageload.ShowDialog( );
                     if (messageload.DialogResult == DialogResult.OK)
                     {
@@ -516,17 +514,6 @@ public partial class FmMain : Form
         return text;
     }
 
-    private static void clearRect(bool[][] Colors, Rectangle Rect)
-    {
-        for (int i = Rect.Top; i <= Rect.Bottom; i++)
-        {
-            for (int j = Rect.Left; j <= Rect.Right; j++)
-            {
-                Colors[i][j] = false;
-            }
-        }
-    }
-
     private static bool contain_punctuation(string str) => Regex.IsMatch(str, "\\p{P}");
 
     private static string Content_Length(string text, string fromlang, string tolang) => string.Concat(new string[]
@@ -584,22 +571,6 @@ public partial class FmMain : Form
         Clipboard.SetDataObject(dataObject);
     }
 
-    private static bool D_Exist(bool[][] Colors, Rectangle Rect)
-    {
-        if (Rect.Bottom >= Colors.Length || Rect.Top < 0)
-        {
-            return false;
-        }
-        for (int i = 0; i < Rect.Width; i++)
-        {
-            if (Exist(Colors, Rect.Bottom + 1, Rect.Left + i))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void DeleteFile(string path)
     {
         if (File.GetAttributes(path) == FileAttributes.Directory)
@@ -611,8 +582,6 @@ public partial class FmMain : Form
     }
 
     private static int en_count(string text) => Regex.Matches(text, "\\s+").Count + 1;
-
-    private static bool Exist(bool[][] Colors, int x, int y) => x >= 0 && y >= 0 && x < Colors.Length && y < Colors[0].Length && Colors[x][y];
 
     private static Image FindBundingBox(Bitmap bitmap)
     {
@@ -713,22 +682,6 @@ public partial class FmMain : Form
         return true;
     }
 
-    private static bool L_Exist(bool[][] Colors, Rectangle Rect)
-    {
-        if (Rect.Right >= Colors[0].Length || Rect.Left < 0)
-        {
-            return false;
-        }
-        for (int i = 0; i < Rect.Height; i++)
-        {
-            if (Exist(Colors, Rect.Top + i, Rect.Left - 1))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static byte[] Mergebyte(byte[] a, byte[] b, byte[] c)
     {
         byte[] array = new byte[a.Length + b.Length + c.Length];
@@ -756,100 +709,6 @@ public partial class FmMain : Form
             array2 = null;
         }
         return array2;
-    }
-
-    private static byte[] OCR_sougou_Content_Length(Image img)
-    {
-        byte[] bytes = Encoding.UTF8.GetBytes("------WebKitFormBoundary1ZZDB9E4sro7pf0g\r\nContent-Disposition: form-data; name=\"pic_path\"; filename=\"test2018.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n");
-        byte[] array = OCR_ImgToByte(img);
-        byte[] bytes2 = Encoding.UTF8.GetBytes("\r\n------WebKitFormBoundary1ZZDB9E4sro7pf0g--\r\n");
-        byte[] array2 = new byte[bytes.Length + array.Length + bytes2.Length];
-        bytes.CopyTo(array2, 0);
-        array.CopyTo(array2, bytes.Length);
-        bytes2.CopyTo(array2, bytes.Length + array.Length);
-        return array2;
-    }
-
-    private static string OCR_sougou_SogouGet(string url, CookieContainer cookie, string refer)
-    {
-        string text = "";
-        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
-        httpWebRequest.Method = "GET";
-        httpWebRequest.CookieContainer = cookie;
-        httpWebRequest.Referer = refer;
-        httpWebRequest.Timeout = 10000;
-        httpWebRequest.Accept = "application/json";
-        httpWebRequest.Headers.Add("X-Requested-With: XMLHttpRequest");
-        httpWebRequest.Headers.Add("Accept-Encoding: gzip,deflate");
-        httpWebRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-        httpWebRequest.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
-        httpWebRequest.ServicePoint.Expect100Continue = false;
-        httpWebRequest.ProtocolVersion = new Version(1, 1);
-        string text2;
-        try
-        {
-            using (HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse( ))
-            {
-                Stream stream = httpWebResponse.GetResponseStream( );
-                if (httpWebResponse.ContentEncoding.ToLower(System.Globalization.CultureInfo.CurrentCulture).Contains("gzip"))
-                {
-                    stream = new GZipStream(stream, CompressionMode.Decompress);
-                }
-                using StreamReader streamReader = new(stream, Encoding.UTF8);
-                text = streamReader.ReadToEnd( );
-                streamReader.Close( );
-                httpWebResponse.Close( );
-            }
-            text2 = text;
-        }
-        catch
-        {
-            text2 = null;
-        }
-        return text2;
-    }
-
-    private static string OCR_sougou_SogouPost(string url, CookieContainer cookie, byte[] content)
-    {
-        string text = "";
-        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
-        httpWebRequest.Method = "POST";
-        httpWebRequest.CookieContainer = cookie;
-        httpWebRequest.Timeout = 10000;
-        httpWebRequest.Referer = "http://pic.sogou.com/resource/pic/shitu_intro/index.html";
-        httpWebRequest.ContentType = "multipart/form-data; boundary=----WebKitFormBoundary1ZZDB9E4sro7pf0g";
-        httpWebRequest.Accept = "*/*";
-        httpWebRequest.Headers.Add("Origin: http://pic.sogou.com");
-        httpWebRequest.Headers.Add("Accept-Encoding: gzip,deflate");
-        httpWebRequest.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
-        httpWebRequest.ServicePoint.Expect100Continue = false;
-        httpWebRequest.ProtocolVersion = new Version(1, 1);
-        httpWebRequest.ContentLength = content.Length;
-        Stream requestStream = httpWebRequest.GetRequestStream( );
-        requestStream.Write(content, 0, content.Length);
-        requestStream.Close( );
-        string text2;
-        try
-        {
-            using (HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse( ))
-            {
-                Stream stream = httpWebResponse.GetResponseStream( );
-                if (httpWebResponse.ContentEncoding.ToLower(System.Globalization.CultureInfo.CurrentCulture).Contains("gzip"))
-                {
-                    stream = new GZipStream(stream, CompressionMode.Decompress);
-                }
-                using StreamReader streamReader = new(stream, Encoding.UTF8);
-                text = streamReader.ReadToEnd( );
-                streamReader.Close( );
-                httpWebResponse.Close( );
-            }
-            text2 = text;
-        }
-        catch
-        {
-            text2 = null;
-        }
-        return text2;
     }
 
     private static string Post_Html(string url, string post_str)
@@ -971,22 +830,6 @@ public partial class FmMain : Form
             }
         }
         return new string(array);
-    }
-
-    private static bool R_Exist(bool[][] Colors, Rectangle Rect)
-    {
-        if (Rect.Right >= Colors[0].Length || Rect.Left < 0)
-        {
-            return false;
-        }
-        for (int i = 0; i < Rect.Height; i++)
-        {
-            if (Exist(Colors, Rect.Top + i, Rect.Right + 1))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static int split_char_x(string split_char) => Convert.ToInt32(split_char.Split(new char[] { ',' })[0]);
@@ -1145,22 +988,6 @@ public partial class FmMain : Form
             text = "[百度接口报错]：\r\n1.接口请求出现问题等待修复。";
         }
         return text;
-    }
-
-    private static bool U_Exist(bool[][] Colors, Rectangle Rect)
-    {
-        if (Rect.Bottom >= Colors.Length || Rect.Top < 0)
-        {
-            return false;
-        }
-        for (int i = 0; i < Rect.Width; i++)
-        {
-            if (Exist(Colors, Rect.Top - 1, Rect.Left + i))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static Bitmap ZoomImage(Bitmap bitmap1, int destHeight, int destWidth)
@@ -1839,7 +1666,7 @@ public partial class FmMain : Form
         {
             array[i] = GetRect(buildPic, buildRects[i]);
             image_screen = array[i];
-            Messageload messageload = new( );
+            MessageLoad messageload = new( );
             messageload.ShowDialog( );
             if (messageload.DialogResult == DialogResult.OK)
             {
@@ -2037,8 +1864,7 @@ public partial class FmMain : Form
                     }
                     UnregisterHotKey(Handle, 222);
                     StaticValue.CaptureRejection = false;
-                    flagForm.Show( );
-                    flagForm.DrawStr("已复制颜色");
+                    FmFlags.Display("已复制颜色");
                 }
                 else if (image_screen == null)
                 {
@@ -2084,8 +1910,7 @@ public partial class FmMain : Form
                         {
                             PlaySong(Config.Get("截图音效", "音效路径"));
                         }
-                        flagForm.Show( );
-                        flagForm.DrawStr("已复制截图");
+                        FmFlags.Display("已复制截图");
                     }
                     else if (mode_flag == "自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
@@ -2096,8 +1921,7 @@ public partial class FmMain : Form
                         {
                             PlaySong(Config.Get("截图音效", "音效路径"));
                         }
-                        flagForm.Show( );
-                        flagForm.DrawStr("已保存图片");
+                        FmFlags.Display("已保存图片");
                     }
                     else if (mode_flag == "多区域自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
@@ -2107,8 +1931,7 @@ public partial class FmMain : Form
                         {
                             PlaySong(Config.Get("截图音效", "音效路径"));
                         }
-                        flagForm.Show( );
-                        flagForm.DrawStr("已保存图片");
+                        FmFlags.Display("已保存图片");
                     }
                     else if (mode_flag == "保存")
                     {
@@ -2180,7 +2003,7 @@ public partial class FmMain : Form
                             thread = new Thread(new ThreadStart(ShowLoading));
                             thread.Start( );
                             ts = new TimeSpan(DateTime.Now.Ticks);
-                            Messageload messageload = new( );
+                            MessageLoad messageload = new( );
                             messageload.ShowDialog( );
                             if (messageload.DialogResult == DialogResult.OK)
                             {
@@ -2365,14 +2188,13 @@ public partial class FmMain : Form
             FormBorderStyle = FormBorderStyle.Sizable;
             Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
             Visible = false;
-            flagForm.Show( );
             if (RichBoxBody.Text == "***该区域未发现文本***")
             {
-                flagForm.DrawStr("无文本");
+                FmFlags.Display("无文本");
             }
             else
             {
-                flagForm.DrawStr("已识别");
+                FmFlags.Display("已识别");
             }
             if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
             {
@@ -3097,7 +2919,7 @@ public partial class FmMain : Form
         {
             if (!File.Exists("cvextern.dll"))
             {
-                MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\r\n将下载后的文件与 天若.exe 这个文件放在一起。");
+                MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\n将下载后的文件与 天若.exe 这个文件放在一起。");
                 Process.Start("https://www.lanzous.com/i1ab3vg");
                 return;
             }
@@ -3458,7 +3280,7 @@ public partial class FmMain : Form
                     graphics.Dispose( );
                 }
             }
-            Messageload messageload = new( );
+            MessageLoad messageload = new( );
             messageload.ShowDialog( );
             if (messageload.DialogResult == DialogResult.OK)
             {
@@ -3519,8 +3341,7 @@ public partial class FmMain : Form
         string[] array2 = new string[] { text, text2 };
         if (!RegisterHotKey(Handle, flag, (KeyModifiers) Enum.Parse(typeof(KeyModifiers), array2[0].Trim( )), (Keys) Enum.Parse(typeof(Keys), array2[1].Trim( ))))
         {
-            flagForm.Show( );
-            flagForm.DrawStr("快捷键冲突，请更换！");
+            FmFlags.Display("快捷键冲突，请更换！");
         }
         RegisterHotKey(Handle, flag, (KeyModifiers) Enum.Parse(typeof(KeyModifiers), array2[0].Trim( )), (Keys) Enum.Parse(typeof(Keys), array2[1].Trim( )));
     }
@@ -3971,7 +3792,7 @@ public partial class FmMain : Form
             {
                 Program.updateTimer.Enabled = true;
                 Program.updateTimer.Interval = 3600000.0 * Convert.ToInt32(Config.Get("更新", "间隔时间"));
-                Program.updateTimer.Elapsed += Program.CheckTimer_Elapsed;
+                Program.updateTimer.Elapsed += Program.CheckTimerElapsed;
                 Program.updateTimer.Start( );
             }
         }

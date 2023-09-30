@@ -4,9 +4,9 @@ using System.Windows.Forms;
 
 namespace TrOCR;
 
-public partial class Messageload : Form
+public partial class MessageLoad : Form
 {
-    public Messageload( ) => InitializeComponent( );
+    public MessageLoad( ) => InitializeComponent( );
 
     public void Form1Load(object sender, EventArgs e) => base.DialogResult = DialogResult.OK;
 

@@ -1,6 +1,6 @@
 ﻿namespace TrOCR
 {
-	public partial class Messageload : global::System.Windows.Forms.Form
+	public partial class MessageLoad : global::System.Windows.Forms.Form
 	{
 		protected override void Dispose(bool disposing)
 		{

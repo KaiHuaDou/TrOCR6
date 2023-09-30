@@ -15,7 +15,7 @@ public partial class FmHelp : Form
         panel_识别说明.Visible = true;
         panel_快捷键.Visible = false;
         panel_常见问题.Visible = false;
-        listBox1.Font = new Font("宋体", 10f / Program.DpiFactor);
+        listBox1.Font = new Font("宋体", 10f / Helper.System.DpiFactor);
     }
 
     public static Point DpiSize( ) => new(109, 5);

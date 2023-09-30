@@ -30,38 +30,10 @@ public sealed partial class FmSetting : Form
         InitializeComponent( );
     }
 
-    public FmSettingTab InnerSelectedIndex
+    public FmSettingTab SelectedTab
     {
         get => (FmSettingTab) tabControl.SelectedIndex;
         set => tabControl.SelectedIndex = (int) value;
-    }
-
-    public static void AutoStart(bool isAuto)
-    {
-        try
-        {
-            string text = Application.ExecutablePath.Replace("/", "\\");
-            if (isAuto)
-            {
-                RegistryKey currentUser = Registry.CurrentUser;
-                RegistryKey registryKey = currentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-                registryKey.SetValue("tianruoOCR", text);
-                registryKey.Close( );
-                currentUser.Close( );
-            }
-            else
-            {
-                RegistryKey currentUser2 = Registry.CurrentUser;
-                RegistryKey registryKey2 = currentUser2.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-                registryKey2.DeleteValue("tianruoOCR", false);
-                registryKey2.Close( );
-                currentUser2.Close( );
-            }
-        }
-        catch (Exception)
-        {
-            MessageBox.Show("您需要管理员权限修改", "提示");
-        }
     }
 
     public static string GetHtml(string url)
@@ -116,6 +88,33 @@ public sealed partial class FmSetting : Form
         return text;
     }
 
+    public static void SetAutoStart(bool isAuto)
+    {
+        try
+        {
+            string text = Application.ExecutablePath.Replace("/", "\\");
+            if (isAuto)
+            {
+                RegistryKey currentUser = Registry.CurrentUser;
+                RegistryKey registryKey = currentUser.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+                registryKey.SetValue("tianruoOCR", text);
+                registryKey.Close( );
+                currentUser.Close( );
+            }
+            else
+            {
+                RegistryKey currentUser2 = Registry.CurrentUser;
+                RegistryKey registryKey2 = currentUser2.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+                registryKey2.DeleteValue("tianruoOCR", false);
+                registryKey2.Close( );
+                currentUser2.Close( );
+            }
+        }
+        catch (Exception)
+        {
+            MessageBox.Show("您需要管理员权限修改", "提示");
+        }
+    }
     public void PlaySong(string file)
     {
         mciSendString("close media", null, 0, IntPtr.Zero);
@@ -206,33 +205,33 @@ public sealed partial class FmSetting : Form
             textBox_path.Text = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
         }
         string value8 = Config.Get("快捷键", "文字识别");
-        txtBox_文字识别.Text = value8;
+        Box文字识别.Text = value8;
         if (value8 == "__ERROR__")
         {
-            txtBox_文字识别.Text = "F4";
+            Box文字识别.Text = "F4";
         }
         string value9 = Config.Get("快捷键", "翻译文本");
-        txtBox_翻译文本.Text = value9;
+        Box翻译文本.Text = value9;
         if (value9 == "__ERROR__")
         {
-            txtBox_翻译文本.Text = "F9";
+            Box翻译文本.Text = "F9";
         }
         string value10 = Config.Get("快捷键", "记录界面");
-        txtBox_记录界面.Text = value10;
+        Box记录界面.Text = value10;
         if (value10 == "__ERROR__")
         {
-            txtBox_记录界面.Text = "请按下快捷键";
+            Box记录界面.Text = "请按下快捷键";
         }
         string value11 = Config.Get("快捷键", "识别界面");
-        txtBox_识别界面.Text = value11;
+        Box识别界面.Text = value11;
         if (value11 == "__ERROR__")
         {
-            txtBox_识别界面.Text = "请按下快捷键";
+            Box识别界面.Text = "请按下快捷键";
         }
-        pictureBox_文字识别.Image = (txtBox_文字识别.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
-        pictureBox_翻译文本.Image = (txtBox_翻译文本.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
-        pictureBox_记录界面.Image = (txtBox_记录界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
-        pictureBox_识别界面.Image = (txtBox_识别界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
+        pictureBox_文字识别.Image = (Box文字识别.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
+        pictureBox_翻译文本.Image = (Box翻译文本.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
+        pictureBox_记录界面.Image = (Box记录界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
+        pictureBox_识别界面.Image = (Box识别界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
         string value12 = Config.Get("密钥_百度", "secret_id");
         text_baiduaccount.Text = value12;
         if (value12 == "__ERROR__")
@@ -408,7 +407,7 @@ public sealed partial class FmSetting : Form
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        => (keyData == Keys.Tab && txtBox_文字识别.Focused) || (keyData == Keys.Tab && txtBox_翻译文本.Focused) || (keyData == Keys.Tab && txtBox_记录界面.Focused) || (keyData == Keys.Tab && txtBox_识别界面.Focused);
+        => (keyData == Keys.Tab && Box文字识别.Focused) || (keyData == Keys.Tab && Box翻译文本.Focused) || (keyData == Keys.Tab && Box记录界面.Focused) || (keyData == Keys.Tab && Box识别界面.Focused);
 
     private void btn_浏览_Click(object o, EventArgs e)
     {
@@ -459,7 +458,7 @@ public sealed partial class FmSetting : Form
     }
 
     private void cbBox_开机_CheckedChanged(object o, EventArgs e)
-        => AutoStart(cbBox_开机.Checked);
+        => SetAutoStart(cbBox_开机.Checked);
 
     private void chbox_copy_CheckedChanged(object o, EventArgs e)
     {
@@ -556,10 +555,10 @@ public sealed partial class FmSetting : Form
         Config.Set("配置", "记录数目", numbox_记录.Text);
         Config.Set("配置", "自动保存", cbBox_保存.Checked.ToString( ));
         Config.Set("配置", "截图位置", textBox_path.Text);
-        Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
-        Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
-        Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
-        Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
+        Config.Set("快捷键", "文字识别", Box文字识别.Text);
+        Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
+        Config.Set("快捷键", "记录界面", Box记录界面.Text);
+        Config.Set("快捷键", "识别界面", Box识别界面.Text);
         Config.Set("密钥_百度", "secret_id", text_baiduaccount.Text);
         Config.Set("密钥_百度", "secret_key", text_baidupassword.Text);
         Config.Set("代理", "代理类型", combox_代理.Text);
@@ -585,7 +584,7 @@ public sealed partial class FmSetting : Form
         DialogResult = DialogResult.OK;
     }
 
-    private void Form1_Load(object o, EventArgs e)
+    private void FormLoaded(object o, EventArgs e)
     {
         ComponentResourceManager componentResourceManager = new(typeof(FmMain));
         Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
@@ -613,11 +612,11 @@ public sealed partial class FmSetting : Form
         int[] array6 = new int[4];
         array6[0] = 1;
         numericUpDown6.Value = new decimal(array6);
-        tabControl.Height = (int) (350.0 * Program.DpiFactor);
+        tabControl.Height = (int) (400.0 * Helper.System.DpiFactor);
         Height = tabControl.Height + 50;
         ReadConfig( );
         chbox_代理服务器.CheckedChanged += chbox_代理服务器_CheckedChanged;
-        更新Button_check.Click += 更新Button_check_Click;
+        更新Button_check.Click += 更新Check;
         label_更新日期.Text = "更新时间：" + StaticValue.DateNow;
         label_版本号.Text = "当前版本：" + StaticValue.Version;
         txt_更新说明.Text = (string) componentResourceManager.GetObject("更新说明");
@@ -634,83 +633,31 @@ public sealed partial class FmSetting : Form
     {
     }
 
-    private void pic_help_Click(object o, EventArgs e) => new FmHelp( ).Show( );
+    private void PictureHelpClick(object o, EventArgs e)
+        => new FmHelp( ).Show( );
 
-    private void tab_标签_SelectedIndexChanged(object o, EventArgs e)
+    private void TabControlSelectionChanged(object o, EventArgs e)
     {
-        if (tabControl.SelectedTab == page_常规)
+        double height = 0;
+        switch (SelectedTab)
         {
-            tabControl.Height = (int) (350.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
+            case FmSettingTab.常规: height = 400.0; break;
+            case FmSettingTab.快捷键: height = 280.0; break;
+            case FmSettingTab.密钥: height = 240.0; break;
+            case FmSettingTab.代理: height = 300.0; break;
+            case FmSettingTab.更新: height = 185.0; break;
+            case FmSettingTab.关于: height = 400.0; break;
+            case FmSettingTab.赞助: height = 275.0; break;
+            case FmSettingTab.反馈: height = 250.0; break;
         }
-        if (tabControl.SelectedTab == Page_快捷键)
-        {
-            tabControl.Height = (int) (225.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_密钥)
-        {
-            tabControl.Height = (int) (190.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_代理)
-        {
-            tabControl.Height = (int) (245.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_更新)
-        {
-            tabControl.Height = (int) (135.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_关于)
-        {
-            tabControl.Height = (int) (340.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_赞助)
-        {
-            tabControl.Height = (int) (225.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
-        if (tabControl.SelectedTab == Page_反馈)
-        {
-            tabControl.Height = (int) (200.0 * Program.DpiFactor);
-            Height = tabControl.Height + 50;
-        }
+        tabControl.Height = (int) (height * Helper.System.DpiFactor);
+        Height = tabControl.Height + 50;
     }
 
-    private void text_baiduaccount_TextChanged(object o, EventArgs e)
-    {
-    }
+    private void TextBoxKeyDown(object o, KeyEventArgs e)
+        => e.SuppressKeyPress = true;
 
-    private void text_baidupassword_TextChanged(object o, EventArgs e)
-    {
-    }
-
-    private void text_端口_MaskInputRejected(object o, MaskInputRejectedEventArgs e)
-    {
-    }
-
-    private void text_端口_TextChanged(object o, EventArgs e)
-    {
-    }
-
-    private void text_服务器_TextChanged(object o, EventArgs e)
-    {
-    }
-
-    private void text_密码_TextChanged(object o, EventArgs e)
-    {
-    }
-
-    private void text_账号_TextChanged(object o, EventArgs e)
-    {
-    }
-
-    private void txtBox_KeyDown(object o, KeyEventArgs e) => e.SuppressKeyPress = true;
-
-    private void txtBox_KeyUp(object o, KeyEventArgs e)
+    private void TextBoxKeyUp(object o, KeyEventArgs e)
     {
         TextBox textBox = o as TextBox;
         Regex regex = new("[一-龥]+");
@@ -728,19 +675,19 @@ public sealed partial class FmSetting : Form
             pictureBox.Image = Resources.快捷键_0;
             if (textBox.Name.Contains("文字识别"))
             {
-                Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
+                Config.Set("快捷键", "文字识别", Box文字识别.Text);
             }
             if (textBox.Name.Contains("翻译文本"))
             {
-                Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
+                Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
             }
             if (textBox.Name.Contains("记录界面"))
             {
-                Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
+                Config.Set("快捷键", "记录界面", Box记录界面.Text);
             }
             if (textBox.Name.Contains("识别界面"))
             {
-                Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
+                Config.Set("快捷键", "识别界面", Box识别界面.Text);
                 return;
             }
         }
@@ -761,19 +708,19 @@ public sealed partial class FmSetting : Form
             {
                 if (textBox.Name.Contains("文字识别"))
                 {
-                    Config.Set("快捷键", "文字识别", txtBox_文字识别.Text);
+                    Config.Set("快捷键", "文字识别", Box文字识别.Text);
                 }
                 if (textBox.Name.Contains("翻译文本"))
                 {
-                    Config.Set("快捷键", "翻译文本", txtBox_翻译文本.Text);
+                    Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
                 }
                 if (textBox.Name.Contains("记录界面"))
                 {
-                    Config.Set("快捷键", "记录界面", txtBox_记录界面.Text);
+                    Config.Set("快捷键", "记录界面", Box记录界面.Text);
                 }
                 if (textBox.Name.Contains("识别界面"))
                 {
-                    Config.Set("快捷键", "识别界面", txtBox_识别界面.Text);
+                    Config.Set("快捷键", "识别界面", Box识别界面.Text);
                 }
             }
         }
@@ -789,9 +736,9 @@ public sealed partial class FmSetting : Form
         MessageBox.Show("请确保密钥正确!", "提醒");
     }
 
-    private void 百度申请_Click(object o, EventArgs e)
+    private void 百度申请Click(object o, EventArgs e)
         => Process.Start("https://console.bce.baidu.com/ai/");
-    private void 常规Button_Click(object o, EventArgs e)
+    private void 常规Click(object o, EventArgs e)
     {
         cbBox_开机.Checked = true;
         cbBox_翻译.Checked = true;
@@ -808,7 +755,7 @@ public sealed partial class FmSetting : Form
         chbox_取色.Checked = false;
     }
 
-    private void 代理Button_Click(object o, EventArgs e)
+    private void 代理Click(object o, EventArgs e)
     {
         combox_代理.Text = "系统代理";
         text_账号.Enabled = false;
@@ -818,49 +765,46 @@ public sealed partial class FmSetting : Form
         text_服务器.Enabled = false;
     }
 
-    private void 反馈Button_Click(object o, EventArgs e)
-        => new Thread(new ThreadStart(反馈send)).Start( );
+    private void 反馈Click(object o, EventArgs e)
+        => new Thread(new ThreadStart(反馈Send)).Start( );
 
-    private void 反馈send( )
+    private void 反馈Send( )
     {
         if (!string.IsNullOrEmpty(txt_问题反馈.Text))
         {
             string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.Version + "&nr=";
             PostHtml("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(txt_问题反馈.Text));
             txt_问题反馈.Text = "";
-            FmFlags fmFlags = new( );
-            fmFlags.Show( );
-            fmFlags.DrawStr("感谢您的反馈！");
+            FmFlags.Display("感谢您的反馈！");
             return;
         }
-        FmFlags fmFlags2 = new( );
-        fmFlags2.Show( );
-        fmFlags2.DrawStr("反馈文本不能为空");
+        FmFlags.Display("反馈文本不能为空");
     }
 
-    private void 更新Button_check_Click(object o, EventArgs e) => new Thread(new ThreadStart(Program.CheckUpdate)).Start( );
+    private void 更新Check(object o, EventArgs e)
+        => new Thread(new ThreadStart(Helper.Update.CheckUpdate)).Start( );
 
-    private void 更新Button_Click(object o, EventArgs e)
+    private void 更新Click(object o, EventArgs e)
     {
         numbox_间隔时间.Value = 24m;
         check_检查更新.Checked = true;
         checkBox_更新间隔.Checked = true;
     }
 
-    private void 快捷键Button_Click(object o, EventArgs e)
+    private void 快捷键Click(object o, EventArgs e)
     {
         new ComponentResourceManager(typeof(FmSetting));
-        txtBox_文字识别.Text = "F4";
+        Box文字识别.Text = "F4";
         pictureBox_文字识别.Image = Resources.快捷键_1;
-        txtBox_翻译文本.Text = "F9";
+        Box翻译文本.Text = "F9";
         pictureBox_翻译文本.Image = Resources.快捷键_1;
-        txtBox_记录界面.Text = "请按下快捷键";
+        Box记录界面.Text = "请按下快捷键";
         pictureBox_记录界面.Image = Resources.快捷键_0;
-        txtBox_识别界面.Text = "请按下快捷键";
+        Box识别界面.Text = "请按下快捷键";
         pictureBox_识别界面.Image = Resources.快捷键_0;
     }
 
-    private void 密钥Button_Click(object o, EventArgs e)
+    private void 密钥Click(object o, EventArgs e)
     {
         text_baiduaccount.Text = "YsZKG1wha34PlDOPYaIrIIKO";
         text_baidupassword.Text = "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD";

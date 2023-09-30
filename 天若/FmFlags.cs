@@ -10,12 +10,11 @@ namespace TrOCR;
 
 public partial class FmFlags : Form
 {
-    private int fmWidth;
-    private Graphics g;
-    private Bitmap image;
+    private string text;
 
     public FmFlags( ) => InitializeComponent( );
 
+    // Override this to change the style of the form.
     protected override CreateParams CreateParams
     {
         get
@@ -23,69 +22,61 @@ public partial class FmFlags : Form
             CreateParams createParams = base.CreateParams;
             createParams.Style |= 131072;
             if (!DesignMode)
-            {
                 createParams.ExStyle |= 524288;
-            }
             return createParams;
         }
     }
 
-    public void DrawStr(string str)
+    public static void Display(string text)
+        => new FmFlags( ) { text = text }.Show( );
+
+    public new void Show( )
     {
-        fmWidth = 50 * str.Length;
+        base.Show( );
+
+        int fmWidth = 50 * text.Length;
         ClientSize = new Size(fmWidth, 50);
         Location = new Point((Screen.PrimaryScreen.Bounds.Width - Width) / 2, (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2 / 3 * 5);
-        image = new Bitmap(fmWidth, 50);
-        g = Graphics.FromImage(image);
-        g.InterpolationMode = InterpolationMode.Bilinear;
-        g.SmoothingMode = SmoothingMode.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.Clear(Color.Transparent);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
-        StringFormat stringFormat = new( )
-        {
-            Alignment = StringAlignment.Center
-        };
-        Rectangle rectangle = new(0, 3, fmWidth, 50);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, fmWidth - 2, 48);
-        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 2, 2, fmWidth - 2 - 2, 46);
-        g.DrawString(str, new Font("微软雅黑", 24f / Program.DpiFactor), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
-        SetBits(image);
-        g.Dispose( );
+        Bitmap image = new(fmWidth, 50);
+
+        Graphics graphics = Graphics.FromImage(image);
+        graphics.InterpolationMode = InterpolationMode.Bilinear;
+        graphics.SmoothingMode = SmoothingMode.HighQuality;
+        graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+        graphics.Clear(Color.Transparent);
+        graphics.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
+        graphics.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, fmWidth - 2, 48);
+        graphics.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 2, 2, fmWidth - 2 - 2, 46);
+        graphics.DrawString(
+            text,
+            new Font("微软雅黑", 24f / Helper.System.DpiFactor),
+            new SolidBrush(Color.FromArgb(255, Color.White)),
+            new Rectangle(0, 3, fmWidth, 50),
+            new StringFormat( ) { Alignment = StringAlignment.Center }
+        );
+        SetImage(image);
+
+        graphics.Dispose( );
         image.Dispose( );
         Delay(600U);
         Hide( );
     }
 
-    public void DrawStrUpdate(string str)
+    private static void Delay(uint ms)
     {
-        fmWidth = 28 * str.Length;
-        ClientSize = new Size(fmWidth, 50);
-        image = new Bitmap(fmWidth, 50);
-        g = Graphics.FromImage(image);
-        g.InterpolationMode = InterpolationMode.Bilinear;
-        g.SmoothingMode = SmoothingMode.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.Clear(Color.Transparent);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(1, 255, 255, 255)), ClientRectangle);
-        StringFormat stringFormat = new( )
+        uint tickCount = GetTickCount( );
+        while (GetTickCount( ) - tickCount < ms)
         {
-            Alignment = StringAlignment.Center
-        };
-        Rectangle rectangle = new(0, 10, fmWidth, 48);
-        g.FillRectangle(new SolidBrush(Color.FromArgb(120, Color.Black)), 1, 1, fmWidth - 2, 48);
-        g.DrawRectangle(new Pen(Color.FromArgb(224, 224, 224)), 1, 1, fmWidth - 2, 48);
-        g.DrawString(str, new Font("微软雅黑", 18f), new SolidBrush(Color.FromArgb(255, Color.White)), rectangle, stringFormat);
-        SetBitsUpdate(image);
-        Delay(2000U);
-        Hide( );
+            Thread.Sleep(1);
+            Application.DoEvents( );
+        }
     }
 
-    public void SetBits(Bitmap bitmap)
+    private void SetImage(Bitmap bitmap)
     {
         if (!Image.IsCanonicalPixelFormat(bitmap.PixelFormat) || !Image.IsAlphaPixelFormat(bitmap.PixelFormat))
         {
-            throw new ApplicationException("图片必须是32位带Alhpa通道的图片。");
+            throw new BadImageFormatException("图片必须是32位色彩且带 Alpha 通道的图片");
         }
         IntPtr intPtr = IntPtr.Zero;
         IntPtr dc = GetDC(IntPtr.Zero);
@@ -114,51 +105,6 @@ public partial class FmFlags : Form
             }
             ReleaseDC(IntPtr.Zero, dc);
             DeleteDC(intPtr3);
-        }
-    }
-    public void SetBitsUpdate(Bitmap bitmap)
-    {
-        if (!Image.IsCanonicalPixelFormat(bitmap.PixelFormat) || !Image.IsAlphaPixelFormat(bitmap.PixelFormat))
-        {
-            throw new ApplicationException("图片必须是32位带Alhpa通道的图片。");
-        }
-        IntPtr intPtr = IntPtr.Zero;
-        IntPtr dc = GetDC(IntPtr.Zero);
-        IntPtr intPtr2 = IntPtr.Zero;
-        IntPtr intPtr3 = CreateCompatibleDC(dc);
-        try
-        {
-            Point point = new(Screen.PrimaryScreen.Bounds.Width - Width, Screen.PrimaryScreen.WorkingArea.Height - 50);
-            Size size = new(bitmap.Width, bitmap.Height);
-            BLENDFUNCTION blendfunction = default;
-            Point point2 = new(0, 0);
-            intPtr2 = bitmap.GetHbitmap(Color.FromArgb(0));
-            intPtr = SelectObject(intPtr3, intPtr2);
-            blendfunction.BlendOp = 0;
-            blendfunction.SourceConstantAlpha = byte.MaxValue;
-            blendfunction.AlphaFormat = 1;
-            blendfunction.BlendFlags = 0;
-            UpdateLayeredWindow(Handle, dc, ref point, ref size, intPtr3, ref point2, 0, ref blendfunction, 2);
-        }
-        finally
-        {
-            if (intPtr2 != IntPtr.Zero)
-            {
-                SelectObject(intPtr3, intPtr);
-                DeleteObject(intPtr2);
-            }
-            ReleaseDC(IntPtr.Zero, dc);
-            DeleteDC(intPtr3);
-        }
-    }
-
-    private static void Delay(uint ms)
-    {
-        uint tickCount = GetTickCount( );
-        while (GetTickCount( ) - tickCount < ms)
-        {
-            Thread.Sleep(1);
-            Application.DoEvents( );
         }
     }
 }

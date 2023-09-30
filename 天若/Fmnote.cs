@@ -22,7 +22,7 @@ public partial class FmNote : Form
         base.Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
         mainDataGrid.ColumnCount = 1;
         mainDataGrid.RowCount = StaticValue.NoteCount;
-        mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Program.DpiFactor);
+        mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Helper.System.DpiFactor);
         mainDataGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
         mainDataGrid.AllowUserToResizeRows = false;
         mainDataGrid.AllowUserToResizeColumns = false;
@@ -39,7 +39,7 @@ public partial class FmNote : Form
             : (object) (i + 1 + "." + StaticValue.Notes[i]);
         }
         mainDataGrid.Columns[0].DefaultCellStyle.SelectionBackColor = Color.DodgerBlue;
-        mainDataGrid.Size = new Size(Convert.ToInt32(402f * Program.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
+        mainDataGrid.Size = new Size(Convert.ToInt32(402f * Helper.System.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
         base.ClientSize = mainDataGrid.Size;
         base.MaximumSize = new Size(base.Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3);
         mainDataGrid.MaximumSize = new Size(base.Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3 - 5);
@@ -114,9 +114,7 @@ public partial class FmNote : Form
         if (mainDataGrid.SelectedCells[0].Value.ToString( ).Remove(0, 3) != "")
         {
             Clipboard.SetDataObject(mainDataGrid.SelectedCells[0].Value.ToString( ).Remove(0, 3));
-            FmFlags fmFlags = new( );
-            fmFlags.Show( );
-            fmFlags.DrawStr("已复制");
+            FmFlags.Display("已复制");
         }
     }
 
@@ -128,7 +126,7 @@ public partial class FmNote : Form
             mainDataGrid.Rows.Clear( );
             mainDataGrid.ColumnCount = 1;
             mainDataGrid.RowCount = StaticValue.NoteCount;
-            mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Program.DpiFactor);
+            mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Helper.System.DpiFactor);
             mainDataGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
             mainDataGrid.AllowUserToResizeRows = false;
             mainDataGrid.AllowUserToResizeColumns = false;
@@ -137,7 +135,7 @@ public partial class FmNote : Form
                 mainDataGrid.Rows[i].Cells[0].Value = i < 9 ? "0" + (i + 1) + "." : (object) (i + 1 + ".");
             }
             mainDataGrid.Columns[0].DefaultCellStyle.SelectionBackColor = Color.DodgerBlue;
-            mainDataGrid.Size = new Size(Convert.ToInt32(402f * Program.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
+            mainDataGrid.Size = new Size(Convert.ToInt32(402f * Helper.System.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
             base.ClientSize = mainDataGrid.Size;
             base.MaximumSize = new Size(base.Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3);
             mainDataGrid.MaximumSize = new Size(base.Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3 - 5);

@@ -40,16 +40,13 @@ internal static class NativeMethods
     public static extern IntPtr GetForegroundWindow( );
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    public static extern int GetPrivateProfileString(string sectionName, string key, string defaultValue, byte[] returnBuffer, int size, string filePath);
-
+    public static extern int GetPrivateProfileString(string sectionName, string keyName, string @default, StringBuilder returnedString, int size, string fileName);
+    
     [DllImport("kernel32.dll")]
     public static extern uint GetTickCount( );
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
-
-    [DllImport("wininet.dll")]
-    public static extern bool InternetGetConnectedState(out int connectionDescription, int reservedValue);
 
     [DllImport("wininet.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref int pcchCookieData, int dwFlags, object lpReserved);
@@ -117,7 +114,7 @@ internal static class NativeMethods
     public static extern int UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref Point pptDst, ref Size psize, IntPtr hdcSrc, ref Point pptSrc, int crKey, ref BLENDFUNCTION pblend, int dwFlags);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-    public static extern long WritePrivateProfileString(string sectionName, string key, string value, string filePath);
+    public static extern long WritePrivateProfileString(string sectionName, string keyName, string value, string fileName);
     #endregion
 
     public const byte AC_SRC_ALPHA = 1;

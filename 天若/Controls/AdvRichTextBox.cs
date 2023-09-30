@@ -101,9 +101,9 @@ public partial class AdvRichTextBox : UserControl
         get => EditBox.Text;
         set
         {
-            EditBox.Font = new Font("Times New Roman", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+            EditBox.Font = new Font("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
             EditBox.Text = value;
-            EditBox.Font = new Font("Times New Roman", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+            EditBox.Font = new Font("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         }
     }
 
@@ -265,7 +265,7 @@ public partial class AdvRichTextBox : UserControl
 
     private void IndentTwo(int flag)
     {
-        Font font = new(Font.Name, 9f * Program.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font font = new(Font.Name, 9f * Helper.System.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         Graphics graphics = CreateGraphics( );
         SizeF sizeF = graphics.MeasureString("中", font);
         EditBox.SelectionIndent = (int) sizeF.Width * 2 * flag;
@@ -436,7 +436,7 @@ public partial class AdvRichTextBox : UserControl
         font新罗马.ForeColor = Color.Black;
         string text = EditBox.Text;
         EditBox.Text = "";
-        Font font = new("黑体", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        Font font = new("黑体", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.Font = font;
         EditBox.Text = text;
     }
@@ -450,7 +450,7 @@ public partial class AdvRichTextBox : UserControl
         font新罗马.ForeColor = Color.Black;
         string text = EditBox.Text;
         EditBox.Text = "";
-        Font font = new("STKaiti", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        Font font = new("STKaiti", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.Font = font;
         EditBox.Text = text;
     }
@@ -464,7 +464,7 @@ public partial class AdvRichTextBox : UserControl
         font新罗马.ForeColor = Color.Black;
         string text = EditBox.Text;
         EditBox.Text = "";
-        Font font = new("宋体", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        Font font = new("宋体", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.Font = font;
         EditBox.Text = text;
     }
@@ -478,7 +478,7 @@ public partial class AdvRichTextBox : UserControl
         font新罗马.ForeColor = Color.Black;
         string text = EditBox.Text;
         EditBox.Text = "";
-        Font font = new("微软雅黑", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        Font font = new("微软雅黑", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.Font = font;
         EditBox.Text = text;
     }
@@ -492,7 +492,7 @@ public partial class AdvRichTextBox : UserControl
         font新罗马.ForeColor = Color.Red;
         string text = EditBox.Text;
         EditBox.Text = "";
-        Font font = new("Times New Roman", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        Font font = new("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.Font = font;
         EditBox.Text = text;
     }
@@ -630,9 +630,7 @@ public partial class AdvRichTextBox : UserControl
         keybd_event(Keys.V, 0, 0U, 0U);
         keybd_event(Keys.V, 0, 2U, 0U);
         keybd_event(Keys.ControlKey, 0, 2U, 0U);
-        FmFlags fmFlags = new( );
-        fmFlags.Show( );
-        fmFlags.DrawStr("已复制");
+        FmFlags.Display("已复制");
     }
 
     private void toolStripButtonspace_Click(object o, EventArgs e)
@@ -769,12 +767,9 @@ public partial class AdvRichTextBox : UserControl
                     num = num2 + jobject["Error"].ToString( ).Length;
                 }
             }
-            EditBox.Select(0, 0);
         }
-        catch
-        {
-            EditBox.Select(0, 0);
-        }
+        catch { }
+        EditBox.Select(0, 0);
     }
     private void zh_en_Click(object o, EventArgs e)
     {

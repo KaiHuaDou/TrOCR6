@@ -240,7 +240,7 @@ public partial class AdvRichTextBox : UserControl, IDisposable
         ((ToolStripDropDownMenu) languagle.DropDown).ShowImageMargin = false;
         languagle.DropDown.BackColor = Color.White;
         languagle.DropDown.AutoSize = false;
-        languagle.DropDown.AutoSize = Program.DpiFactor != 1f;
+        languagle.DropDown.AutoSize = Helper.System.DpiFactor != 1f;
         languagle.DropDown.Width = Convert.ToInt32(55f);
         languagle.DropDown.Height = Convert.ToInt32(70f);
         languagle.ShowDropDownArrow = false;
@@ -261,7 +261,7 @@ public partial class AdvRichTextBox : UserControl, IDisposable
         ((ToolStripDropDownMenu) Fontstyle.DropDown).ShowImageMargin = false;
         Fontstyle.DropDown.BackColor = Color.White;
         Fontstyle.DropDown.AutoSize = false;
-        Fontstyle.DropDown.AutoSize = Program.DpiFactor != 1f;
+        Fontstyle.DropDown.AutoSize = Helper.System.DpiFactor != 1f;
         Fontstyle.DropDown.Width = Convert.ToInt32(123f);
         Fontstyle.DropDown.Height = Convert.ToInt32(115f);
         Fontstyle.ShowDropDownArrow = false;
@@ -304,14 +304,14 @@ public partial class AdvRichTextBox : UserControl, IDisposable
         EditBox.DragEnter += Form1_DragEnter;
         EditBox.DragDrop += Form1_DragDrop;
         EditBox.SelectionAlignment = TextAlign.Justify;
-        EditBox.Font = new Font("Times New Roman", 16f * Program.DpiFactor, GraphicsUnit.Pixel);
+        EditBox.Font = new Font("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
         EditBox.LanguageOption = RichTextBoxLanguageOptions.UIFonts;
         EditBox.TextChanged += richeditbox_TextChanged;
         EditBox.Cursor = Cursors.IBeam;
         IndentTwo(1);
-        mode.Font = new Font("微软雅黑", 9f * Program.DpiFactor, FontStyle.Regular);
-        languagle.Font = new Font("微软雅黑", 9f * Program.DpiFactor, FontStyle.Regular);
-        Fontstyle.Font = new Font("微软雅黑", 9f * Program.DpiFactor, FontStyle.Regular);
+        mode.Font = new Font("微软雅黑", 9f * Helper.System.DpiFactor, FontStyle.Regular);
+        languagle.Font = new Font("微软雅黑", 9f * Helper.System.DpiFactor, FontStyle.Regular);
+        Fontstyle.Font = new Font("微软雅黑", 9f * Helper.System.DpiFactor, FontStyle.Regular);
         AutoScaleMode = AutoScaleMode.None;
         Controls.Add(EditBox);
         Controls.Add(toolStripToolBar);

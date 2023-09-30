@@ -85,13 +85,6 @@ dotnet_naming_rule.non_field_members_should_be_bigstart.severity = suggestion
 dotnet_naming_rule.non_field_members_should_be_bigstart.symbols = non_field_members
 dotnet_naming_rule.non_field_members_should_be_bigstart.style = bigstart
 
-dotnet_naming_rule.private_or_internal_field_should_be_smallstart.severity = suggestion
-dotnet_naming_rule.private_or_internal_field_should_be_smallstart.symbols = private_or_internal_field
-dotnet_naming_rule.private_or_internal_field_should_be_smallstart.style = smallstart
-
-dotnet_naming_rule.private_or_internal_static_field_should_be_smallstart.severity = suggestion
-dotnet_naming_rule.private_or_internal_static_field_should_be_smallstart.symbols = private_or_internal_static_field
-dotnet_naming_rule.private_or_internal_static_field_should_be_smallstart.style = smallstart
 
 # 符号规范
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected

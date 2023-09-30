@@ -115,8 +115,8 @@ public partial class AliTable : Form
         {
             if (!string.IsNullOrEmpty(Config.Get("特殊", "ali_account").Trim( )) && !string.IsNullOrEmpty(Config.Get("特殊", "ali_password").Trim( )))
             {
-                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-id").setAttribute("value", Config.Get("特殊", "ali_account"), 1);
-                WebBrowserHelper.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-password").setAttribute("value", Config.Get("特殊", "ali_password"), 1);
+                Web.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-id").setAttribute("value", Config.Get("特殊", "ali_account"), 1);
+                Web.GetDocumentFromWindow(webBrowser1.Document.Window.Frames["alibaba-login-box"].DomWindow as IHTMLWindow2).getElementById("fm-login-password").setAttribute("value", Config.Get("特殊", "ali_password"), 1);
             }
         }
         catch { }

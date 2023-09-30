@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using static TrOCR.External.NativeMethods;
 
-namespace TrOCR;
+namespace TrOCR.Controls;
 
 public class RichTextBoxEx : RichTextBox
 {
@@ -79,9 +79,7 @@ public class RichTextBoxEx : RichTextBox
     protected override void Dispose(bool disposing)
     {
         if (disposing && components != null)
-        {
             components.Dispose( );
-        }
         base.Dispose(disposing);
     }
 

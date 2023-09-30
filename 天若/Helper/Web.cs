@@ -5,46 +5,40 @@ using System.Windows.Forms;
 
 using mshtml;
 
-namespace TrOCR;
+namespace TrOCR.Helper;
 
-internal class WebBrowserHelper
+public static class Web
 {
-    public static IHTMLDocument3 GetDocumentFromWindow(IHTMLWindow2 htmlWindow)
+    private static Guid GUID_IWebBrowser2 = new("D30C1661-CDAF-11D0-8A3E-00C04FC9E26E");
+    private static Guid GUID_IWebBrowserApp = new("0002DF05-0000-0000-C000-000000000046");
+
+    public enum OLECMDEXECOPT
     {
-        if (htmlWindow != null)
-        {
-            try
-            {
-                return (IHTMLDocument3) htmlWindow.document;
-            }
-            catch (COMException)
-            {
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-            try
-            {
-                WebBrowserHelper.IServiceProvider serviceProvider = (WebBrowserHelper.IServiceProvider) htmlWindow;
-                serviceProvider.QueryService(ref WebBrowserHelper.IID_IWebBrowserApp, ref WebBrowserHelper.IID_IWebBrowser2, out object obj);
-                return (IHTMLDocument3) ((WebBrowserHelper.IWebBrowser2) obj).Document;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            return null;
-        }
-        return null;
+        OLECMDEXECOPTDODEFAULT,
+        OLECMDEXECOPTPROMPTUSER,
+        OLECMDEXECOPTDONTPROMPTUSER,
+        OLECMDEXECOPTSHOWHELP
     }
 
-    private static Guid IID_IWebBrowserApp = new("0002DF05-0000-0000-C000-000000000046");
+    [Flags]
+    public enum OLECMDF
+    {
+        OLECMDFDEFHIDEONCTXTMENU = 32,
+        OLECMDFENABLED = 2,
+        OLECMDFINVISIBLE = 16,
+        OLECMDFLATCHED = 4,
+        OLECMDFNINCHED = 8,
+        OLECMDFSUPPORTED = 1
+    }
 
-    private static Guid IID_IWebBrowser2 = new("D30C1661-CDAF-11D0-8A3E-00C04FC9E26E");
+    public enum OLECMDID
+    {
+        OLECMDIDPAGESETUP = 8,
+        OLECMDIDPRINT = 6,
+        OLECMDIDPRINTPREVIEW,
+        OLECMDIDPROPERTIES = 10,
+        OLECMDIDSAVEAS = 4
+    }
 
     [ComImport]
     [ComVisible(true)]
@@ -187,10 +181,10 @@ internal class WebBrowserHelper
         void Navigate2([In] ref object URL, [In] ref object flags, [In] ref object targetFrameName, [In] ref object postData, [In] ref object headers);
 
         [DispId(501)]
-        WebBrowserHelper.OLECMDF QueryStatusWB([In] WebBrowserHelper.OLECMDID cmdID);
+        OLECMDF QueryStatusWB([In] OLECMDID cmdID);
 
         [DispId(502)]
-        void ExecWB([In] WebBrowserHelper.OLECMDID cmdID, [In] WebBrowserHelper.OLECMDEXECOPT cmdexecopt, ref object pvaIn, IntPtr pvaOut);
+        void ExecWB([In] OLECMDID cmdID, [In] OLECMDEXECOPT cmdexecopt, ref object pvaIn, IntPtr pvaOut);
 
         [DispId(503)]
         void ShowBrowserBar([In] ref object pvaClsid, [In] ref object pvarShow, [In] ref object pvarSize);
@@ -220,30 +214,27 @@ internal class WebBrowserHelper
         bool Resizable { get; set; }
     }
 
-    public enum OLECMDEXECOPT
+    public static IHTMLDocument3 GetDocumentFromWindow(IHTMLWindow2 htmlWindow)
     {
-        OLECMDEXECOPT_DODEFAULT,
-        OLECMDEXECOPT_PROMPTUSER,
-        OLECMDEXECOPT_DONTPROMPTUSER,
-        OLECMDEXECOPT_SHOWHELP
-    }
-
-    public enum OLECMDF
-    {
-        OLECMDF_DEFHIDEONCTXTMENU = 32,
-        OLECMDF_ENABLED = 2,
-        OLECMDF_INVISIBLE = 16,
-        OLECMDF_LATCHED = 4,
-        OLECMDF_NINCHED = 8,
-        OLECMDF_SUPPORTED = 1
-    }
-
-    public enum OLECMDID
-    {
-        OLECMDID_PAGESETUP = 8,
-        OLECMDID_PRINT = 6,
-        OLECMDID_PRINTPREVIEW,
-        OLECMDID_PROPERTIES = 10,
-        OLECMDID_SAVEAS = 4
+        if (htmlWindow == null)
+            return null;
+        try
+        {
+            return (IHTMLDocument3) htmlWindow.document;
+        }
+        catch (COMException) { }
+        catch (UnauthorizedAccessException) { }
+        catch (Exception) { return null; }
+        try
+        {
+            IServiceProvider serviceProvider = (IServiceProvider) htmlWindow;
+            serviceProvider.QueryService(ref GUID_IWebBrowserApp, ref GUID_IWebBrowser2, out object obj);
+            return (IHTMLDocument3) ((IWebBrowser2) obj).Document;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        return null;
     }
 }
