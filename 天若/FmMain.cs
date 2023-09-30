@@ -32,10 +32,9 @@ public partial class FmMain : Form
 {
     private static bool speakCopy;
     private readonly AutoResetEvent autoResetEvent;
-    private AliTable ailibaba;
     private string autoFlag;
-    private string baiduFlags;
     private string baidu_vip;
+    private string baiduFlags;
     private bool changeQQScreenshot;
     private string esc;
     private Thread escThread;
@@ -45,67 +44,67 @@ public partial class FmMain : Form
     private int formWidth;
     private string googleTransText;
     private string htmltxt;
-    private int[] imageNum;
     private Image image_ori;
-    private Image image_screen;
     private List<Image> imagelist;
-    private int imagelist_lenght;
-    private string interface_flag;
+    private int imageListLength;
+    private int[] imageNum;
+    private Image imageScreen;
+    private string interfaceFlag;
+    private bool isMerged;
+    private int isNumOk;
+    private bool isSplited;
+    private bool isTranslated;
     private string language;
-    private int num_ok;
     private string ocrBaiduA;
-    private string OCR_baidu_b;
-    private string OCR_baidu_c;
-    private string OCR_baidu_d;
-    private string OCR_baidu_e;
+    private string ocrBaiduB;
+    private string ocrBaiduC;
+    private string ocrBaiduD;
+    private string ocrBaiduE;
     private bool paragraph;
-    private bool pinyin_flag;
-    private string proxy_flag;
-    private string proxy_name;
-    private string proxy_password;
-    private string proxy_port;
-    private string proxy_url;
+    private bool pinyinFlag;
+    private string proxyFlag;
+    private string proxyName;
+    private string proxyPassword;
+    private string proxyPort;
+    private string proxyUrl;
     private string[] pubnote;
-    private bool set_merge;
-    private bool set_split;
-    private string shupai_Left_txt;
-    private string shupai_Right_txt;
-    private string speak_copyb;
+    private string speakCopyB;
     private bool speaking;
     private string splitedText;
     private Thread thread;
-    private bool tranclick;
-    private string trans_hotkey;
-    private string transtalate_fla;
-    private TimeSpan ts;
+    private TimeSpan timeUsed;
+    private string transFlag;
+    private string transHotkey;
     private byte[] ttsData;
-    private string typeset_txt;
-    private int voice_count;
+    private string typeSetText;
+    private string verticalLeftText;
+    private string verticalRightText;
+    private int voiceCount;
 
     public FmMain( )
     {
-        set_merge = false;
-        set_split = false;
-        set_split = false;
+        isMerged = false;
+        isSplited = false;
+        isSplited = false;
         StaticValue.CaptureRejection = false;
-        pinyin_flag = false;
-        tranclick = false;
+        pinyinFlag = false;
+        isTranslated = false;
         autoResetEvent = new AutoResetEvent(false);
         imagelist = new List<Image>( );
         StaticValue.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
         baiduFlags = "";
         esc = "";
-        voice_count = 0;
+        voiceCount = 0;
         fmNote = new FmNote( );
         pubnote = new string[StaticValue.NoteCount];
         for (int i = 0; i < StaticValue.NoteCount; i++)
             pubnote[i] = "";
         StaticValue.Notes = pubnote;
         StaticValue.mainhandle = Handle;
-        Font = new Font(Font.Name, 9f / StaticValue.Dpifactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / StaticValue.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         googleTransText = "";
-        num_ok = 0;
-        F_factor = Helper.System.DpiFactor;
+        isNumOk = 0;
+        fontFactor = Helper.System.DpiFactor;
         components = null;
         InitializeComponent( );
         nextClipboardViewer = (IntPtr) SetClipboardViewer((int) Handle);
@@ -114,16 +113,16 @@ public partial class FmMain : Form
         WindowState = FormWindowState.Minimized;
         Visible = false;
         splitedText = "";
-        MinimumSize = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+        MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
         speakCopy = false;
         OcrForeach("");
     }
 
-    private delegate int Dllinput(string command);
+    private delegate int DllInput(string command);
 
-    private delegate void ocr_thread( );
+    private delegate void OcrThread( );
 
-    private delegate void translate( );
+    private delegate void Translate( );
 
     protected override CreateParams CreateParams
     {
@@ -142,7 +141,7 @@ public partial class FmMain : Form
         mciSendString("play media notify", null, 0, Handle);
     }
 
-    public void TrayUpdateClick(object o, EventArgs e)
+    private void TrayUpdateClick(object o, EventArgs e)
         => new FmSetting( ) { SelectedTab = FmSettingTab.更新 }.Show( );
 
     protected override void WndProc(ref Message m)
@@ -169,13 +168,13 @@ public partial class FmMain : Form
         }
         else
         {
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 530 && RichBoxBody.Text != null)
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 530 && richBox.Text != null)
             {
-                p_note(RichBoxBody.Text);
+                p_note(richBox.Text);
                 StaticValue.Notes = pubnote;
                 if (fmNote.Created)
                 {
-                    fmNote.TextNote = "";
+                    fmNote.SetTextNote( );
                 }
             }
             if (m.Msg == 786 && m.WParam.ToInt32( ) == 520)
@@ -192,30 +191,30 @@ public partial class FmMain : Form
                 changeQQScreenshot = false;
                 FormBorderStyle = FormBorderStyle.None;
                 Hide( );
-                formWidth = transtalate_fla == "开启" ? Width / 2 : Width;
+                formWidth = transFlag == "开启" ? Width / 2 : Width;
                 formHeight = Height;
-                minico.Visible = false;
-                minico.Visible = true;
+                notifyIcon.Visible = false;
+                notifyIcon.Visible = true;
                 menu.Close( );
-                menu_copy.Close( );
+                menuCopy.Close( );
                 autoFlag = "开启";
                 splitedText = "";
-                RichBoxBody.Text = "***该区域未发现文本***";
-                RichBoxBody_T.Text = "";
-                typeset_txt = "";
-                transtalate_fla = "关闭";
-                Trans_close.PerformClick( );
-                Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+                richBox.Text = "***该区域未发现文本***";
+                richBoxTrans.Text = "";
+                typeSetText = "";
+                transFlag = "关闭";
+                transClose.PerformClick( );
+                Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
                 FormBorderStyle = FormBorderStyle.Sizable;
                 StaticValue.CaptureRejection = true;
-                image_screen = StaticValue.ImageOCR;
+                imageScreen = StaticValue.ImageOCR;
                 if (Config.Get("工具栏", "分栏") == "True")
                 {
-                    minico.Visible = true;
+                    notifyIcon.Visible = true;
                     thread = new Thread(new ThreadStart(ShowLoading));
                     thread.Start( );
-                    ts = new TimeSpan(DateTime.Now.Ticks);
-                    Image image = image_screen;
+                    timeUsed = new TimeSpan(DateTime.Now.Ticks);
+                    Image image = imageScreen;
                     Bitmap bitmap = new(image.Width, image.Height);
                     Graphics graphics = Graphics.FromImage(bitmap);
                     graphics.DrawImage(image, 0, 0, image.Width, image.Height);
@@ -226,51 +225,51 @@ public partial class FmMain : Form
                 }
                 else
                 {
-                    minico.Visible = true;
+                    notifyIcon.Visible = true;
                     thread = new Thread(new ThreadStart(ShowLoading));
                     thread.Start( );
-                    ts = new TimeSpan(DateTime.Now.Ticks);
+                    timeUsed = new TimeSpan(DateTime.Now.Ticks);
                     MessageLoad messageload = new( );
                     messageload.ShowDialog( );
                     if (messageload.DialogResult == DialogResult.OK)
                     {
-                        escThread = new Thread(new ThreadStart(Main_OCR_Thread));
+                        escThread = new Thread(new ThreadStart(MainOcrThread));
                         escThread.Start( );
                     }
                 }
             }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 590 && speak_copyb == "朗读")
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 590 && speakCopyB == "朗读")
             {
                 TTS( );
                 return;
             }
             if (m.Msg == 786 && m.WParam.ToInt32( ) == 511)
             {
-                base.MinimumSize = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
-                transtalate_fla = "关闭";
-                RichBoxBody.Dock = DockStyle.Fill;
-                RichBoxBody_T.Visible = false;
-                PictureBox1.Visible = false;
-                RichBoxBody_T.Text = "";
+                base.MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+                transFlag = "关闭";
+                richBox.Dock = DockStyle.Fill;
+                richBoxTrans.Visible = false;
+                image1.Visible = false;
+                richBoxTrans.Text = "";
                 if (WindowState == FormWindowState.Maximized)
                 {
                     WindowState = FormWindowState.Normal;
                 }
-                Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+                Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
             }
             if (m.Msg == 786 && m.WParam.ToInt32( ) == 512)
             {
-                transtalate_Click( );
+                TranslateClick( );
             }
             if (m.Msg == 786 && m.WParam.ToInt32( ) == 518)
             {
                 if (ActiveControl.Name == "htmlTextBoxBody")
                 {
-                    htmltxt = RichBoxBody.Text;
+                    htmltxt = richBox.Text;
                 }
                 if (ActiveControl.Name == "rich_trans")
                 {
-                    htmltxt = RichBoxBody_T.Text;
+                    htmltxt = richBoxTrans.Text;
                 }
                 if (string.IsNullOrEmpty(htmltxt))
                 {
@@ -316,9 +315,9 @@ public partial class FmMain : Form
                 {
                     UnregisterHotKey(Handle, 205);
                     menu.Hide( );
-                    RichBoxBody.Hide = "";
-                    RichBoxBody_T.Hide = "";
-                    Main_OCR_Quickscreenshots( );
+                    richBox.Hide = "";
+                    richBoxTrans.Hide = "";
+                    MainOcrQuickCapture( );
                 }
                 if (m.Msg == 786 && m.WParam.ToInt32( ) == 206)
                 {
@@ -358,21 +357,21 @@ public partial class FmMain : Form
                 }
                 if (m.Msg == 786 && m.WParam.ToInt32( ) == 205)
                 {
-                    翻译文本( );
+                    translateText( );
                 }
                 base.WndProc(ref m);
                 return;
             }
-            if (transtalate_fla == "开启")
+            if (transFlag == "开启")
             {
                 WindowState = FormWindowState.Normal;
-                Size = new Size((int) font_base.Width * 23 * 2, (int) font_base.Height * 24);
+                Size = new Size((int) fontBase.Width * 23 * 2, (int) fontBase.Height * 24);
                 Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10 * 2, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
                 return;
             }
             WindowState = FormWindowState.Normal;
             Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
-            Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
             return;
         }
     }
@@ -410,7 +409,7 @@ public partial class FmMain : Form
         return image2;
     }
 
-    private static Image BoundingBox_fences(Image<Gray, byte> src, Image<Bgr, byte> draw)
+    private static Image BoundingBoxFences(Image<Gray, byte> src, Image<Bgr, byte> draw)
     {
         Image image2;
         using (VectorOfVectorOfPoint vectorOfVectorOfPoint = new( ))
@@ -456,8 +455,6 @@ public partial class FmMain : Form
         }
         return bitmap;
     }
-
-    private static Stream BytesToStream(byte[] bytes) => new MemoryStream(bytes);
 
     private static int ch_count(string str)
     {
@@ -544,31 +541,6 @@ public partial class FmMain : Form
             text = text2;
         }
         return text;
-    }
-
-    private static void CopyHtmlToClipBoard(string html)
-    {
-        Encoding utf = Encoding.UTF8;
-        string text = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
-        string text2 = "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + utf.WebName + "\">\r\n<title>HTML clipboard</title>\r\n</head>\r\n<body>\r\n<!--StartFragment-->";
-        string text3 = "<!--EndFragment-->\r\n</body>\r\n</html>\r\n";
-        string text4 = string.Format(text, new object[] { 0, 0, 0, 0 });
-        int byteCount = utf.GetByteCount(text4);
-        int byteCount2 = utf.GetByteCount(text2);
-        int byteCount3 = utf.GetByteCount(html);
-        int byteCount4 = utf.GetByteCount(text3);
-        string text5 = string.Format(text, new object[]
-        {
-                byteCount,
-                byteCount + byteCount2 + byteCount3 + byteCount4,
-                byteCount + byteCount2,
-                byteCount + byteCount2 + byteCount3
-        }) + text2 + html + text3;
-        DataObject dataObject = new( );
-        dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(text5)));
-        string text6 = new HtmlToText( ).Convert(html);
-        dataObject.SetData(DataFormats.Text, text6);
-        Clipboard.SetDataObject(dataObject);
     }
 
     private static void DeleteFile(string path)
@@ -1034,7 +1006,7 @@ public partial class FmMain : Form
             for (int i = 0; i < imageNum[0]; i++)
             {
                 Stream stream = File.Open("Data\\image_temp\\" + i + ".jpg", FileMode.Open);
-                OCR_baidu_use_A(Image.FromStream(stream));
+                OcrBaiduA(Image.FromStream(stream));
                 stream.Close( );
             }
             ((ManualResetEvent) objEvent).Set( );
@@ -1052,7 +1024,7 @@ public partial class FmMain : Form
             for (int i = imageNum[0]; i < imageNum[1]; i++)
             {
                 Stream stream = File.Open("Data\\image_temp\\" + i + ".jpg", FileMode.Open);
-                OCR_baidu_use_B(Image.FromStream(stream));
+                OcrBaiduB(Image.FromStream(stream));
                 stream.Close( );
             }
             ((ManualResetEvent) objEvent).Set( );
@@ -1117,96 +1089,91 @@ public partial class FmMain : Form
         }
     }
 
-    private void bool_image_count(int num)
+    private void CountBoolImage(int num)
     {
-        if (num >= 5)
+        switch (num)
         {
-            imageNum = new int[num];
-            if (num - num / 5 * 5 == 0)
-            {
-                imageNum[0] = num / 5;
-                imageNum[1] = num / 5 * 2;
-                imageNum[2] = num / 5 * 3;
-                imageNum[3] = num / 5 * 4;
-                imageNum[4] = num;
-            }
-            if (num - num / 5 * 5 == 1)
-            {
-                imageNum[0] = num / 5 + 1;
-                imageNum[1] = num / 5 * 2;
-                imageNum[2] = num / 5 * 3;
-                imageNum[3] = num / 5 * 4;
-                imageNum[4] = num;
-            }
-            if (num - num / 5 * 5 == 2)
-            {
-                imageNum[0] = num / 5 + 1;
-                imageNum[1] = num / 5 * 2 + 1;
-                imageNum[2] = num / 5 * 3;
-                imageNum[3] = num / 5 * 4;
-                imageNum[4] = num;
-            }
-            if (num - num / 5 * 5 == 3)
-            {
-                imageNum[0] = num / 5 + 1;
-                imageNum[1] = num / 5 * 2 + 1;
-                imageNum[2] = num / 5 * 3 + 1;
-                imageNum[3] = num / 5 * 4;
-                imageNum[4] = num;
-            }
-            if (num - num / 5 * 5 == 4)
-            {
-                imageNum[0] = num / 5 + 1;
-                imageNum[1] = num / 5 * 2 + 1;
-                imageNum[2] = num / 5 * 3 + 1;
-                imageNum[3] = num / 5 * 4 + 1;
-                imageNum[4] = num;
-            }
-        }
-        if (num == 4)
-        {
-            imageNum = new int[5];
-            imageNum[0] = 1;
-            imageNum[1] = 2;
-            imageNum[2] = 3;
-            imageNum[3] = 4;
-            imageNum[4] = 0;
-        }
-        if (num == 3)
-        {
-            imageNum = new int[5];
-            imageNum[0] = 1;
-            imageNum[1] = 2;
-            imageNum[2] = 3;
-            imageNum[3] = 0;
-            imageNum[4] = 0;
-        }
-        if (num == 2)
-        {
-            imageNum = new int[5];
-            imageNum[0] = 1;
-            imageNum[1] = 2;
-            imageNum[2] = 0;
-            imageNum[3] = 0;
-            imageNum[4] = 0;
-        }
-        if (num == 1)
-        {
-            imageNum = new int[5];
-            imageNum[0] = 1;
-            imageNum[1] = 0;
-            imageNum[2] = 0;
-            imageNum[3] = 0;
-            imageNum[4] = 0;
-        }
-        if (num == 0)
-        {
-            imageNum = new int[5];
-            imageNum[0] = 0;
-            imageNum[1] = 0;
-            imageNum[2] = 0;
-            imageNum[3] = 0;
-            imageNum[4] = 0;
+            case >= 5:
+                imageNum = new int[num];
+                switch (num - num / 5 * 5)
+                {
+                    case 0:
+                        imageNum[0] = num / 5;
+                        imageNum[1] = num / 5 * 2;
+                        imageNum[2] = num / 5 * 3;
+                        imageNum[3] = num / 5 * 4;
+                        imageNum[4] = num;
+                        break;
+                    case 1:
+                        imageNum[0] = num / 5 + 1;
+                        imageNum[1] = num / 5 * 2;
+                        imageNum[2] = num / 5 * 3;
+                        imageNum[3] = num / 5 * 4;
+                        imageNum[4] = num;
+                        break;
+                    case 2:
+                        imageNum[0] = num / 5 + 1;
+                        imageNum[1] = num / 5 * 2 + 1;
+                        imageNum[2] = num / 5 * 3;
+                        imageNum[3] = num / 5 * 4;
+                        imageNum[4] = num;
+                        break;
+                    case 3:
+                        imageNum[0] = num / 5 + 1;
+                        imageNum[1] = num / 5 * 2 + 1;
+                        imageNum[2] = num / 5 * 3 + 1;
+                        imageNum[3] = num / 5 * 4;
+                        imageNum[4] = num;
+                        break;
+                    case 4:
+                        imageNum[0] = num / 5 + 1;
+                        imageNum[1] = num / 5 * 2 + 1;
+                        imageNum[2] = num / 5 * 3 + 1;
+                        imageNum[3] = num / 5 * 4 + 1;
+                        imageNum[4] = num;
+                        break;
+                }
+                break;
+            case 4:
+                imageNum = new int[5];
+                imageNum[0] = 1;
+                imageNum[1] = 2;
+                imageNum[2] = 3;
+                imageNum[3] = 4;
+                imageNum[4] = 0;
+                break;
+            case 3:
+                imageNum = new int[5];
+                imageNum[0] = 1;
+                imageNum[1] = 2;
+                imageNum[2] = 3;
+                imageNum[3] = 0;
+                imageNum[4] = 0;
+                break;
+            case 2:
+                imageNum = new int[5];
+                imageNum[0] = 1;
+                imageNum[1] = 2;
+                imageNum[2] = 0;
+                imageNum[3] = 0;
+                imageNum[4] = 0;
+                break;
+            case 1:
+                imageNum = new int[5];
+                imageNum[0] = 1;
+                imageNum[1] = 0;
+                imageNum[2] = 0;
+                imageNum[3] = 0;
+                imageNum[4] = 0;
+                break;
+            case 0:
+                imageNum = new int[5];
+                imageNum[0] = 0;
+                imageNum[1] = 0;
+                imageNum[2] = 0;
+                imageNum[3] = 0;
+                imageNum[4] = 0;
+                break;
         }
     }
 
@@ -1221,67 +1188,10 @@ public partial class FmMain : Form
             using VectorOfPoint vectorOfPoint = vectorOfVectorOfPoint[i];
             array[size - 1 - i] = CvInvoke.BoundingRectangle(vectorOfPoint);
         }
-        getSubPics_ocr(image_screen, array);
+        getSubPics_ocr(imageScreen, array);
     }
 
-    private void change_Chinese_Click(object o, EventArgs e)
-    {
-        language = "中文标点";
-        if (!string.IsNullOrEmpty(typeset_txt))
-        {
-            RichBoxBody.Text = punctuation_en_ch_x(RichBoxBody.Text);
-            RichBoxBody.Text = TextUtils.PunctuationQuotation(RichBoxBody.Text);
-        }
-    }
-
-    private void change_pinyin_Click(object o, EventArgs e)
-    {
-        pinyin_flag = true;
-        transtalate_Click( );
-    }
-
-    private void change_str_Upper_Click(object o, EventArgs e)
-    {
-        if (RichBoxBody.Text != null)
-        {
-            RichBoxBody.Text = RichBoxBody.Text.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
-        }
-    }
-
-    private void change_tra_zh_Click(object o, EventArgs e)
-    {
-        if (RichBoxBody.Text != null)
-        {
-            RichBoxBody.Text = TextUtils.ToSimplified(RichBoxBody.Text);
-        }
-    }
-
-    private void change_Upper_str_Click(object o, EventArgs e)
-    {
-        if (RichBoxBody.Text != null)
-        {
-            RichBoxBody.Text = RichBoxBody.Text.ToLower(System.Globalization.CultureInfo.CurrentCulture);
-        }
-    }
-
-    private void change_zh_tra_Click(object o, EventArgs e)
-    {
-        if (RichBoxBody.Text != null)
-        {
-            RichBoxBody.Text = TextUtils.ToTraditional(RichBoxBody.Text);
-        }
-    }
-
-    private void ChangeEnglishClick(object o, EventArgs e)
-    {
-        language = "英文标点";
-        if (!string.IsNullOrEmpty(typeset_txt))
-        {
-            RichBoxBody.Text = PunctuationChEn(RichBoxBody.Text);
-        }
-    }
-
-    private void checked_location_sougou(JArray jarray, int lastlength, string words, string location)
+    private void SogouLocationCheck(JArray jarray, int lastlength, string words, string location)
     {
         paragraph = false;
         int num = 20000;
@@ -1333,10 +1243,10 @@ public partial class FmMain : Form
             text2 = text2 + jobject4[words].ToString( ).Trim( ) + "\r\n";
         }
         splitedText = text2.Replace("\r\n\r\n", "\r\n");
-        typeset_txt = text;
+        typeSetText = text;
     }
 
-    private void checked_txt(JArray jarray, int lastlength, string words)
+    private void TextCheck(JArray jarray, int lastlength, string words)
     {
         int num = 0;
         for (int i = 0; i < jarray.Count; i++)
@@ -1357,17 +1267,11 @@ public partial class FmMain : Form
             char[] array2 = jobject2[words].ToString( ).ToCharArray( );
             int length2 = jobject[words].ToString( ).Length;
             int length3 = jobject2[words].ToString( ).Length;
-            if (Math.Abs(length2 - length3) <= 0)
+            if (Math.Abs(length2 - length3) <= 0 || (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Math.Abs(length2 - length3) <= 1))
             {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
-                {
-                    text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-                }
-                else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
-                {
-                    text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-                }
-                else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
+                if ((TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
+                    || (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
+                    || (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( ))))
                 {
                     text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
                 }
@@ -1376,30 +1280,8 @@ public partial class FmMain : Form
                     text2 += jobject[words].ToString( ).Trim( );
                 }
             }
-            else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Math.Abs(length2 - length3) <= 1)
-            {
-                if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
-                {
-                    text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-                }
-                else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
-                {
-                    text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-                }
-                else if (TextUtils.IsSplited(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
-                {
-                    text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-                }
-                else
-                {
-                    text2 += jobject[words].ToString( ).Trim( );
-                }
-            }
-            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && length2 <= num / 2)
-            {
-                text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
-            }
-            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )) && length3 - length2 < 4 && array2[1].ToString( ) == ".")
+            else if (!(!TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) || length2 > num / 2)
+                  || !(!TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) || !IsNum(array2[0].ToString( )) || length3 - length2 >= 4 || array2[1].ToString( ) != "."))
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + "\r\n";
             }
@@ -1411,19 +1293,14 @@ public partial class FmMain : Form
             {
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
-            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && TextUtils.ContainEn(array2[0].ToString( )))
-            {
-                text2 += jobject[words].ToString( ).Trim( );
-            }
-            else if (TextUtils.ContainEn(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
-            {
-                text2 += jobject[words].ToString( ).Trim( );
-            }
-            else if (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( )) && Is_punctuation(array2[0].ToString( )))
-            {
-                text2 += jobject[words].ToString( ).Trim( );
-            }
-            else if (Is_punctuation(array[array.Length - lastlength].ToString( )) && TextUtils.ContainsZh(array2[0].ToString( )))
+            else if ((TextUtils.ContainsZh(array[array.Length - lastlength].ToString( ))
+                   && TextUtils.ContainEn(array2[0].ToString( )))
+                   || (TextUtils.ContainEn(array[array.Length - lastlength].ToString( ))
+                   && TextUtils.ContainsZh(array2[0].ToString( )))
+                   || (TextUtils.ContainsZh(array[array.Length - lastlength].ToString( ))
+                   && Is_punctuation(array2[0].ToString( )))
+                   || (Is_punctuation(array[array.Length - lastlength].ToString( ))
+                   && TextUtils.ContainsZh(array2[0].ToString( ))))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
@@ -1454,7 +1331,7 @@ public partial class FmMain : Form
             text = text + jobject[words].ToString( ).Trim( ) + "\r\n";
         }
         splitedText = text + JObject.Parse(jarray[jarray.Count - 1].ToString( ))[words];
-        typeset_txt = text2.Replace("\r\n\r\n", "\r\n") + JObject.Parse(jarray[jarray.Count - 1].ToString( ))[words];
+        typeSetText = text2.Replace("\r\n\r\n", "\r\n") + JObject.Parse(jarray[jarray.Count - 1].ToString( ))[words];
     }
 
     private void DoWork(object state)
@@ -1472,8 +1349,8 @@ public partial class FmMain : Form
         ThreadPool.QueueUserWorkItem(new WaitCallback(baidu_image_e), array[4]);
         WaitHandle[] array2 = array;
         WaitHandle.WaitAll(array2);
-        shupai_Right_txt = string.Concat(new string[] { ocrBaiduA, OCR_baidu_b, OCR_baidu_c, OCR_baidu_d, OCR_baidu_e }).Replace("\r\n\r\n", "");
-        string text = shupai_Right_txt.TrimEnd(new char[] { '\n' }).TrimEnd(new char[] { '\r' }).TrimEnd(new char[] { '\n' });
+        verticalRightText = string.Concat(new string[] { ocrBaiduA, ocrBaiduB, ocrBaiduC, ocrBaiduD, ocrBaiduE }).Replace("\r\n\r\n", "");
+        string text = verticalRightText.TrimEnd(new char[] { '\n' }).TrimEnd(new char[] { '\r' }).TrimEnd(new char[] { '\n' });
         if (text.Split(Environment.NewLine.ToCharArray( )).Length > 1)
         {
             string[] array3 = text.Split(new string[] { "\r\n" }, StringSplitOptions.None);
@@ -1482,10 +1359,10 @@ public partial class FmMain : Form
             {
                 text2 = text2 + array3[array3.Length - i - 1].Replace("\r", "").Replace("\n", "") + "\r\n";
             }
-            shupai_Left_txt = text2;
+            verticalLeftText = text2;
         }
         fmLoading.FormClose = "窗体已关闭";
-        Invoke(new ocr_thread(Main_OCR_Thread_last));
+        Invoke(new OcrThread(MainOcrThreadNormal));
         try
         {
             DeleteFile("Data\\image_temp");
@@ -1535,7 +1412,7 @@ public partial class FmMain : Form
         Image<Bgr, byte> image4 = image3.Convert<Bgr, byte>( );
         Image<Gray, byte> image5 = image3.Clone( );
         CvInvoke.Canny(image3, image5, 255.0, 255.0, 5, true);
-        Image image6 = BoundingBox_fences(image5, image4);
+        Image image6 = BoundingBoxFences(image5, image4);
         Image<Gray, byte> image7 = new((Bitmap) image6);
         BoundingBoxFencesUp(image7);
         image.Dispose( );
@@ -1547,11 +1424,11 @@ public partial class FmMain : Form
 
     private void Form_Resize(object o, EventArgs e)
     {
-        if (RichBoxBody.Dock != DockStyle.Fill)
+        if (richBox.Dock != DockStyle.Fill)
         {
-            RichBoxBody.Size = new Size(ClientRectangle.Width / 2, ClientRectangle.Height);
-            RichBoxBody_T.Size = new Size(RichBoxBody.Width, ClientRectangle.Height);
-            RichBoxBody_T.Location = (Point) new Size(RichBoxBody.Width, 0);
+            richBox.Size = new Size(ClientRectangle.Width / 2, ClientRectangle.Height);
+            richBoxTrans.Size = new Size(richBox.Width, ClientRectangle.Height);
+            richBoxTrans.Location = (Point) new Size(richBox.Width, 0);
         }
     }
 
@@ -1665,26 +1542,26 @@ public partial class FmMain : Form
         for (int i = 0; i < buildRects.Length; i++)
         {
             array[i] = GetRect(buildPic, buildRects[i]);
-            image_screen = array[i];
+            imageScreen = array[i];
             MessageLoad messageload = new( );
             messageload.ShowDialog( );
             if (messageload.DialogResult == DialogResult.OK)
             {
-                if (interface_flag == "搜狗")
+                if (interfaceFlag == "搜狗")
                 {
-                    OCR_sougou2( );
+                    OcrSogou2( );
                 }
-                if (interface_flag == "腾讯")
+                if (interfaceFlag == "腾讯")
                 {
                     OcrTencent( );
                 }
-                if (interface_flag == "有道")
+                if (interfaceFlag == "有道")
                 {
                     OcrYoudao( );
                 }
-                if (interface_flag is "日语" or "中英" or "韩语")
+                if (interfaceFlag is "日语" or "中英" or "韩语")
                 {
-                    OCR_baidu( );
+                    OcrBaidu( );
                 }
                 messageload.Dispose( );
             }
@@ -1692,30 +1569,30 @@ public partial class FmMain : Form
             {
                 if (paragraph)
                 {
-                    text = text + "\r\n" + typeset_txt.Trim( );
+                    text = text + "\r\n" + typeSetText.Trim( );
                     text2 = text2 + "\r\n" + splitedText.Trim( ) + "\r\n";
                 }
                 else
                 {
-                    text += typeset_txt.Trim( );
+                    text += typeSetText.Trim( );
                     text2 = text2 + "\r\n" + splitedText.Trim( ) + "\r\n";
                 }
             }
             else if (paragraph)
             {
-                text = text + "\r\n" + typeset_txt.Trim( ) + "\r\n";
+                text = text + "\r\n" + typeSetText.Trim( ) + "\r\n";
                 text2 = text2 + "\r\n" + splitedText.Trim( ) + "\r\n";
             }
             else
             {
-                text = text + typeset_txt.Trim( ) + "\r\n";
+                text = text + typeSetText.Trim( ) + "\r\n";
                 text2 = text2 + "\r\n" + splitedText.Trim( ) + "\r\n";
             }
         }
-        typeset_txt = text.Replace("\r\n\r\n", "\r\n");
+        typeSetText = text.Replace("\r\n\r\n", "\r\n");
         splitedText = text2.Replace("\r\n\r\n", "\r\n");
         fmLoading.FormClose = "窗体已关闭";
-        Invoke(new ocr_thread(Main_OCR_Thread_last));
+        Invoke(new OcrThread(MainOcrThreadNormal));
         return array;
     }
 
@@ -1733,7 +1610,7 @@ public partial class FmMain : Form
             TrayHelpMenu.Click += TrayHelpClick;
             MenuItem TrayExitMenu = new( ) { Text = "退出" };
             TrayExitMenu.Click += TrayExitClick;
-            minico.ContextMenu = new ContextMenu(new MenuItem[]
+            notifyIcon.ContextMenu = new ContextMenu(new MenuItem[]
             {
                 TrayShowMenu, TraySettingMenu, TrayUpdateMenu, TrayHelpMenu, TrayExitMenu
             });
@@ -1749,23 +1626,14 @@ public partial class FmMain : Form
         WindowState = FormWindowState.Minimized;
         Visible = false;
     }
-    private void Main_baidu_search(object o, EventArgs e)
+
+    private void MainCopyClick(object o, EventArgs e)
     {
-        if (string.IsNullOrEmpty(RichBoxBody.SelectText))
-        {
-            Process.Start("https://www.baidu.com/");
-            return;
-        }
-        Process.Start("https://www.baidu.com/s?wd=" + RichBoxBody.SelectText);
+        richBox.Focus( );
+        richBox.EditBox.Copy( );
     }
 
-    private void Main_copy_Click(object o, EventArgs e)
-    {
-        RichBoxBody.Focus( );
-        RichBoxBody.EditBox.Copy( );
-    }
-
-    private void Main_OCR_Quickscreenshots( )
+    private void MainOcrQuickCapture( )
     {
         if (!StaticValue.CaptureRejection)
         {
@@ -1775,28 +1643,28 @@ public partial class FmMain : Form
                 FormBorderStyle = FormBorderStyle.None;
                 Visible = false;
                 Thread.Sleep(100);
-                formWidth = transtalate_fla == "开启" ? Width / 2 : Width;
-                shupai_Right_txt = "";
-                shupai_Left_txt = "";
+                formWidth = transFlag == "开启" ? Width / 2 : Width;
+                verticalRightText = "";
+                verticalLeftText = "";
                 formHeight = Height;
-                minico.Visible = false;
-                minico.Visible = true;
+                notifyIcon.Visible = false;
+                notifyIcon.Visible = true;
                 menu.Close( );
-                menu_copy.Close( );
+                menuCopy.Close( );
                 autoFlag = "开启";
                 splitedText = "";
-                RichBoxBody.Text = "***该区域未发现文本***";
-                RichBoxBody_T.Text = "";
-                typeset_txt = "";
-                transtalate_fla = "关闭";
+                richBox.Text = "***该区域未发现文本***";
+                richBoxTrans.Text = "";
+                typeSetText = "";
+                transFlag = "关闭";
                 if (Config.Get("工具栏", "翻译") == "False")
                 {
-                    Trans_close.PerformClick( );
+                    transClose.PerformClick( );
                 }
-                Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+                Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
                 FormBorderStyle = FormBorderStyle.Sizable;
                 StaticValue.CaptureRejection = true;
-                image_screen = RegionCaptureTasks.GetRegionImage_Mo(new RegionCaptureOptions
+                imageScreen = RegionCaptureTasks.GetRegionImage_Mo(new RegionCaptureOptions
                 {
                     ShowMagnifier = false,
                     UseSquareMagnifier = false,
@@ -1809,17 +1677,17 @@ public partial class FmMain : Form
                     RegionCaptureOptions regionCaptureOptions = new( );
                     using RegionCaptureForm regionCaptureForm = new(regionCaptureMode, regionCaptureOptions);
                     regionCaptureForm.Image_get = false;
-                    regionCaptureForm.Prepare(image_screen);
+                    regionCaptureForm.Prepare(imageScreen);
                     regionCaptureForm.ShowDialog( );
-                    image_screen = null;
-                    image_screen = regionCaptureForm.GetResultImage( );
+                    imageScreen = null;
+                    imageScreen = regionCaptureForm.GetResultImage( );
                     mode_flag = regionCaptureForm.Mode_flag;
                 }
                 RegisterHotKey(Handle, 222, KeyModifiers.None, Keys.Escape);
                 if (mode_flag == "贴图")
                 {
                     Point point2 = new(point.X, point.Y);
-                    new FmScreenPaste(image_screen, point2).Show( );
+                    new FmScreenPaste(imageScreen, point2).Show( );
                     if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
                         string value = Config.Get("快捷键", "翻译文本");
@@ -1832,7 +1700,7 @@ public partial class FmMain : Form
                 }
                 else if (mode_flag == "区域多选")
                 {
-                    if (image_screen == null)
+                    if (imageScreen == null)
                     {
                         if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                         {
@@ -1846,11 +1714,11 @@ public partial class FmMain : Form
                     }
                     else
                     {
-                        minico.Visible = true;
+                        notifyIcon.Visible = true;
                         thread = new Thread(new ThreadStart(ShowLoading));
                         thread.Start( );
-                        ts = new TimeSpan(DateTime.Now.Ticks);
-                        getSubPics_ocr(image_screen, array);
+                        timeUsed = new TimeSpan(DateTime.Now.Ticks);
+                        getSubPics_ocr(imageScreen, array);
                     }
                 }
                 else if (mode_flag == "取色")
@@ -1866,7 +1734,7 @@ public partial class FmMain : Form
                     StaticValue.CaptureRejection = false;
                     FmFlags.Display("已复制颜色");
                 }
-                else if (image_screen == null)
+                else if (imageScreen == null)
                 {
                     if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                     {
@@ -1886,17 +1754,17 @@ public partial class FmMain : Form
                     }
                     if (mode_flag == "拆分")
                     {
-                        set_merge = false;
-                        set_split = true;
+                        isMerged = false;
+                        isSplited = true;
                     }
                     if (mode_flag == "合并")
                     {
-                        set_merge = true;
-                        set_split = false;
+                        isMerged = true;
+                        isSplited = false;
                     }
                     if (mode_flag == "截图")
                     {
-                        Clipboard.SetImage(image_screen);
+                        Clipboard.SetImage(imageScreen);
                         if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
                         {
                             string value5 = Config.Get("快捷键", "翻译文本");
@@ -1906,7 +1774,7 @@ public partial class FmMain : Form
                         }
                         UnregisterHotKey(Handle, 222);
                         StaticValue.CaptureRejection = false;
-                        if (Config.Get("截图音效", "粘贴板") == "True")
+                        if (Config.Get("截图音效", "剪贴板") == "True")
                         {
                             PlaySong(Config.Get("截图音效", "音效路径"));
                         }
@@ -1915,7 +1783,7 @@ public partial class FmMain : Form
                     else if (mode_flag == "自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
                         string text11 = Config.Get("配置", "截图位置") + "\\" + TextUtils.RenameFile(Config.Get("配置", "截图位置"), "图片.Png");
-                        image_screen.Save(text11, ImageFormat.Png);
+                        imageScreen.Save(text11, ImageFormat.Png);
                         StaticValue.CaptureRejection = false;
                         if (Config.Get("截图音效", "自动保存") == "True")
                         {
@@ -1925,7 +1793,7 @@ public partial class FmMain : Form
                     }
                     else if (mode_flag == "多区域自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
-                        getSubPics(image_screen, array);
+                        getSubPics(imageScreen, array);
                         StaticValue.CaptureRejection = false;
                         if (Config.Get("截图音效", "自动保存") == "True")
                         {
@@ -1959,15 +1827,15 @@ public partial class FmMain : Form
                             string extension = Path.GetExtension(saveFileDialog.FileName);
                             if (extension.Equals(".jpg", StringComparison.Ordinal))
                             {
-                                image_screen.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
+                                imageScreen.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
                             }
                             if (extension.Equals(".png", StringComparison.Ordinal))
                             {
-                                image_screen.Save(saveFileDialog.FileName, ImageFormat.Png);
+                                imageScreen.Save(saveFileDialog.FileName, ImageFormat.Png);
                             }
                             if (extension.Equals(".bmp", StringComparison.Ordinal))
                             {
-                                image_screen.Save(saveFileDialog.FileName, ImageFormat.Bmp);
+                                imageScreen.Save(saveFileDialog.FileName, ImageFormat.Bmp);
                             }
                         }
                         if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
@@ -1980,34 +1848,34 @@ public partial class FmMain : Form
                         UnregisterHotKey(Handle, 222);
                         StaticValue.CaptureRejection = false;
                     }
-                    else if (image_screen != null)
+                    else if (imageScreen != null)
                     {
                         if (Config.Get("工具栏", "分栏") == "True")
                         {
-                            minico.Visible = true;
+                            notifyIcon.Visible = true;
                             thread = new Thread(new ThreadStart(ShowLoading));
                             thread.Start( );
-                            ts = new TimeSpan(DateTime.Now.Ticks);
-                            Image image = image_screen;
+                            timeUsed = new TimeSpan(DateTime.Now.Ticks);
+                            Image image = imageScreen;
                             Graphics graphics = Graphics.FromImage(new Bitmap(image.Width, image.Height));
                             graphics.DrawImage(image, 0, 0, image.Width, image.Height);
                             graphics.Save( );
                             graphics.Dispose( );
                             ((Bitmap) FindBundingBox_fences((Bitmap) image)).Save("Data\\分栏预览图.jpg");
                             image.Dispose( );
-                            image_screen.Dispose( );
+                            imageScreen.Dispose( );
                         }
                         else
                         {
-                            minico.Visible = true;
+                            notifyIcon.Visible = true;
                             thread = new Thread(new ThreadStart(ShowLoading));
                             thread.Start( );
-                            ts = new TimeSpan(DateTime.Now.Ticks);
+                            timeUsed = new TimeSpan(DateTime.Now.Ticks);
                             MessageLoad messageload = new( );
                             messageload.ShowDialog( );
                             if (messageload.DialogResult == DialogResult.OK)
                             {
-                                escThread = new Thread(new ThreadStart(Main_OCR_Thread));
+                                escThread = new Thread(new ThreadStart(MainOcrThread));
                                 escThread.Start( );
                             }
                         }
@@ -2021,94 +1889,65 @@ public partial class FmMain : Form
         }
     }
 
-    private void Main_OCR_Thread( )
+    private void MainOcrThread( )
     {
         if (!string.IsNullOrEmpty(ScanQRCode( )))
         {
-            typeset_txt = ScanQRCode( );
-            RichBoxBody.Text = typeset_txt;
+            typeSetText = ScanQRCode( );
+            richBox.Text = typeSetText;
             fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
+            Invoke(new OcrThread(MainOcrThreadNormal));
             return;
         }
-        if (interface_flag == "搜狗")
+        switch (interfaceFlag)
         {
-            OCR_sougou2( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
-            return;
+            case "日语" or "中英" or "韩语":
+                OcrBaidu( );
+                fmLoading.FormClose = "窗体已关闭";
+                Invoke(new OcrThread(MainOcrThreadNormal));
+                imageScreen.Dispose( );
+                GC.Collect( );
+                return;
+            case "从左向右" or "从右向左":
+            {
+                verticalRightText = "";
+                Image image = imageScreen;
+                Bitmap bitmap = new(image.Width, image.Height);
+                Graphics graphics = Graphics.FromImage(bitmap);
+                graphics.DrawImage(image, 0, 0, image.Width, image.Height);
+                graphics.Save( );
+                graphics.Dispose( );
+                image_ori = bitmap;
+                Image<Gray, byte> image2 = new(bitmap);
+                Image<Gray, byte> image3 = new((Bitmap) FindBundingBox(image2.ToBitmap( )));
+                Image<Bgr, byte> image4 = image3.Convert<Bgr, byte>( );
+                Image<Gray, byte> image5 = image3.Clone( );
+                CvInvoke.Canny(image3, image5, 0.0, 0.0, 5, true);
+                select_image(image5, image4);
+                bitmap.Dispose( );
+                image2.Dispose( );
+                image3.Dispose( );
+                imageScreen.Dispose( );
+                GC.Collect( );
+                return;
+            }
+            case "搜狗": OcrSogou2( ); break;
+            case "腾讯": OcrTencent( ); break;
+            case "有道": OcrYoudao( ); break;
+            case "公式": OcrMath( ); break;
+            case "百度表格": OcrTableBaidu( ); break;
+            case "阿里表格": OcrTableAli( ); break;
         }
-        if (interface_flag == "腾讯")
-        {
-            OcrTencent( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
-            return;
-        }
-        if (interface_flag == "有道")
-        {
-            OcrYoudao( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
-            return;
-        }
-        if (interface_flag == "公式")
-        {
-            OCR_Math( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
-            return;
-        }
-        if (interface_flag == "百度表格")
-        {
-            OCR_baidu_table( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_table));
-            return;
-        }
-        if (interface_flag == "阿里表格")
-        {
-            OCR_ali_table( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_table));
-            return;
-        }
-        if (interface_flag is "日语" or "中英" or "韩语")
-        {
-            OCR_baidu( );
-            fmLoading.FormClose = "窗体已关闭";
-            Invoke(new ocr_thread(Main_OCR_Thread_last));
-        }
-        if (interface_flag is "从左向右" or "从右向左")
-        {
-            shupai_Right_txt = "";
-            Image image = image_screen;
-            Bitmap bitmap = new(image.Width, image.Height);
-            Graphics graphics = Graphics.FromImage(bitmap);
-            graphics.DrawImage(image, 0, 0, image.Width, image.Height);
-            graphics.Save( );
-            graphics.Dispose( );
-            image_ori = bitmap;
-            Image<Gray, byte> image2 = new(bitmap);
-            Image<Gray, byte> image3 = new((Bitmap) FindBundingBox(image2.ToBitmap( )));
-            Image<Bgr, byte> image4 = image3.Convert<Bgr, byte>( );
-            Image<Gray, byte> image5 = image3.Clone( );
-            CvInvoke.Canny(image3, image5, 0.0, 0.0, 5, true);
-            select_image(image5, image4);
-            bitmap.Dispose( );
-            image2.Dispose( );
-            image3.Dispose( );
-        }
-        image_screen.Dispose( );
-        GC.Collect( );
+        fmLoading.FormClose = "窗体已关闭";
+        Invoke(new OcrThread(MainOcrThreadNormal));
     }
 
-    private void Main_OCR_Thread_last( )
+    private void MainOcrThreadNormal( )
     {
-        image_screen.Dispose( );
+        imageScreen.Dispose( );
         GC.Collect( );
         StaticValue.CaptureRejection = false;
-        string text = typeset_txt;
+        string text = typeSetText;
         text = check_str(text);
         splitedText = check_str(splitedText);
         if (!TextUtils.HasPunctuation(text))
@@ -2121,21 +1960,21 @@ public partial class FmMain : Form
         }
         if (!string.IsNullOrEmpty(text))
         {
-            RichBoxBody.Text = text;
+            richBox.Text = text;
         }
         StaticValue.Split = splitedText;
-        if (bool.Parse(Config.Get("工具栏", "拆分")) || set_split)
+        if (bool.Parse(Config.Get("工具栏", "拆分")) || isSplited)
         {
-            set_split = false;
-            RichBoxBody.Text = splitedText;
+            isSplited = false;
+            richBox.Text = splitedText;
         }
-        if (bool.Parse(Config.Get("工具栏", "合并")) || set_merge)
+        if (bool.Parse(Config.Get("工具栏", "合并")) || isMerged)
         {
-            set_merge = false;
-            RichBoxBody.Text = text.Replace("\n", "").Replace("\r", "");
+            isMerged = false;
+            richBox.Text = text.Replace("\n", "").Replace("\r", "");
         }
         TimeSpan timeSpan = new(DateTime.Now.Ticks);
-        TimeSpan timeSpan2 = timeSpan.Subtract(ts).Duration( );
+        TimeSpan timeSpan2 = timeSpan.Subtract(timeUsed).Duration( );
         string text2 = string.Concat(new string[]
         {
                 timeSpan2.Seconds.ToString(),
@@ -2143,35 +1982,35 @@ public partial class FmMain : Form
                 Convert.ToInt32(timeSpan2.TotalMilliseconds).ToString(),
                 "秒"
         });
-        if (RichBoxBody.Text != null)
+        if (richBox.Text != null)
         {
-            p_note(RichBoxBody.Text);
+            p_note(richBox.Text);
             StaticValue.Notes = pubnote;
             if (fmNote.Created)
             {
-                fmNote.TextNote = "";
+                fmNote.SetTextNote( );
             }
         }
         TopMost = StaticValue.Topmost;
         Text = "耗时：" + text2;
-        minico.Visible = true;
-        if (interface_flag == "从右向左")
+        notifyIcon.Visible = true;
+        if (interfaceFlag == "从右向左")
         {
-            RichBoxBody.Text = shupai_Right_txt;
+            richBox.Text = verticalRightText;
         }
-        if (interface_flag == "从左向右")
+        if (interfaceFlag == "从左向右")
         {
-            RichBoxBody.Text = shupai_Left_txt;
+            richBox.Text = verticalLeftText;
         }
-        Clipboard.SetDataObject(RichBoxBody.Text);
+        Clipboard.SetDataObject(richBox.Text);
         if (baiduFlags == "百度")
         {
             FormBorderStyle = FormBorderStyle.Sizable;
-            Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
             Visible = false;
             WindowState = FormWindowState.Minimized;
             Show( );
-            Process.Start("https://www.baidu.com/s?wd=" + RichBoxBody.Text);
+            Process.Start("https://www.baidu.com/s?wd=" + richBox.Text);
             baiduFlags = "";
             if (Config.Get("快捷键", "翻译文本") != "请按下快捷键")
             {
@@ -2186,9 +2025,9 @@ public partial class FmMain : Form
         if (Config.Get("配置", "识别弹窗") == "False")
         {
             FormBorderStyle = FormBorderStyle.Sizable;
-            Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
             Visible = false;
-            if (RichBoxBody.Text == "***该区域未发现文本***")
+            if (richBox.Text == "***该区域未发现文本***")
             {
                 FmFlags.Display("无文本");
             }
@@ -2212,13 +2051,13 @@ public partial class FmMain : Form
         WindowState = FormWindowState.Normal;
         Size = new Size(formWidth, formHeight);
         SetForegroundWindow(Handle);
-        StaticValue.GoogleTransTxt = RichBoxBody.Text;
+        StaticValue.GoogleTransText = richBox.Text;
         if (bool.Parse(Config.Get("工具栏", "翻译")))
         {
             try
             {
                 autoFlag = "";
-                Invoke(new translate(transtalate_Click));
+                Invoke(new Translate(TranslateClick));
             }
             catch
             {
@@ -2228,7 +2067,7 @@ public partial class FmMain : Form
         {
             try
             {
-                RichBoxBody.Find = "";
+                richBox.Find = "";
             }
             catch
             {
@@ -2242,338 +2081,42 @@ public partial class FmMain : Form
             SetHotkey(text7, text8, value3, 205);
         }
         UnregisterHotKey(Handle, 222);
-        RichBoxBody.Refresh( );
-    }
-
-    private void Main_OCR_Thread_table( )
-    {
-        ailibaba = new AliTable( );
-        TimeSpan timeSpan = new(DateTime.Now.Ticks);
-        TimeSpan timeSpan2 = timeSpan.Subtract(ts).Duration( );
-        string text = string.Concat(new string[]
-        {
-                timeSpan2.Seconds.ToString(),
-                ".",
-                Convert.ToInt32(timeSpan2.TotalMilliseconds).ToString(),
-                "秒"
-        });
-        TopMost = StaticValue.Topmost;
-        Text = "耗时：" + text;
-        if (interface_flag == "百度表格")
-        {
-            DataObject dataObject = new( );
-            dataObject.SetData(DataFormats.Rtf, RichBoxBody.Rtf);
-            dataObject.SetData(DataFormats.UnicodeText, RichBoxBody.Text);
-            RichBoxBody.Text = "[消息]：表格已复制到粘贴板！";
-            Clipboard.SetDataObject(dataObject);
-        }
-        image_screen.Dispose( );
-        GC.Collect( );
-        StaticValue.CaptureRejection = false;
-        FormBorderStyle = FormBorderStyle.Sizable;
-        Visible = true;
-        Show( );
-        WindowState = FormWindowState.Normal;
-        Size = new Size(formWidth, formHeight);
-        SetForegroundWindow(Handle);
-        if (interface_flag == "阿里表格")
-        {
-            if (splitedText == "弹出cookie")
-            {
-                splitedText = "";
-                ailibaba.TopMost = true;
-                ailibaba.GetCookie = "";
-                Config.Set("特殊", "ali_cookie", ailibaba.GetCookie);
-                ailibaba.ShowDialog( );
-                SetForegroundWindow(ailibaba.Handle);
-                return;
-            }
-            Clipboard.SetDataObject(typeset_txt);
-            CopyHtmlToClipBoard(typeset_txt);
-        }
-    }
-
-    private void Main_Voice_Click(object o, EventArgs e)
-    {
-        RichBoxBody.Focus( );
-        speak_copyb = "朗读";
-        htmltxt = RichBoxBody.SelectText;
-        SendMessage(Handle, 786, 590);
+        richBox.Refresh( );
     }
 
     private void MainPasteClick(object o, EventArgs e)
     {
-        RichBoxBody.Focus( );
-        RichBoxBody.EditBox.Paste( );
+        richBox.Focus( );
+        richBox.EditBox.Paste( );
     }
 
     private void MainSelectAllClick(object o, EventArgs e)
     {
-        RichBoxBody.Focus( );
-        RichBoxBody.EditBox.SelectAll( );
+        richBox.Focus( );
+        richBox.EditBox.SelectAll( );
     }
 
-    private void OCR_ailitable_Click(object o, EventArgs e) => OcrForeach("阿里表格");
-
-    private void OCR_ali_table( )
+    private void MainVoiceClick(object o, EventArgs e)
     {
-        string text = "";
-        splitedText = "";
-        try
-        {
-            string value = Config.Get("特殊", "ali_cookie");
-            Stream stream = BytesToStream(ImageToByteArray(BWPic((Bitmap) image_screen)));
-            string text2 = Convert.ToBase64String(new BinaryReader(stream).ReadBytes(Convert.ToInt32(stream.Length)));
-            stream.Close( );
-            string text3 = "{\n\t\"image\": \"" + text2 + "\",\n\t\"configure\": \"{\\\"format\\\":\\\"html\\\", \\\"finance\\\":false}\"\n}";
-            string text4 = "https://predict-pai.data.aliyun.com/dp_experience_mall/ocr/ocr_table_parse";
-            text = Post_Html_final(text4, text3, value);
-            typeset_txt = ((JObject) JsonConvert.DeserializeObject(Post_Html_final(text4, text3, value)))["tables"].ToString( ).Replace("table tr td { border: 1px solid blue }", "table tr td {border: 0.5px black solid }").Replace("table { border: 1px solid blue }", "table { border: 0.5px black solid; border-collapse : collapse}\r\n");
-            RichBoxBody.Text = "[消息]：表格已复制到粘贴板！";
-        }
-        catch
-        {
-            RichBoxBody.Text = "[消息]：阿里表格识别出错！";
-            if (text.Contains("NEED_LOGIN"))
-            {
-                splitedText = "弹出cookie";
-            }
-        }
+        richBox.Focus( );
+        speakCopyB = "朗读";
+        htmltxt = richBox.SelectText;
+        SendMessage(Handle, 786, 590);
     }
 
-    private void OCR_baidu( )
+    private void MaiSearchClick(object o, EventArgs e)
     {
-        splitedText = "";
-        try
+        if (string.IsNullOrEmpty(richBox.SelectText))
         {
-            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
-            if (string.IsNullOrEmpty(baidu_vip))
-            {
-                MessageBox.Show("请检查密钥输入是否正确！", "提醒");
-            }
-            else
-            {
-                string text = "CHN_ENG";
-                splitedText = "";
-                Image image = image_screen;
-                byte[] array = OCR_ImgToByte(image);
-                if (interface_flag == "中英")
-                {
-                    text = "CHN_ENG";
-                }
-                if (interface_flag == "日语")
-                {
-                    text = "JAP";
-                }
-                if (interface_flag == "韩语")
-                {
-                    text = "KOR";
-                }
-                string text2 = "image=" + HttpUtility.UrlEncode(Convert.ToBase64String(array)) + "&language_type=" + text;
-                byte[] bytes = Encoding.UTF8.GetBytes(text2);
-                HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"]);
-                httpWebRequest.Method = "POST";
-                httpWebRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                httpWebRequest.Timeout = 8000;
-                httpWebRequest.ReadWriteTimeout = 5000;
-                using (Stream requestStream = httpWebRequest.GetRequestStream( ))
-                {
-                    requestStream.Write(bytes, 0, bytes.Length);
-                }
-                Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
-                string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-                responseStream.Close( );
-                JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["words_result"].ToString( ));
-                checked_txt(jarray, 1, "words");
-            }
+            Process.Start("https://www.baidu.com/");
+            return;
         }
-        catch
-        {
-            if (esc != "退出")
-            {
-                RichBoxBody.Text = "***该区域未发现文本或者密钥次数用尽***";
-            }
-            else
-            {
-                RichBoxBody.Text = "***该区域未发现文本***";
-                esc = "";
-            }
-        }
-    }
-
-    private void OCR_baidu_Ch_and_En_Click(object o, EventArgs e) => OcrForeach("中英");
-
-    private void OCR_baidu_Click(object o, EventArgs e)
-    {
+        Process.Start("https://www.baidu.com/s?wd=" + richBox.SelectText);
     }
 
     private void OCR_baidu_Jap_Click(object o, EventArgs e) => OcrForeach("日语");
 
     private void OCR_baidu_Kor_Click(object o, EventArgs e) => OcrForeach("韩语");
-
-    private void OCR_baidu_table( )
-    {
-        typeset_txt = "[消息]：表格已下载！";
-        splitedText = "";
-        try
-        {
-            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
-            if (string.IsNullOrEmpty(baidu_vip))
-            {
-                MessageBox.Show("请检查密钥输入是否正确！", "提醒");
-            }
-            else
-            {
-                splitedText = "";
-                Image image = image_screen;
-                MemoryStream memoryStream = new( );
-                image.Save(memoryStream, ImageFormat.Jpeg);
-                byte[] array = new byte[memoryStream.Length];
-                memoryStream.Position = 0L;
-                memoryStream.Read(array, 0, (int) memoryStream.Length);
-                memoryStream.Close( );
-                string text = "image=" + HttpUtility.UrlEncode(Convert.ToBase64String(array));
-                byte[] bytes = Encoding.UTF8.GetBytes(text);
-                HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"]);
-                httpWebRequest.Proxy = null;
-                httpWebRequest.Method = "POST";
-                httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-                httpWebRequest.Timeout = 8000;
-                httpWebRequest.ReadWriteTimeout = 5000;
-                using (Stream requestStream = httpWebRequest.GetRequestStream( ))
-                {
-                    requestStream.Write(bytes, 0, bytes.Length);
-                }
-                Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
-                string text2 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-                responseStream.Close( );
-                string text3 = "request_id=" + JObject.Parse(JArray.Parse(((JObject) JsonConvert.DeserializeObject(text2))["result"].ToString( ))[0].ToString( ))["request_id"].ToString( ).Trim( ) + "&result_type=json";
-                string text4 = "";
-                while (!text4.Contains("已完成"))
-                {
-                    if (text4.Contains("image recognize error"))
-                    {
-                        RichBoxBody.Text = "[消息]：未发现表格！";
-                        break;
-                    }
-                    Thread.Sleep(120);
-                    text4 = Post_Html("https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/get_request_result?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"], text3);
-                }
-                if (!text4.Contains("image recognize error"))
-                {
-                    get_table(text4);
-                }
-            }
-        }
-        catch
-        {
-            RichBoxBody.Text = "[消息]：免费百度密钥50次已经耗完！请更换自己的密钥继续使用！";
-        }
-    }
-
-    private void OCR_baidu_use_A(Image imagearr)
-    {
-        try
-        {
-            string text = "CHN_ENG";
-            MemoryStream memoryStream = new( );
-            imagearr.Save(memoryStream, ImageFormat.Jpeg);
-            byte[] array = new byte[memoryStream.Length];
-            memoryStream.Position = 0L;
-            memoryStream.Read(array, 0, (int) memoryStream.Length);
-            memoryStream.Close( );
-            string text2 = "type=general_location&image=data" + HttpUtility.UrlEncode(":image/jpeg;base64," + Convert.ToBase64String(array)) + "&language_type=" + text;
-            byte[] bytes = Encoding.UTF8.GetBytes(text2);
-            HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/tech/ocr/general");
-            httpWebRequest.CookieContainer = new CookieContainer( );
-            httpWebRequest.GetResponse( ).Close( );
-            HttpWebRequest httpWebRequest2 = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/aidemo");
-            httpWebRequest2.Method = "POST";
-            httpWebRequest2.Referer = "http://ai.baidu.com/tech/ocr/general";
-            httpWebRequest2.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-            httpWebRequest2.Timeout = 8000;
-            httpWebRequest2.ReadWriteTimeout = 5000;
-            httpWebRequest2.Headers.Add("Cookie:" + CookieCollectionToStrCookie(((HttpWebResponse) httpWebRequest.GetResponse( )).Cookies));
-            using (Stream requestStream = httpWebRequest2.GetRequestStream( ))
-            {
-                requestStream.Write(bytes, 0, bytes.Length);
-            }
-            Stream responseStream = ((HttpWebResponse) httpWebRequest2.GetResponse( )).GetResponseStream( );
-            string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-            responseStream.Close( );
-            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["data"]["words_result"].ToString( ));
-            string text4 = "";
-            string[] array2 = new string[jarray.Count];
-            for (int i = 0; i < jarray.Count; i++)
-            {
-                JObject jobject = JObject.Parse(jarray[i].ToString( ));
-                text4 += jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
-                array2[jarray.Count - 1 - i] = jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
-            }
-            string text5 = "";
-            for (int j = 0; j < array2.Length; j++)
-            {
-                text5 += array2[j];
-            }
-            ocrBaiduA = (ocrBaiduA + text4 + "\r\n").Replace("\r\n\r\n", "");
-            Thread.Sleep(10);
-        }
-        catch
-        {
-        }
-    }
-
-    private void OCR_baidu_use_B(Image imagearr)
-    {
-        try
-        {
-            string text = "CHN_ENG";
-            MemoryStream memoryStream = new( );
-            imagearr.Save(memoryStream, ImageFormat.Jpeg);
-            byte[] array = new byte[memoryStream.Length];
-            memoryStream.Position = 0L;
-            memoryStream.Read(array, 0, (int) memoryStream.Length);
-            memoryStream.Close( );
-            string text2 = "type=general_location&image=data" + HttpUtility.UrlEncode(":image/jpeg;base64," + Convert.ToBase64String(array)) + "&language_type=" + text;
-            byte[] bytes = Encoding.UTF8.GetBytes(text2);
-            HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/tech/ocr/general");
-            httpWebRequest.CookieContainer = new CookieContainer( );
-            httpWebRequest.GetResponse( ).Close( );
-            HttpWebRequest httpWebRequest2 = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/aidemo");
-            httpWebRequest2.Method = "POST";
-            httpWebRequest2.Referer = "http://ai.baidu.com/tech/ocr/general";
-            httpWebRequest2.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-            httpWebRequest2.Timeout = 8000;
-            httpWebRequest2.ReadWriteTimeout = 5000;
-            httpWebRequest2.Headers.Add("Cookie:" + CookieCollectionToStrCookie(((HttpWebResponse) httpWebRequest.GetResponse( )).Cookies));
-            using (Stream requestStream = httpWebRequest2.GetRequestStream( ))
-            {
-                requestStream.Write(bytes, 0, bytes.Length);
-            }
-            Stream responseStream = ((HttpWebResponse) httpWebRequest2.GetResponse( )).GetResponseStream( );
-            string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-            responseStream.Close( );
-            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["data"]["words_result"].ToString( ));
-            string text4 = "";
-            string[] array2 = new string[jarray.Count];
-            for (int i = 0; i < jarray.Count; i++)
-            {
-                JObject jobject = JObject.Parse(jarray[i].ToString( ));
-                text4 += jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
-                array2[jarray.Count - 1 - i] = jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
-            }
-            string text5 = "";
-            for (int j = 0; j < array2.Length; j++)
-            {
-                text5 += array2[j];
-            }
-            OCR_baidu_b = (OCR_baidu_b + text4 + "\r\n").Replace("\r\n\r\n", "");
-            Thread.Sleep(10);
-        }
-        catch
-        {
-        }
-    }
 
     private void OCR_baidu_use_C(Image imagearr)
     {
@@ -2619,7 +2162,7 @@ public partial class FmMain : Form
             {
                 text5 += array2[j];
             }
-            OCR_baidu_c = (OCR_baidu_c + text4 + "\r\n").Replace("\r\n\r\n", "");
+            ocrBaiduC = (ocrBaiduC + text4 + "\r\n").Replace("\r\n\r\n", "");
             Thread.Sleep(10);
         }
         catch
@@ -2671,7 +2214,7 @@ public partial class FmMain : Form
             {
                 text5 += array2[j];
             }
-            OCR_baidu_d = (OCR_baidu_d + text4 + "\r\n").Replace("\r\n\r\n", "");
+            ocrBaiduD = (ocrBaiduD + text4 + "\r\n").Replace("\r\n\r\n", "");
             Thread.Sleep(10);
         }
         catch
@@ -2723,7 +2266,7 @@ public partial class FmMain : Form
             {
                 text5 += array2[j];
             }
-            OCR_baidu_e = (OCR_baidu_e + text4 + "\r\n").Replace("\r\n\r\n", "");
+            ocrBaiduE = (ocrBaiduE + text4 + "\r\n").Replace("\r\n\r\n", "");
             Thread.Sleep(10);
         }
         catch
@@ -2731,16 +2274,273 @@ public partial class FmMain : Form
         }
     }
 
-    private void OCR_baidutable_Click(object o, EventArgs e) => OcrForeach("百度表格");
-
     private void OCR_lefttoright_Click(object o, EventArgs e) => OcrForeach("从左向右");
 
-    private void OCR_Math( )
+    private void OCR_righttoleft_Click(object o, EventArgs e) => OcrForeach("从右向左");
+
+    private void OCR_table_Click(object o, EventArgs e) => OcrForeach("表格");
+
+    private void OcrBaidu( )
     {
         splitedText = "";
         try
         {
-            Image image = image_screen;
+            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
+            if (string.IsNullOrEmpty(baidu_vip))
+            {
+                MessageBox.Show("请检查密钥输入是否正确！", "提醒");
+            }
+            else
+            {
+                string text = "CHN_ENG";
+                splitedText = "";
+                Image image = imageScreen;
+                byte[] array = OCR_ImgToByte(image);
+                if (interfaceFlag == "中英")
+                {
+                    text = "CHN_ENG";
+                }
+                if (interfaceFlag == "日语")
+                {
+                    text = "JAP";
+                }
+                if (interfaceFlag == "韩语")
+                {
+                    text = "KOR";
+                }
+                string text2 = "image=" + HttpUtility.UrlEncode(Convert.ToBase64String(array)) + "&language_type=" + text;
+                byte[] bytes = Encoding.UTF8.GetBytes(text2);
+                HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"]);
+                httpWebRequest.Method = "POST";
+                httpWebRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                httpWebRequest.Timeout = 8000;
+                httpWebRequest.ReadWriteTimeout = 5000;
+                using (Stream requestStream = httpWebRequest.GetRequestStream( ))
+                {
+                    requestStream.Write(bytes, 0, bytes.Length);
+                }
+                Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
+                string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
+                responseStream.Close( );
+                JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["words_result"].ToString( ));
+                TextCheck(jarray, 1, "words");
+            }
+        }
+        catch
+        {
+            if (esc != "退出")
+            {
+                richBox.Text = "***该区域未发现文本或者密钥次数用尽***";
+            }
+            else
+            {
+                richBox.Text = "***该区域未发现文本***";
+                esc = "";
+            }
+        }
+    }
+
+    private void OcrBaiduA(Image image)
+    {
+        try
+        {
+            string text = "CHN_ENG";
+            MemoryStream memoryStream = new( );
+            image.Save(memoryStream, ImageFormat.Jpeg);
+            byte[] array = new byte[memoryStream.Length];
+            memoryStream.Position = 0L;
+            memoryStream.Read(array, 0, (int) memoryStream.Length);
+            memoryStream.Close( );
+            string text2 = "type=general_location&image=data" + HttpUtility.UrlEncode(":image/jpeg;base64," + Convert.ToBase64String(array)) + "&language_type=" + text;
+            byte[] bytes = Encoding.UTF8.GetBytes(text2);
+            HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/tech/ocr/general");
+            httpWebRequest.CookieContainer = new CookieContainer( );
+            httpWebRequest.GetResponse( ).Close( );
+            HttpWebRequest httpWebRequest2 = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/aidemo");
+            httpWebRequest2.Method = "POST";
+            httpWebRequest2.Referer = "http://ai.baidu.com/tech/ocr/general";
+            httpWebRequest2.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            httpWebRequest2.Timeout = 8000;
+            httpWebRequest2.ReadWriteTimeout = 5000;
+            httpWebRequest2.Headers.Add("Cookie:" + CookieCollectionToStrCookie(((HttpWebResponse) httpWebRequest.GetResponse( )).Cookies));
+            using (Stream requestStream = httpWebRequest2.GetRequestStream( ))
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+            }
+            Stream responseStream = ((HttpWebResponse) httpWebRequest2.GetResponse( )).GetResponseStream( );
+            string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
+            responseStream.Close( );
+            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["data"]["words_result"].ToString( ));
+            string text4 = "";
+            string[] array2 = new string[jarray.Count];
+            for (int i = 0; i < jarray.Count; i++)
+            {
+                JObject jobject = JObject.Parse(jarray[i].ToString( ));
+                text4 += jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
+                array2[jarray.Count - 1 - i] = jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
+            }
+            string text5 = "";
+            for (int j = 0; j < array2.Length; j++)
+            {
+                text5 += array2[j];
+            }
+            ocrBaiduA = (ocrBaiduA + text4 + "\r\n").Replace("\r\n\r\n", "");
+            Thread.Sleep(10);
+        }
+        catch
+        {
+        }
+    }
+
+    private void OcrBaiduB(Image imagearr)
+    {
+        try
+        {
+            string text = "CHN_ENG";
+            MemoryStream memoryStream = new( );
+            imagearr.Save(memoryStream, ImageFormat.Jpeg);
+            byte[] array = new byte[memoryStream.Length];
+            memoryStream.Position = 0L;
+            memoryStream.Read(array, 0, (int) memoryStream.Length);
+            memoryStream.Close( );
+            string text2 = "type=general_location&image=data" + HttpUtility.UrlEncode(":image/jpeg;base64," + Convert.ToBase64String(array)) + "&language_type=" + text;
+            byte[] bytes = Encoding.UTF8.GetBytes(text2);
+            HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/tech/ocr/general");
+            httpWebRequest.CookieContainer = new CookieContainer( );
+            httpWebRequest.GetResponse( ).Close( );
+            HttpWebRequest httpWebRequest2 = (HttpWebRequest) WebRequest.Create("http://ai.baidu.com/aidemo");
+            httpWebRequest2.Method = "POST";
+            httpWebRequest2.Referer = "http://ai.baidu.com/tech/ocr/general";
+            httpWebRequest2.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            httpWebRequest2.Timeout = 8000;
+            httpWebRequest2.ReadWriteTimeout = 5000;
+            httpWebRequest2.Headers.Add("Cookie:" + CookieCollectionToStrCookie(((HttpWebResponse) httpWebRequest.GetResponse( )).Cookies));
+            using (Stream requestStream = httpWebRequest2.GetRequestStream( ))
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+            }
+            Stream responseStream = ((HttpWebResponse) httpWebRequest2.GetResponse( )).GetResponseStream( );
+            string text3 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
+            responseStream.Close( );
+            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text3))["data"]["words_result"].ToString( ));
+            string text4 = "";
+            string[] array2 = new string[jarray.Count];
+            for (int i = 0; i < jarray.Count; i++)
+            {
+                JObject jobject = JObject.Parse(jarray[i].ToString( ));
+                text4 += jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
+                array2[jarray.Count - 1 - i] = jobject["words"].ToString( ).Replace("\r", "").Replace("\n", "");
+            }
+            string text5 = "";
+            for (int j = 0; j < array2.Length; j++)
+            {
+                text5 += array2[j];
+            }
+            ocrBaiduB = (ocrBaiduB + text4 + "\r\n").Replace("\r\n\r\n", "");
+            Thread.Sleep(10);
+        }
+        catch
+        {
+        }
+    }
+
+    private void OcrBaiduClick(object o, EventArgs e)
+    {
+    }
+
+    private void OcrBaiduZhEnClick(object o, EventArgs e)
+        => OcrForeach("中英");
+
+    private void OcrForeach(string name)
+    {
+        switch (name)
+        {
+            case "韩语":
+                interfaceFlag = "韩语";
+                Refresh( );
+                baidu.Text = "百度√";
+                kor.Text = "韩语√";
+                break;
+            case "日语":
+                interfaceFlag = "日语";
+                Refresh( );
+                baidu.Text = "百度√";
+                jap.Text = "日语√";
+                break;
+            case "中英":
+                interfaceFlag = "中英";
+                Refresh( );
+                baidu.Text = "百度√";
+                ch2en.Text = "中英√";
+                break;
+            case "搜狗":
+                interfaceFlag = "搜狗";
+                Refresh( );
+                sougou.Text = "搜狗√";
+                break;
+            case "腾讯":
+                interfaceFlag = "腾讯";
+                Refresh( );
+                tencent.Text = "腾讯√";
+                break;
+            case "有道":
+                interfaceFlag = "有道";
+                Refresh( );
+                youdao.Text = "有道√";
+                break;
+            case "公式":
+                interfaceFlag = "公式";
+                Refresh( );
+                mathFunction.Text = "公式√";
+                break;
+            case "百度表格":
+                interfaceFlag = "百度表格";
+                Refresh( );
+                tableOcr.Text = "表格√";
+                tableBaidu.Text = "百度√";
+                break;
+            case "阿里表格":
+                interfaceFlag = "阿里表格";
+                Refresh( );
+                tableOcr.Text = "表格√";
+                tableAli.Text = "阿里√";
+                break;
+            case "从左向右":
+                if (!File.Exists("cvextern.dll"))
+                {
+                    MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\r\n将下载后的文件与 天若.exe 这个文件放在一起。");
+                    Process.Start("https://www.lanzous.com/i1ab3vg");
+                }
+                else
+                {
+                    interfaceFlag = "从左向右";
+                    Refresh( );
+                    verticalScan.Text = "竖排√";
+                    left2right.Text = "从左向右√";
+                }
+                break;
+            case "从右向左":
+                if (!File.Exists("cvextern.dll"))
+                {
+                    MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\n将下载后的文件与 天若.exe 这个文件放在一起。");
+                    Process.Start("https://www.lanzous.com/i1ab3vg");
+                    return;
+                }
+                interfaceFlag = "从右向左";
+                Refresh( );
+                verticalScan.Text = "竖排√";
+                right2left.Text = "从右向左√";
+                break;
+        }
+        Config.Set("配置", "接口", interfaceFlag);
+    }
+
+    private void OcrMath( )
+    {
+        splitedText = "";
+        try
+        {
+            Image image = imageScreen;
             byte[] array = OCR_ImgToByte(image);
             string text = "{\t\"formats\": [\"latex_styled\", \"text\"],\t\"metadata\": {\t\t\"count\": 1,\t\t\"platform\": \"windows 10\",\t\t\"skip_recrop\": true,\t\t\"user_id\": \"123ab2a82ea246a0b011a37183c87bab\",\t\t\"version\": \"snip.windows@00.00.0083\"\t},\t\"ocr\": [\"text\", \"math\"],\t\"src\": \"data:image/jpeg;base64," + Convert.ToBase64String(array) + "\"}";
             byte[] bytes = Encoding.UTF8.GetBytes(text);
@@ -2760,37 +2560,31 @@ public partial class FmMain : Form
             responseStream.Close( );
             string text3 = "$" + ((JObject) JsonConvert.DeserializeObject(text2))["latex_styled"] + "$";
             splitedText = text3;
-            typeset_txt = text3;
+            typeSetText = text3;
         }
         catch
         {
             if (esc != "退出")
             {
-                RichBoxBody.Text = "***该区域未发现文本或者密钥次数用尽***";
+                richBox.Text = "***该区域未发现文本或者密钥次数用尽***";
             }
             else
             {
-                RichBoxBody.Text = "***该区域未发现文本***";
+                richBox.Text = "***该区域未发现文本***";
                 esc = "";
             }
         }
     }
 
-    private void OCR_Mathfuntion_Click(object o, EventArgs e) => OcrForeach("公式");
+    private void OcrMathClick(object o, EventArgs e) => OcrForeach("公式");
 
-    private void OCR_righttoleft_Click(object o, EventArgs e) => OcrForeach("从右向左");
-
-    private void OCR_shupai_Click(object o, EventArgs e)
-    {
-    }
-
-    private void OCR_sougou2( )
+    private void OcrSogou2( )
     {
         try
         {
             splitedText = "";
             string text = "------WebKitFormBoundary8orYTmcj8BHvQpVU";
-            Image image = ZoomImage((Bitmap) image_screen, 120, 120);
+            Image image = ZoomImage((Bitmap) imageScreen, 120, 120);
             byte[] array = OCR_ImgToByte(image);
             string text2 = text + "\r\nContent-Disposition: form-data; name=\"pic\"; filename=\"pic.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
             string text3 = "\r\n" + text + "--\r\n";
@@ -2811,11 +2605,11 @@ public partial class FmMain : Form
             JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text4))["result"].ToString( ));
             if (Config.Get("工具栏", "分段") == "True")
             {
-                checked_location_sougou(jarray, 2, "content", "frame");
+                SogouLocationCheck(jarray, 2, "content", "frame");
             }
             else
             {
-                checked_txt(jarray, 2, "content");
+                TextCheck(jarray, 2, "content");
             }
             image.Dispose( );
         }
@@ -2823,116 +2617,108 @@ public partial class FmMain : Form
         {
             if (esc != "退出")
             {
-                RichBoxBody.Text = "***该区域未发现文本***";
+                richBox.Text = "***该区域未发现文本***";
             }
             else
             {
-                RichBoxBody.Text = "***该区域未发现文本***";
+                richBox.Text = "***该区域未发现文本***";
                 esc = "";
             }
         }
     }
 
-    private void OCR_table_Click(object o, EventArgs e) => OcrForeach("表格");
+    private void OcrSogouClick(object o, EventArgs e)
+        => OcrForeach("搜狗");
 
-    private void OCR_write_Click(object o, EventArgs e) => OcrForeach("手写");
-
-    private void OCR_youdao_Click(object o, EventArgs e) => OcrForeach("有道");
-
-    private void OcrForeach(string name)
+    private void OcrTableAli( )
     {
-        if (name == "韩语")
+        string text = "";
+        splitedText = "";
+        try
         {
-            interface_flag = "韩语";
-            Refresh( );
-            baidu.Text = "百度√";
-            kor.Text = "韩语√";
+            string value = Config.Get("特殊", "ali_cookie");
+            Stream stream = new MemoryStream(ImageToByteArray(BWPic((Bitmap) imageScreen)));
+            string text2 = Convert.ToBase64String(new BinaryReader(stream).ReadBytes(Convert.ToInt32(stream.Length)));
+            stream.Close( );
+            string text3 = "{\n\t\"image\": \"" + text2 + "\",\n\t\"configure\": \"{\\\"format\\\":\\\"html\\\", \\\"finance\\\":false}\"\n}";
+            string text4 = "https://predict-pai.data.aliyun.com/dp_experience_mall/ocr/ocr_table_parse";
+            text = Post_Html_final(text4, text3, value);
+            typeSetText = ((JObject) JsonConvert.DeserializeObject(Post_Html_final(text4, text3, value)))["tables"].ToString( ).Replace("table tr td { border: 1px solid blue }", "table tr td {border: 0.5px black solid }").Replace("table { border: 1px solid blue }", "table { border: 0.5px black solid; border-collapse : collapse}\r\n");
+            richBox.Text = "[消息]：表格已复制到剪贴板！";
         }
-        if (name == "日语")
+        catch
         {
-            interface_flag = "日语";
-            Refresh( );
-            baidu.Text = "百度√";
-            jap.Text = "日语√";
-        }
-        if (name == "中英")
-        {
-            interface_flag = "中英";
-            Refresh( );
-            baidu.Text = "百度√";
-            ch_en.Text = "中英√";
-        }
-        if (name == "搜狗")
-        {
-            interface_flag = "搜狗";
-            Refresh( );
-            sougou.Text = "搜狗√";
-        }
-        if (name == "腾讯")
-        {
-            interface_flag = "腾讯";
-            Refresh( );
-            tencent.Text = "腾讯√";
-        }
-        if (name == "有道")
-        {
-            interface_flag = "有道";
-            Refresh( );
-            youdao.Text = "有道√";
-        }
-        if (name == "公式")
-        {
-            interface_flag = "公式";
-            Refresh( );
-            Mathfuntion.Text = "公式√";
-        }
-        if (name == "百度表格")
-        {
-            interface_flag = "百度表格";
-            Refresh( );
-            ocr_table.Text = "表格√";
-            baidu_table.Text = "百度√";
-        }
-        if (name == "阿里表格")
-        {
-            interface_flag = "阿里表格";
-            Refresh( );
-            ocr_table.Text = "表格√";
-            ali_table.Text = "阿里√";
-        }
-        if (name == "从左向右")
-        {
-            if (!File.Exists("cvextern.dll"))
+            richBox.Text = "[消息]：阿里表格识别出错！";
+            if (text.Contains("NEED_LOGIN"))
             {
-                MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\r\n将下载后的文件与 天若.exe 这个文件放在一起。");
-                Process.Start("https://www.lanzous.com/i1ab3vg");
+                splitedText = "弹出cookie";
+            }
+        }
+    }
+
+    private void OcrTableAliClick(object o, EventArgs e) => OcrForeach("阿里表格");
+
+    private void OcrTableBaidu( )
+    {
+        typeSetText = "[消息]：表格已下载！";
+        splitedText = "";
+        try
+        {
+            baidu_vip = Get_html(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + StaticValue.BaiduApiId + "&client_secret=" + StaticValue.BaiduApiKey));
+            if (string.IsNullOrEmpty(baidu_vip))
+            {
+                MessageBox.Show("请检查密钥输入是否正确！", "提醒");
             }
             else
             {
-                interface_flag = "从左向右";
-                Refresh( );
-                shupai.Text = "竖排√";
-                left_right.Text = "从左向右√";
+                splitedText = "";
+                Image image = imageScreen;
+                MemoryStream memoryStream = new( );
+                image.Save(memoryStream, ImageFormat.Jpeg);
+                byte[] array = new byte[memoryStream.Length];
+                memoryStream.Position = 0L;
+                memoryStream.Read(array, 0, (int) memoryStream.Length);
+                memoryStream.Close( );
+                string text = "image=" + HttpUtility.UrlEncode(Convert.ToBase64String(array));
+                byte[] bytes = Encoding.UTF8.GetBytes(text);
+                HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/request?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"]);
+                httpWebRequest.Proxy = null;
+                httpWebRequest.Method = "POST";
+                httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+                httpWebRequest.Timeout = 8000;
+                httpWebRequest.ReadWriteTimeout = 5000;
+                using (Stream requestStream = httpWebRequest.GetRequestStream( ))
+                {
+                    requestStream.Write(bytes, 0, bytes.Length);
+                }
+                Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
+                string text2 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
+                responseStream.Close( );
+                string text3 = "request_id=" + JObject.Parse(JArray.Parse(((JObject) JsonConvert.DeserializeObject(text2))["result"].ToString( ))[0].ToString( ))["request_id"].ToString( ).Trim( ) + "&result_type=json";
+                string text4 = "";
+                while (!text4.Contains("已完成"))
+                {
+                    if (text4.Contains("image recognize error"))
+                    {
+                        richBox.Text = "[消息]：未发现表格！";
+                        break;
+                    }
+                    Thread.Sleep(120);
+                    text4 = Post_Html("https://aip.baidubce.com/rest/2.0/solution/v1/form_ocr/get_request_result?access_token=" + ((JObject) JsonConvert.DeserializeObject(baidu_vip))["access_token"], text3);
+                }
+                if (!text4.Contains("image recognize error"))
+                {
+                    get_table(text4);
+                }
             }
         }
-        if (name == "从右向左")
+        catch
         {
-            if (!File.Exists("cvextern.dll"))
-            {
-                MessageBox.Show("请从蓝奏网盘中下载cvextern.dll大小约25m，点击确定自动弹出网页。\n将下载后的文件与 天若.exe 这个文件放在一起。");
-                Process.Start("https://www.lanzous.com/i1ab3vg");
-                return;
-            }
-            interface_flag = "从右向左";
-            Refresh( );
-            shupai.Text = "竖排√";
-            righ_left.Text = "从右向左√";
+            richBox.Text = "[消息]：免费百度密钥50次已经耗完！请更换自己的密钥继续使用！";
         }
-        Config.Set("配置", "接口", interface_flag);
     }
 
-    private void OcrSogouClick(object o, EventArgs e)
-        => OcrForeach("搜狗");
+    private void OcrTableBaiduClick(object o, EventArgs e) => OcrForeach("百度表格");
 
     private void OcrTencent( )
     {
@@ -2940,7 +2726,7 @@ public partial class FmMain : Form
         {
             splitedText = "";
             string text = "------WebKitFormBoundaryRDEqU0w702X9cWPJ";
-            Image image = image_screen;
+            Image image = imageScreen;
             if (image.Width > 90 && image.Height < 90)
             {
                 Bitmap bitmap = new(image.Width, 300);
@@ -2970,7 +2756,7 @@ public partial class FmMain : Form
             }
             else
             {
-                image = image_screen;
+                image = imageScreen;
             }
             byte[] array = OCR_ImgToByte(image);
             string text2 = text + "\r\nContent-Disposition: form-data; name=\"image_file\"; filename=\"pic.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
@@ -2994,11 +2780,11 @@ public partial class FmMain : Form
             string text4 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
             responseStream.Close( );
             JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text4))["data"]["item_list"].ToString( ));
-            checked_txt(jarray, 1, "itemstring");
+            TextCheck(jarray, 1, "itemstring");
         }
         catch
         {
-            RichBoxBody.Text = "***该区域未发现文本***";
+            richBox.Text = "***该区域未发现文本***";
             if (esc == "退出")
                 esc = "";
         }
@@ -3007,12 +2793,18 @@ public partial class FmMain : Form
     private void OcrTencentClick(object o, EventArgs e)
         => OcrForeach("腾讯");
 
+    private void OcrVerticalClick(object o, EventArgs e)
+    {
+    }
+
+    private void OcrWriteClick(object o, EventArgs e) => OcrForeach("手写");
+
     private void OcrYoudao( )
     {
         try
         {
             splitedText = "";
-            Image image = image_screen;
+            Image image = imageScreen;
             if (image.Width > 90 && image.Height < 90)
             {
                 Bitmap bitmap = new(image.Width, 200);
@@ -3042,7 +2834,7 @@ public partial class FmMain : Form
             }
             else
             {
-                image = image_screen;
+                image = imageScreen;
             }
             int i = image.Width;
             int j = image.Height;
@@ -3085,22 +2877,24 @@ public partial class FmMain : Form
             string text2 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
             responseStream.Close( );
             JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text2))["lines"].ToString( ));
-            checked_txt(jarray, 1, "words");
+            TextCheck(jarray, 1, "words");
             image.Dispose( );
         }
         catch
         {
             if (esc != "退出")
             {
-                RichBoxBody.Text = "***该区域未发现文本***";
+                richBox.Text = "***该区域未发现文本***";
             }
             else
             {
-                RichBoxBody.Text = "***该区域未发现文本***";
+                richBox.Text = "***该区域未发现文本***";
                 esc = "";
             }
         }
     }
+
+    private void OcrYoudaoClick(object o, EventArgs e) => OcrForeach("有道");
 
     private void p_note(string a)
     {
@@ -3119,27 +2913,27 @@ public partial class FmMain : Form
 
     private void ReadIniFile( )
     {
-        proxy_flag = Config.Get("代理", "代理类型");
-        proxy_url = Config.Get("代理", "服务器");
-        proxy_port = Config.Get("代理", "端口");
-        proxy_name = Config.Get("代理", "服务器账号");
-        proxy_password = Config.Get("代理", "服务器密码");
-        if (proxy_flag == "不使用代理")
+        proxyFlag = Config.Get("代理", "代理类型");
+        proxyUrl = Config.Get("代理", "服务器");
+        proxyPort = Config.Get("代理", "端口");
+        proxyName = Config.Get("代理", "服务器账号");
+        proxyPassword = Config.Get("代理", "服务器密码");
+        if (proxyFlag == "不使用代理")
         {
             WebRequest.DefaultWebProxy = null;
         }
-        if (proxy_flag == "系统代理")
+        if (proxyFlag == "系统代理")
         {
             WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy( );
         }
-        if (proxy_flag == "自定义代理")
+        if (proxyFlag == "自定义代理")
         {
             try
             {
-                WebProxy webProxy = new(proxy_url, Convert.ToInt32(proxy_port));
-                if (!string.IsNullOrEmpty(proxy_name) && !string.IsNullOrEmpty(proxy_password))
+                WebProxy webProxy = new(proxyUrl, Convert.ToInt32(proxyPort));
+                if (!string.IsNullOrEmpty(proxyName) && !string.IsNullOrEmpty(proxyPassword))
                 {
-                    ICredentials credentials = new NetworkCredential(proxy_name, proxy_password);
+                    ICredentials credentials = new NetworkCredential(proxyName, proxyPassword);
                     webProxy.Credentials = credentials;
                 }
                 WebRequest.DefaultWebProxy = webProxy;
@@ -3149,15 +2943,15 @@ public partial class FmMain : Form
                 MessageBox.Show("请检查代理设置！");
             }
         }
-        interface_flag = Config.Get("配置", "接口");
-        if (interface_flag == "__ERROR__")
+        interfaceFlag = Config.Get("配置", "接口");
+        if (interfaceFlag == "__ERROR__")
         {
             Config.Set("配置", "接口", "搜狗");
             OcrForeach("搜狗");
         }
         else
         {
-            OcrForeach(interface_flag);
+            OcrForeach(interfaceFlag);
         }
         if (Config.Get("快捷键", "文字识别") != "请按下快捷键")
         {
@@ -3205,27 +2999,27 @@ public partial class FmMain : Form
         tencent.Text = "腾讯";
         baidu.Text = "百度";
         youdao.Text = "有道";
-        shupai.Text = "竖排";
-        ocr_table.Text = "表格";
-        ch_en.Text = "中英";
+        verticalScan.Text = "竖排";
+        tableOcr.Text = "表格";
+        ch2en.Text = "中英";
         jap.Text = "日语";
         kor.Text = "韩语";
-        left_right.Text = "从左向右";
-        righ_left.Text = "从右向左";
-        baidu_table.Text = "百度";
-        ali_table.Text = "阿里";
-        Mathfuntion.Text = "公式";
+        left2right.Text = "从左向右";
+        right2left.Text = "从右向左";
+        tableBaidu.Text = "百度";
+        tableAli.Text = "阿里";
+        mathFunction.Text = "公式";
     }
 
     private void SaveIniFile( )
-        => Config.Set("配置", "接口", interface_flag);
+        => Config.Set("配置", "接口", interfaceFlag);
 
     private string ScanQRCode( )
     {
         string text = "";
         try
         {
-            BinaryBitmap binaryBitmap = new(new HybridBinarizer(new BitmapLuminanceSource((Bitmap) image_screen)));
+            BinaryBitmap binaryBitmap = new(new HybridBinarizer(new BitmapLuminanceSource((Bitmap) imageScreen)));
             Result result = new QRCodeReader( ).decode(binaryBitmap);
             if (result != null)
             {
@@ -3245,17 +3039,17 @@ public partial class FmMain : Form
             using VectorOfVectorOfPoint vectorOfVectorOfPoint = new( );
             CvInvoke.FindContours(src, vectorOfVectorOfPoint, null, RetrType.List, ChainApproxMethod.ChainApproxSimple, default);
             int num = vectorOfVectorOfPoint.Size / 2;
-            imagelist_lenght = num;
-            bool_image_count(num);
+            imageListLength = num;
+            CountBoolImage(num);
             if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "Data\\image_temp"))
             {
                 Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "Data\\image_temp");
             }
             ocrBaiduA = "";
-            OCR_baidu_b = "";
-            OCR_baidu_c = "";
-            OCR_baidu_d = "";
-            OCR_baidu_e = "";
+            ocrBaiduB = "";
+            ocrBaiduC = "";
+            ocrBaiduD = "";
+            ocrBaiduE = "";
             for (int i = 0; i < num; i++)
             {
                 using VectorOfPoint vectorOfPoint = vectorOfVectorOfPoint[i];
@@ -3322,7 +3116,7 @@ public partial class FmMain : Form
                 text2 += "\\row\\intbl";
             }
         }
-        RichBoxBody.Rtf = text + text3 + text2 + text4;
+        richBox.Rtf = text + text3 + text2 + text4;
     }
 
     private void SetHotkey(string text, string text2, string value, int flag)
@@ -3368,7 +3162,7 @@ public partial class FmMain : Form
 
     private void Speak_child( )
     {
-        if (RichBoxBody.Text != null || !string.IsNullOrEmpty(RichBoxBody_T.Text))
+        if (richBox.Text != null || !string.IsNullOrEmpty(richBoxTrans.Text))
         {
             string tempPath = Path.GetTempPath( );
             string text = tempPath + "\\声音.mp3";
@@ -3387,8 +3181,63 @@ public partial class FmMain : Form
     }
 
     private void SplitClick(object o, EventArgs e)
-        => RichBoxBody.Text = splitedText;
+        => richBox.Text = splitedText;
 
+    private void Switch2EnClick(object o, EventArgs e)
+    {
+        language = "英文标点";
+        if (!string.IsNullOrEmpty(typeSetText))
+        {
+            richBox.Text = PunctuationChEn(richBox.Text);
+        }
+    }
+
+    private void Switch2PinyinClick(object o, EventArgs e)
+    {
+        pinyinFlag = true;
+        TranslateClick( );
+    }
+
+    private void Switch2StrUpperClick(object o, EventArgs e)
+    {
+        if (richBox.Text != null)
+        {
+            richBox.Text = richBox.Text.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
+        }
+    }
+
+    private void Switch2TransZhClick(object o, EventArgs e)
+    {
+        if (richBox.Text != null)
+        {
+            richBox.Text = TextUtils.ToSimplified(richBox.Text);
+        }
+    }
+
+    private void Switch2UpperStrClick(object o, EventArgs e)
+    {
+        if (richBox.Text != null)
+        {
+            richBox.Text = richBox.Text.ToLower(System.Globalization.CultureInfo.CurrentCulture);
+        }
+    }
+
+    private void Switch2ZhClick(object o, EventArgs e)
+    {
+        language = "中文标点";
+        if (!string.IsNullOrEmpty(typeSetText))
+        {
+            richBox.Text = punctuation_en_ch_x(richBox.Text);
+            richBox.Text = TextUtils.PunctuationQuotation(richBox.Text);
+        }
+    }
+    private void Switch2ZhTransClick(object o, EventArgs e)
+    {
+        if (richBox.Text != null)
+        {
+            richBox.Text = TextUtils.ToTraditional(richBox.Text);
+        }
+    }
     private string TencentPOST(string url, string content)
     {
         string text2;
@@ -3434,137 +3283,144 @@ public partial class FmMain : Form
     {
     }
 
-    private void Trans_baidu_Click(object o, EventArgs e) => Trans_foreach("百度");
-
     private void trans_Calculate( )
     {
-        if (pinyin_flag)
+        if (pinyinFlag)
         {
-            googleTransText = Pinyin.ToPinyin(typeset_txt);
+            googleTransText = Pinyin.ToPinyin(typeSetText);
         }
-        else if (string.IsNullOrEmpty(typeset_txt))
+        else if (string.IsNullOrEmpty(typeSetText))
         {
             googleTransText = "";
         }
         else
         {
-            if (interface_flag == "韩语")
+            if (interfaceFlag == "韩语")
             {
                 StaticValue.Zh2En = false;
                 StaticValue.Zh2Jp = false;
                 StaticValue.Zh2Ko = true;
-                RichBoxBody_T.Language = "韩语";
+                richBoxTrans.Language = "韩语";
             }
-            if (interface_flag == "日语")
+            if (interfaceFlag == "日语")
             {
                 StaticValue.Zh2En = false;
                 StaticValue.Zh2Jp = true;
                 StaticValue.Zh2Ko = false;
-                RichBoxBody_T.Language = "日语";
+                richBoxTrans.Language = "日语";
             }
-            if (interface_flag == "中英")
+            if (interfaceFlag == "中英")
             {
                 StaticValue.Zh2En = true;
                 StaticValue.Zh2Jp = false;
                 StaticValue.Zh2Ko = false;
-                RichBoxBody_T.Language = "中英";
+                richBoxTrans.Language = "中英";
             }
             if (Config.Get("配置", "翻译接口") == "谷歌")
             {
-                googleTransText = Translate_Google(typeset_txt);
+                googleTransText = Translate_Google(typeSetText);
             }
             if (Config.Get("配置", "翻译接口") == "百度")
             {
-                googleTransText = TranslateBaidu(typeset_txt);
+                googleTransText = TranslateBaidu(typeSetText);
             }
             if (Config.Get("配置", "翻译接口") == "腾讯")
             {
-                googleTransText = Translate_Tencent(typeset_txt);
+                googleTransText = TranslateTencent(typeSetText);
             }
         }
-        PictureBox1.Visible = false;
-        PictureBox1.SendToBack( );
-        Invoke(new translate(translate_child));
-        pinyin_flag = false;
+        image1.Visible = false;
+        image1.SendToBack( );
+        Invoke(new Translate(TranslateChild));
+        pinyinFlag = false;
     }
 
-    private void Trans_close_Click(object o, EventArgs e)
+    private void TransBaiduClick(object o, EventArgs e) => TranslateForeach("百度");
+    private void TransCloseClick(object o, EventArgs e)
     {
-        base.MinimumSize = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
-        transtalate_fla = "关闭";
-        RichBoxBody.Dock = DockStyle.Fill;
-        RichBoxBody_T.Visible = false;
-        PictureBox1.Visible = false;
-        RichBoxBody_T.Text = "";
+        base.MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+        transFlag = "关闭";
+        richBox.Dock = DockStyle.Fill;
+        richBoxTrans.Visible = false;
+        image1.Visible = false;
+        richBoxTrans.Text = "";
         if (WindowState == FormWindowState.Maximized)
         {
             WindowState = FormWindowState.Normal;
         }
-        Size = new Size((int) font_base.Width * 23, (int) font_base.Height * 24);
+        Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
     }
 
-    private void Trans_copy_Click(object o, EventArgs e)
+    private void TransCopyClick(object o, EventArgs e)
     {
-        RichBoxBody_T.Focus( );
-        RichBoxBody_T.EditBox.Copy( );
+        richBoxTrans.Focus( );
+        richBoxTrans.EditBox.Copy( );
     }
 
-    private void Trans_foreach(string name)
+    private void TransGoogleClick(object o, EventArgs e) => TranslateForeach("谷歌");
+
+    private void TranslateChild( )
+    {
+        richBoxTrans.Text = googleTransText;
+        googleTransText = "";
+    }
+
+    private void TranslateClick( )
+    {
+        typeSetText = richBox.Text;
+        richBoxTrans.Visible = true;
+        WindowState = FormWindowState.Normal;
+        transFlag = "开启";
+        richBox.Dock = DockStyle.None;
+        richBoxTrans.Dock = DockStyle.None;
+        richBoxTrans.BorderStyle = BorderStyle.Fixed3D;
+        richBoxTrans.Text = "";
+        richBox.Focus( );
+        if (isNumOk == 0)
+        {
+            richBox.Size = new Size(ClientRectangle.Width, ClientRectangle.Height);
+            Size = new Size(richBox.Width * 2, richBox.Height);
+            richBoxTrans.Size = new Size(richBox.Width, richBox.Height);
+            richBoxTrans.Location = (Point) new Size(richBox.Width, 0);
+            richBoxTrans.Name = "rich_trans";
+            richBoxTrans.TabIndex = 1;
+            richBoxTrans.SetTextFlag("我是翻译文本框");
+            richBoxTrans.ImeMode = ImeMode.On;
+        }
+        isNumOk++;
+        image1.Visible = true;
+        image1.BringToFront( );
+        MinimumSize = new Size((int) fontBase.Width * 23 * 2, (int) fontBase.Height * 24);
+        Size = new Size((int) fontBase.Width * 23 * 2, (int) fontBase.Height * 24);
+        CheckForIllegalCrossThreadCalls = false;
+        new Thread(new ThreadStart(trans_Calculate)).Start( );
+    }
+
+    private void TranslateForeach(string name)
     {
         if (name == "百度")
         {
-            trans_baidu.Text = "百度√";
-            trans_google.Text = "谷歌";
-            trans_tencent.Text = "腾讯";
+            transBaidu.Text = "百度√";
+            transGoogle.Text = "谷歌";
+            transTencent.Text = "腾讯";
             Config.Set("配置", "翻译接口", "百度");
         }
         if (name == "谷歌")
         {
-            trans_baidu.Text = "百度";
-            trans_google.Text = "谷歌√";
-            trans_tencent.Text = "腾讯";
+            transBaidu.Text = "百度";
+            transGoogle.Text = "谷歌√";
+            transTencent.Text = "腾讯";
             Config.Set("配置", "翻译接口", "谷歌");
         }
         if (name == "腾讯")
         {
-            trans_google.Text = "谷歌";
-            trans_baidu.Text = "百度";
-            trans_tencent.Text = "腾讯√";
+            transGoogle.Text = "谷歌";
+            transBaidu.Text = "百度";
+            transTencent.Text = "腾讯√";
             Config.Set("配置", "翻译接口", "腾讯");
         }
     }
-
-    private void Trans_google_Click(object o, EventArgs e) => Trans_foreach("谷歌");
-
-    private void Trans_paste_Click(object o, EventArgs e)
-    {
-        RichBoxBody_T.Focus( );
-        RichBoxBody_T.EditBox.Paste( );
-    }
-
-    private void Trans_SelectAll_Click(object o, EventArgs e)
-    {
-        RichBoxBody_T.Focus( );
-        RichBoxBody_T.EditBox.SelectAll( );
-    }
-
-    private void Trans_tencent_Click(object o, EventArgs e) => Trans_foreach("腾讯");
-
-    private void Trans_Voice_Click(object o, EventArgs e)
-    {
-        RichBoxBody_T.Focus( );
-        speak_copyb = "朗读";
-        htmltxt = RichBoxBody_T.SelectText;
-        SendMessage(Handle, 786, 590);
-    }
-
-    private void translate_child( )
-    {
-        RichBoxBody_T.Text = googleTransText;
-        googleTransText = "";
-    }
-
-    private string Translate_Tencent(string strtrans)
+    private string TranslateTencent(string strtrans)
     {
         string text = "";
         try
@@ -3624,76 +3480,88 @@ public partial class FmMain : Form
         return text;
     }
 
-    private void transtalate_Click( )
+    private void translateText( )
     {
-        typeset_txt = RichBoxBody.Text;
-        RichBoxBody_T.Visible = true;
-        WindowState = FormWindowState.Normal;
-        transtalate_fla = "开启";
-        RichBoxBody.Dock = DockStyle.None;
-        RichBoxBody_T.Dock = DockStyle.None;
-        RichBoxBody_T.BorderStyle = BorderStyle.Fixed3D;
-        RichBoxBody_T.Text = "";
-        RichBoxBody.Focus( );
-        if (num_ok == 0)
+        if (Config.Get("配置", "快速翻译") == "True")
         {
-            RichBoxBody.Size = new Size(ClientRectangle.Width, ClientRectangle.Height);
-            Size = new Size(RichBoxBody.Width * 2, RichBoxBody.Height);
-            RichBoxBody_T.Size = new Size(RichBoxBody.Width, RichBoxBody.Height);
-            RichBoxBody_T.Location = (Point) new Size(RichBoxBody.Width, 0);
-            RichBoxBody_T.Name = "rich_trans";
-            RichBoxBody_T.TabIndex = 1;
-            RichBoxBody_T.SetTextFlag("我是翻译文本框");
-            RichBoxBody_T.ImeMode = ImeMode.On;
+            string text = "";
+            try
+            {
+                transHotkey = TextUtils.GetTextFromClipboard( );
+                if (Config.Get("配置", "翻译接口") == "谷歌")
+                {
+                    text = Translate_Google(transHotkey);
+                }
+                if (Config.Get("配置", "翻译接口") == "百度")
+                {
+                    text = TranslateBaidu(transHotkey);
+                }
+                if (Config.Get("配置", "翻译接口") == "腾讯")
+                {
+                    text = TranslateTencent(transHotkey);
+                }
+                Clipboard.SetData(DataFormats.UnicodeText, text);
+                SendKeys.SendWait("^v");
+                return;
+            }
+            catch
+            {
+                Clipboard.SetData(DataFormats.UnicodeText, text);
+                SendKeys.SendWait("^v");
+                return;
+            }
         }
-        num_ok++;
-        PictureBox1.Visible = true;
-        PictureBox1.BringToFront( );
-        MinimumSize = new Size((int) font_base.Width * 23 * 2, (int) font_base.Height * 24);
-        Size = new Size((int) font_base.Width * 23 * 2, (int) font_base.Height * 24);
-        CheckForIllegalCrossThreadCalls = false;
-        new Thread(new ThreadStart(trans_Calculate)).Start( );
+        SendKeys.SendWait("^c");
+        SendKeys.Flush( );
+        richBox.Text = Clipboard.GetText( );
+        TranslateClick( );
+        FormBorderStyle = FormBorderStyle.Sizable;
+        Visible = true;
+        SetForegroundWindow(StaticValue.mainhandle);
+        Show( );
+        WindowState = FormWindowState.Normal;
+        if (Config.Get("工具栏", "顶置") == "True")
+        {
+            TopMost = true;
+            return;
+        }
+        TopMost = false;
     }
 
-    private void tray_double_Click(object o, EventArgs e)
+    private void TranslateVoiceClick(object o, EventArgs e)
+    {
+        richBoxTrans.Focus( );
+        speakCopyB = "朗读";
+        htmltxt = richBoxTrans.SelectText;
+        SendMessage(Handle, 786, 590);
+    }
+
+    private void TransPasteClick(object o, EventArgs e)
+    {
+        richBoxTrans.Focus( );
+        richBoxTrans.EditBox.Paste( );
+    }
+
+    private void TransSelectAllClick(object o, EventArgs e)
+    {
+        richBoxTrans.Focus( );
+        richBoxTrans.EditBox.SelectAll( );
+    }
+
+    private void TransTencentClick(object o, EventArgs e)
+        => TranslateForeach("腾讯");
+    private void TrayDoubleClick(object o, EventArgs e)
     {
         UnregisterHotKey(Handle, 205);
         menu.Hide( );
-        RichBoxBody.Hide = "";
-        RichBoxBody_T.Hide = "";
-        Main_OCR_Quickscreenshots( );
-    }
-
-    private void tray_limit_Click(object o, EventArgs e) => new Thread(new ThreadStart(about)).Start( );
-
-    private void tray_note_Click(object o, EventArgs e)
-    {
-        fmNote.Show( );
-        fmNote.WindowState = FormWindowState.Normal;
-        fmNote.Visible = true;
-    }
-
-    private void tray_null_Proxy_Click(object o, EventArgs e)
-    {
-        null_Proxy.Text = "不使用代理√";
-        customize_Proxy.Text = "自定义代理";
-        system_Proxy.Text = "系统代理";
-        proxy_flag = "关闭";
-        WebRequest.DefaultWebProxy = null;
-    }
-
-    private void tray_system_Proxy_Click(object o, EventArgs e)
-    {
-        null_Proxy.Text = "不使用代理";
-        customize_Proxy.Text = "自定义代理";
-        system_Proxy.Text = "系统代理√";
-        proxy_flag = "系统";
-        WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy( );
+        richBox.Hide = "";
+        richBoxTrans.Hide = "";
+        MainOcrQuickCapture( );
     }
 
     private void TrayExitClick(object o, EventArgs e)
     {
-        minico.Dispose( );
+        notifyIcon.Dispose( );
         SaveIniFile( );
         Process.GetCurrentProcess( ).Kill( );
     }
@@ -3702,6 +3570,25 @@ public partial class FmMain : Form
     {
         WindowState = FormWindowState.Minimized;
         new FmHelp( ).Show( );
+    }
+
+    private void TrayLimitClick(object o, EventArgs e)
+                => new Thread(new ThreadStart(about)).Start( );
+
+    private void TrayNoteClick(object o, EventArgs e)
+    {
+        fmNote.Show( );
+        fmNote.WindowState = FormWindowState.Normal;
+        fmNote.Visible = true;
+    }
+
+    private void TrayNullProxyClick(object o, EventArgs e)
+    {
+        nullProxy.Text = "不使用代理√";
+        customizeProxy.Text = "自定义代理";
+        systemProxy.Text = "系统代理";
+        proxyFlag = "关闭";
+        WebRequest.DefaultWebProxy = null;
     }
 
     private void TraySettingClick(object o, EventArgs e)
@@ -3726,7 +3613,7 @@ public partial class FmMain : Form
                 pubnote[i] = "";
             }
             StaticValue.Notes = pubnote;
-            fmNote.TextNoteChange = "";
+            fmNote.TextNoteChange( );
             fmNote.Location = new Point(Screen.AllScreens[0].WorkingArea.Width - fmNote.Width, Screen.AllScreens[0].WorkingArea.Height - fmNote.Height);
             if (Config.Get("快捷键", "文字识别") != "请按下快捷键")
             {
@@ -3756,29 +3643,29 @@ public partial class FmMain : Form
                 string text9 = "F11";
                 SetHotkey(text8, text9, value4, 235);
             }
-            proxy_flag = Config.Get("代理", "代理类型");
-            proxy_url = Config.Get("代理", "服务器");
-            proxy_port = Config.Get("代理", "端口");
-            proxy_name = Config.Get("代理", "服务器账号");
-            proxy_password = Config.Get("代理", "服务器密码");
+            proxyFlag = Config.Get("代理", "代理类型");
+            proxyUrl = Config.Get("代理", "服务器");
+            proxyPort = Config.Get("代理", "端口");
+            proxyName = Config.Get("代理", "服务器账号");
+            proxyPassword = Config.Get("代理", "服务器密码");
             StaticValue.BaiduApiId = Config.Get("密钥_百度", "secret_id");
             StaticValue.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
-            if (proxy_flag == "不使用代理")
+            if (proxyFlag == "不使用代理")
             {
                 WebRequest.DefaultWebProxy = null;
             }
-            if (proxy_flag == "系统代理")
+            if (proxyFlag == "系统代理")
             {
                 WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy( );
             }
-            if (proxy_flag == "自定义代理")
+            if (proxyFlag == "自定义代理")
             {
                 try
                 {
-                    WebProxy webProxy = new(proxy_url, Convert.ToInt32(proxy_port));
-                    if (!string.IsNullOrEmpty(proxy_name) && !string.IsNullOrEmpty(proxy_password))
+                    WebProxy webProxy = new(proxyUrl, Convert.ToInt32(proxyPort));
+                    if (!string.IsNullOrEmpty(proxyName) && !string.IsNullOrEmpty(proxyPassword))
                     {
-                        ICredentials credentials = new NetworkCredential(proxy_name, proxy_password);
+                        ICredentials credentials = new NetworkCredential(proxyName, proxyPassword);
                         webProxy.Credentials = credentials;
                     }
                     WebRequest.DefaultWebProxy = webProxy;
@@ -3811,10 +3698,19 @@ public partial class FmMain : Form
         }
         TopMost = false;
     }
-    private void TTS( ) => new Thread(new ThreadStart(TTS_thread)).Start( );
-    private void TTS_child( )
+
+    private void TraySystemProxyClick(object o, EventArgs e)
     {
-        if (RichBoxBody.Text != null || !string.IsNullOrEmpty(RichBoxBody_T.Text))
+        nullProxy.Text = "不使用代理";
+        customizeProxy.Text = "自定义代理";
+        systemProxy.Text = "系统代理√";
+        proxyFlag = "系统";
+        WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy( );
+    }
+    private void TTS( ) => new Thread(new ThreadStart(TtsThread)).Start( );
+    private void TtsChild( )
+    {
+        if (richBox.Text != null || !string.IsNullOrEmpty(richBoxTrans.Text))
         {
             if (speaking)
             {
@@ -3838,7 +3734,7 @@ public partial class FmMain : Form
         }
     }
 
-    private void TTS_thread( )
+    private void TtsThread( )
     {
         try
         {
@@ -3847,13 +3743,13 @@ public partial class FmMain : Form
             responseStream.Close( );
             string text2 = !TextUtils.ContainsZh(htmltxt) ? "zh" : "zh";
             HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create(string.Concat(new string[]
-                {
-                    "http://tsn.baidu.com/text2audio?lan=" + text2 + "&ctp=1&cuid=abcdxxx&tok=",
-                    ((JObject)JsonConvert.DeserializeObject(text))["access_token"].ToString(),
-                    "&tex=",
-                    HttpUtility.UrlEncode(htmltxt.Replace("***", "")),
-                    "&vol=9&per=0&spd=5&pit=5"
-                }));
+            {
+                "http://tsn.baidu.com/text2audio?lan=" + text2 + "&ctp=1&cuid=abcdxxx&tok=",
+                ((JObject)JsonConvert.DeserializeObject(text))["access_token"].ToString(),
+                "&tex=",
+                HttpUtility.UrlEncode(htmltxt.Replace("***", "")),
+                "&vol=9&per=0&spd=5&pit=5"
+            }));
             httpWebRequest.Method = "POST";
             HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse( );
             byte[] array = new byte[16384];
@@ -3868,16 +3764,16 @@ public partial class FmMain : Form
                 array2 = memoryStream.ToArray( );
             }
             ttsData = array2;
-            if (speak_copyb == "朗读" || voice_count == 0)
+            if (speakCopyB == "朗读" || voiceCount == 0)
             {
-                Invoke(new translate(Speak_child));
-                speak_copyb = "";
+                Invoke(new Translate(Speak_child));
+                speakCopyB = "";
             }
             else
             {
-                Invoke(new translate(TTS_child));
+                Invoke(new Translate(TtsChild));
             }
-            voice_count++;
+            voiceCount++;
         }
         catch (Exception ex)
         {
@@ -3886,52 +3782,5 @@ public partial class FmMain : Form
                 MessageBox.Show("文本过长，请使用右键菜单中的选中朗读！", "提醒");
             }
         }
-    }
-    private void 翻译文本( )
-    {
-        if (Config.Get("配置", "快速翻译") == "True")
-        {
-            string text = "";
-            try
-            {
-                trans_hotkey = TextUtils.GetTextFromClipboard( );
-                if (Config.Get("配置", "翻译接口") == "谷歌")
-                {
-                    text = Translate_Google(trans_hotkey);
-                }
-                if (Config.Get("配置", "翻译接口") == "百度")
-                {
-                    text = TranslateBaidu(trans_hotkey);
-                }
-                if (Config.Get("配置", "翻译接口") == "腾讯")
-                {
-                    text = Translate_Tencent(trans_hotkey);
-                }
-                Clipboard.SetData(DataFormats.UnicodeText, text);
-                SendKeys.SendWait("^v");
-                return;
-            }
-            catch
-            {
-                Clipboard.SetData(DataFormats.UnicodeText, text);
-                SendKeys.SendWait("^v");
-                return;
-            }
-        }
-        SendKeys.SendWait("^c");
-        SendKeys.Flush( );
-        RichBoxBody.Text = Clipboard.GetText( );
-        transtalate_Click( );
-        FormBorderStyle = FormBorderStyle.Sizable;
-        Visible = true;
-        SetForegroundWindow(StaticValue.mainhandle);
-        Show( );
-        WindowState = FormWindowState.Normal;
-        if (Config.Get("工具栏", "顶置") == "True")
-        {
-            TopMost = true;
-            return;
-        }
-        TopMost = false;
     }
 }

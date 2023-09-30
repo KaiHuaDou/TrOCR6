@@ -64,7 +64,7 @@ public static class Config
             Set("更新", "间隔时间", "24");
             Set("截图音效", "自动保存", "True");
             Set("截图音效", "音效路径", "Data\\screenshot.wav");
-            Set("截图音效", "粘贴板", "False");
+            Set("截图音效", "剪贴板", "False");
             Set("工具栏", "合并", "False");
             Set("工具栏", "分段", "False");
             Set("工具栏", "分栏", "False");
@@ -126,8 +126,8 @@ public static class Config
             Set("截图音效", "自动保存", "True");
         if (Get("截图音效", "音效路径") == "__ERROR__")
             Set("截图音效", "音效路径", "Data\\screenshot.wav");
-        if (Get("截图音效", "粘贴板") == "__ERROR__")
-            Set("截图音效", "粘贴板", "False");
+        if (Get("截图音效", "剪贴板") == "__ERROR__")
+            Set("截图音效", "剪贴板", "False");
         if (Get("工具栏", "合并") == "__ERROR__")
             Set("工具栏", "合并", "False");
         if (Get("工具栏", "拆分") == "__ERROR__")

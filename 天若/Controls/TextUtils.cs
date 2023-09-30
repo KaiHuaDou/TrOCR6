@@ -49,7 +49,7 @@ public static class TextUtils
     }
 
     public static bool IsSplited(string text)
-                                    => "。？！?!：".IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1;
+        => "。？！?!：".IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1;
 
     public static string PunctuationQuotation(string pStr)
     {

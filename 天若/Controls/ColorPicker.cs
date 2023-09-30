@@ -6,13 +6,11 @@ namespace TrOCR.Controls;
 
 public class ColorPicker : ToolStripButton
 {
-    public Color SelectedColor { get; set; }
     private readonly HWColorPicker picker;
 
-    public ColorPicker( ) => picker = new HWColorPicker
-    {
-        BorderType = BorderStyle.FixedSingle
-    };
+    public ColorPicker( ) => picker = new HWColorPicker { BorderType = BorderStyle.FixedSingle };
+
+    public Color SelectedColor { get; set; }
 
     protected override void OnClick(EventArgs e)
     {

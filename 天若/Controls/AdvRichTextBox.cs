@@ -36,7 +36,7 @@ public partial class AdvRichTextBox : UserControl
         toolSpace = true;
         toolFull = true;
         undoCmd = new UndoCommand(50);
-        Font = new Font(Font.Name, 9f / StaticValue.Dpifactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / StaticValue.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         InitializeComponent( );
         ReadConfig( );
         EditBox.LanguageOption = RichTextBoxLanguageOptions.UIFonts;

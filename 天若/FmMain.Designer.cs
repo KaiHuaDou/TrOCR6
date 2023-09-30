@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using TrOCR.Controls;
 using static TrOCR.External.NativeMethods;
@@ -21,193 +22,193 @@ namespace TrOCR
         {
             this.components = new global::System.ComponentModel.Container();
             global::System.ComponentModel.ComponentResourceManager componentResourceManager = new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain));
-            this.minico = new NotifyIcon(this.components);
+            this.notifyIcon = new NotifyIcon(this.components);
             this.toolStripSeparator1 = new ToolStripSeparator();
             this.toolStrip = new ToolStripMenuItem();
-            this.trans_input = new ToolStripMenuItem();
-            this.trans_google = new ToolStripMenuItem();
-            this.trans_baidu = new ToolStripMenuItem();
-            this.trans_tencent = new ToolStripMenuItem();
-            this.baidu_table = new ToolStripMenuItem();
-            this.ali_table = new ToolStripMenuItem();
-            this.ocr_table = new ToolStripMenuItem();
+            this.transInput = new ToolStripMenuItem();
+            this.transGoogle = new ToolStripMenuItem();
+            this.transBaidu = new ToolStripMenuItem();
+            this.transTencent = new ToolStripMenuItem();
+            this.tableBaidu = new ToolStripMenuItem();
+            this.tableAli = new ToolStripMenuItem();
+            this.tableOcr = new ToolStripMenuItem();
             this.menu = new ContextMenuStrip();
             this.menu.Renderer = new MenuItemRendererT();
-            this.ch_en = new ToolStripMenuItem();
+            this.ch2en = new ToolStripMenuItem();
             this.jap = new ToolStripMenuItem();
             this.kor = new ToolStripMenuItem();
             this.pinyin = new ToolStripMenuItem();
-            this.customize_Proxy = new ToolStripMenuItem();
-            this.null_Proxy = new ToolStripMenuItem();
-            this.system_Proxy = new ToolStripMenuItem();
+            this.customizeProxy = new ToolStripMenuItem();
+            this.nullProxy = new ToolStripMenuItem();
+            this.systemProxy = new ToolStripMenuItem();
             this.Proxy = new ToolStripMenuItem();
-            this.left_right = new ToolStripMenuItem();
-            this.righ_left = new ToolStripMenuItem();
-            this.Main_copy = new ToolStripMenuItem();
-            this.Main_paste = new ToolStripMenuItem();
-            this.Main_selectall = new ToolStripMenuItem();
-            this.Main_jiekou = new ToolStripMenuItem();
-            this.Main_exit = new ToolStripMenuItem();
-            this.Main_change = new ToolStripMenuItem();
-            this.zh_tra = new ToolStripMenuItem();
-            this.tra_zh = new ToolStripMenuItem();
-            this.str_Upper = new ToolStripMenuItem();
-            this.Upper_str = new ToolStripMenuItem();
+            this.left2right = new ToolStripMenuItem();
+            this.right2left = new ToolStripMenuItem();
+            this.mainCopy = new ToolStripMenuItem();
+            this.mainPaste = new ToolStripMenuItem();
+            this.mainSelectAll = new ToolStripMenuItem();
+            this.mainInterface = new ToolStripMenuItem();
+            this.mainExit = new ToolStripMenuItem();
+            this.mainChange = new ToolStripMenuItem();
+            this.ZhTrans = new ToolStripMenuItem();
+            this.TransZh = new ToolStripMenuItem();
+            this.StrUpper = new ToolStripMenuItem();
+            this.UpperStr = new ToolStripMenuItem();
             this.speak = new ToolStripMenuItem();
-            this.Trans_copy = new ToolStripMenuItem();
-            this.Trans_paste = new ToolStripMenuItem();
-            this.Trans_SelectAll = new ToolStripMenuItem();
-            this.Trans_close = new ToolStripMenuItem();
-            this.Trans_Voice = new ToolStripMenuItem();
+            this.transCopy = new ToolStripMenuItem();
+            this.transPaste = new ToolStripMenuItem();
+            this.transSelectAll = new ToolStripMenuItem();
+            this.transClose = new ToolStripMenuItem();
+            this.transVoice = new ToolStripMenuItem();
             this.sougou = new ToolStripMenuItem();
-            this.Mathfuntion = new ToolStripMenuItem();
+            this.mathFunction = new ToolStripMenuItem();
             this.tencent = new ToolStripMenuItem();
             this.baidu = new ToolStripMenuItem();
-            this.shupai = new ToolStripMenuItem();
+            this.verticalScan = new ToolStripMenuItem();
             this.write = new ToolStripMenuItem();
-            this.tencent_v = new ToolStripMenuItem();
-            this.baidu_s = new ToolStripMenuItem();
-            this.baidu_v = new ToolStripMenuItem();
+            this.tencentV = new ToolStripMenuItem();
+            this.baiduS = new ToolStripMenuItem();
+            this.baiduV = new ToolStripMenuItem();
             this.tencent = new ToolStripMenuItem();
             this.baidu = new ToolStripMenuItem();
             this.youdao = new ToolStripMenuItem();
-            this.Chinese = new ToolStripMenuItem();
-            this.English = new ToolStripMenuItem();
-            this.Split = new ToolStripMenuItem();
-            this.Restore = new ToolStripMenuItem();
-            this.menu_copy = new ContextMenuStrip();
-            this.menu_copy.Renderer = new MenuItemRendererT();
-            this.PictureBox1 = new PictureBox();
-            this.RichBoxBody = new AdvRichTextBox();
-            this.RichBoxBody_T = new AdvRichTextBox();
-            this.minico.BalloonTipIcon = ToolTipIcon.Info;
-            this.minico.BalloonTipText = "最小化到任务栏";
-            this.minico.BalloonTipTitle = "提示";
-            this.minico.Icon = (Icon)componentResourceManager.GetObject("minico.Icon");
-            this.minico.Text = "双击开始截图识别";
-            this.minico.Visible = true;
-            this.minico.MouseDoubleClick += new MouseEventHandler(this.tray_double_Click);
-            this.font_base.Width = 18f * this.F_factor;
-            this.font_base.Height = 17f * this.F_factor;
-            this.RichBoxBody_T.Visible = false;
-            this.RichBoxBody.Dock = DockStyle.Fill;
-            this.RichBoxBody.BorderStyle = BorderStyle.Fixed3D;
-            this.RichBoxBody.Location = new Point(0, 0);
-            this.RichBoxBody.Name = "htmlTextBoxBody";
-            this.RichBoxBody.ImeMode = ImeMode.HangulFull;
-            this.RichBoxBody.TabIndex = 200;
-            this.RichBoxBody.SetTextFlag("天若幽心");
-            this.RichBoxBody_T.ImeMode = ImeMode.HangulFull;
-            this.Trans_copy.Text = "复制";
-            this.Trans_copy.Click += new global::System.EventHandler(this.Trans_copy_Click);
-            this.Trans_paste.Text = "粘贴";
-            this.Trans_paste.Click += new global::System.EventHandler(this.Trans_paste_Click);
-            this.Trans_SelectAll.Text = "全选";
-            this.Trans_SelectAll.Click += new global::System.EventHandler(this.Trans_SelectAll_Click);
-            this.Trans_close.Text = "关闭";
-            this.Trans_close.Click += new global::System.EventHandler(this.Trans_close_Click);
-            this.Trans_Voice.Text = "朗读";
-            this.Trans_Voice.Click += new global::System.EventHandler(this.Trans_Voice_Click);
-            this.trans_input.Text = "接口";
-            this.trans_input.Click += new global::System.EventHandler(this.Trans_SelectAll_Click);
-            this.trans_google.Text = "谷歌√";
-            this.trans_google.Click += new global::System.EventHandler(this.Trans_google_Click);
-            this.trans_baidu.Text = "百度";
-            this.trans_baidu.Click += new global::System.EventHandler(this.Trans_baidu_Click);
-            this.trans_tencent.Text = "腾讯";
-            this.trans_tencent.Click += new global::System.EventHandler(this.Trans_tencent_Click);
-            this.menu_copy.Items.AddRange(new ToolStripItem[] { this.Trans_copy, this.Trans_paste, this.Trans_SelectAll, this.Trans_Voice, this.trans_input, this.Trans_close });
-            this.trans_input.DropDownItems.AddRange(new ToolStripItem[] { this.trans_google, this.trans_baidu, this.trans_tencent });
-            this.menu_copy.Font = new Font("微软雅黑", 9f / StaticValue.Dpifactor, FontStyle.Regular);
-            this.Main_copy.Text = "复制";
-            this.Main_copy.Click += new global::System.EventHandler(this.Main_copy_Click);
-            this.Main_paste.Text = "粘贴";
-            this.Main_paste.Click += new global::System.EventHandler(this.MainPasteClick);
-            this.Main_selectall.Text = "全选";
-            this.Main_selectall.Click += new global::System.EventHandler(this.MainSelectAllClick);
+            this.zh = new ToolStripMenuItem();
+            this.en = new ToolStripMenuItem();
+            this.split = new ToolStripMenuItem();
+            this.restore = new ToolStripMenuItem();
+            this.menuCopy = new ContextMenuStrip();
+            this.menuCopy.Renderer = new MenuItemRendererT();
+            this.image1 = new PictureBox();
+            this.richBox = new AdvRichTextBox();
+            this.richBoxTrans = new AdvRichTextBox();
+            this.notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            this.notifyIcon.BalloonTipText = "最小化到任务栏";
+            this.notifyIcon.BalloonTipTitle = "提示";
+            this.notifyIcon.Icon = (Icon)componentResourceManager.GetObject("minico.Icon");
+            this.notifyIcon.Text = "双击开始截图识别";
+            this.notifyIcon.Visible = true;
+            this.notifyIcon.MouseDoubleClick += new MouseEventHandler(this.TrayDoubleClick);
+            this.fontBase.Width = 18f * this.fontFactor;
+            this.fontBase.Height = 17f * this.fontFactor;
+            this.richBoxTrans.Visible = false;
+            this.richBox.Dock = DockStyle.Fill;
+            this.richBox.BorderStyle = BorderStyle.Fixed3D;
+            this.richBox.Location = new Point(0, 0);
+            this.richBox.Name = "htmlTextBoxBody";
+            this.richBox.ImeMode = ImeMode.HangulFull;
+            this.richBox.TabIndex = 200;
+            this.richBox.SetTextFlag("天若幽心");
+            this.richBoxTrans.ImeMode = ImeMode.HangulFull;
+            this.transCopy.Text = "复制";
+            this.transCopy.Click += new EventHandler(this.TransCopyClick);
+            this.transPaste.Text = "粘贴";
+            this.transPaste.Click += new EventHandler(this.TransPasteClick);
+            this.transSelectAll.Text = "全选";
+            this.transSelectAll.Click += new EventHandler(this.TransSelectAllClick);
+            this.transClose.Text = "关闭";
+            this.transClose.Click += new EventHandler(this.TransCloseClick);
+            this.transVoice.Text = "朗读";
+            this.transVoice.Click += new EventHandler(this.TranslateVoiceClick);
+            this.transInput.Text = "接口";
+            this.transInput.Click += new EventHandler(this.TransSelectAllClick);
+            this.transGoogle.Text = "谷歌√";
+            this.transGoogle.Click += new EventHandler(this.TransGoogleClick);
+            this.transBaidu.Text = "百度";
+            this.transBaidu.Click += new EventHandler(this.TransBaiduClick);
+            this.transTencent.Text = "腾讯";
+            this.transTencent.Click += new EventHandler(this.TransTencentClick);
+            this.menuCopy.Items.AddRange(new ToolStripItem[] { this.transCopy, this.transPaste, this.transSelectAll, this.transVoice, this.transInput, this.transClose });
+            this.transInput.DropDownItems.AddRange(new ToolStripItem[] { this.transGoogle, this.transBaidu, this.transTencent });
+            this.menuCopy.Font = new Font("微软雅黑", 9f / StaticValue.DpiFactor, FontStyle.Regular);
+            this.mainCopy.Text = "复制";
+            this.mainCopy.Click += new EventHandler(this.MainCopyClick);
+            this.mainPaste.Text = "粘贴";
+            this.mainPaste.Click += new EventHandler(this.MainPasteClick);
+            this.mainSelectAll.Text = "全选";
+            this.mainSelectAll.Click += new EventHandler(this.MainSelectAllClick);
             this.speak.Text = "朗读";
-            this.speak.Click += new global::System.EventHandler(this.Main_Voice_Click);
-            this.baidu_s.Text = "搜索";
-            this.baidu_s.Click += new global::System.EventHandler(this.Main_baidu_search);
-            this.Main_change.Text = "转换";
-            this.Main_jiekou.Text = "接口";
-            this.Main_exit.Text = "退出";
-            this.Main_exit.Click += new global::System.EventHandler(this.TrayExitClick);
-            this.menu.Items.AddRange(new ToolStripItem[] { this.Main_copy, this.Main_paste, this.Main_selectall, this.speak, this.baidu_s, this.Main_change, this.Main_jiekou, this.Main_exit });
-            this.menu.Font = new Font("微软雅黑", 9f / StaticValue.Dpifactor, FontStyle.Regular);
+            this.speak.Click += new EventHandler(this.MainVoiceClick);
+            this.baiduS.Text = "搜索";
+            this.baiduS.Click += new EventHandler(this.MaiSearchClick);
+            this.mainChange.Text = "转换";
+            this.mainInterface.Text = "接口";
+            this.mainExit.Text = "退出";
+            this.mainExit.Click += new EventHandler(this.TrayExitClick);
+            this.menu.Items.AddRange(new ToolStripItem[] { this.mainCopy, this.mainPaste, this.mainSelectAll, this.speak, this.baiduS, this.mainChange, this.mainInterface, this.mainExit });
+            this.menu.Font = new Font("微软雅黑", 9f / StaticValue.DpiFactor, FontStyle.Regular);
             this.sougou.Text = "搜狗√";
-            this.sougou.Click += new global::System.EventHandler(this.OcrSogouClick);
-            this.Mathfuntion.Text = "公式";
-            this.Mathfuntion.Click += new global::System.EventHandler(this.OCR_Mathfuntion_Click);
+            this.sougou.Click += new EventHandler(this.OcrSogouClick);
+            this.mathFunction.Text = "公式";
+            this.mathFunction.Click += new EventHandler(this.OcrMathClick);
             this.tencent.Text = "腾讯";
-            this.tencent.Click += new global::System.EventHandler(this.OcrTencentClick);
+            this.tencent.Click += new EventHandler(this.OcrTencentClick);
             this.baidu.Text = "百度";
-            this.baidu.Click += new global::System.EventHandler(this.OCR_baidu_Click);
+            this.baidu.Click += new EventHandler(this.OcrBaiduClick);
             this.youdao.Text = "有道";
-            this.youdao.Click += new global::System.EventHandler(this.OCR_youdao_Click);
-            this.ocr_table.Text = "表格";
-            this.baidu_table.Text = "百度";
-            this.baidu_table.Click += new global::System.EventHandler(this.OCR_baidutable_Click);
-            this.ali_table.Text = "阿里";
-            this.ali_table.Click += new global::System.EventHandler(this.OCR_ailitable_Click);
-            this.ocr_table.DropDownItems.AddRange(new ToolStripItem[] { this.baidu_table, this.ali_table });
-            this.shupai.Text = "竖排";
-            this.shupai.Click += new global::System.EventHandler(this.OCR_shupai_Click);
+            this.youdao.Click += new EventHandler(this.OcrYoudaoClick);
+            this.tableOcr.Text = "表格";
+            this.tableBaidu.Text = "百度";
+            this.tableBaidu.Click += new EventHandler(this.OcrTableBaiduClick);
+            this.tableAli.Text = "阿里";
+            this.tableAli.Click += new EventHandler(this.OcrTableAliClick);
+            this.tableOcr.DropDownItems.AddRange(new ToolStripItem[] { this.tableBaidu, this.tableAli });
+            this.verticalScan.Text = "竖排";
+            this.verticalScan.Click += new EventHandler(this.OcrVerticalClick);
             this.write.Text = "手写";
-            this.write.Click += new global::System.EventHandler(this.OCR_write_Click);
-            this.Chinese.Text = "中文标点";
-            this.Chinese.Click += new global::System.EventHandler(this.change_Chinese_Click);
-            this.English.Text = "英文标点";
-            this.English.Click += new global::System.EventHandler(this.ChangeEnglishClick);
-            this.zh_tra.Text = "中文繁体";
-            this.zh_tra.Click += new global::System.EventHandler(this.change_zh_tra_Click);
-            this.tra_zh.Text = "中文简体";
-            this.tra_zh.Click += new global::System.EventHandler(this.change_tra_zh_Click);
-            this.str_Upper.Text = "英文大写";
-            this.str_Upper.Click += new global::System.EventHandler(this.change_str_Upper_Click);
-            this.Upper_str.Text = "英文小写";
-            this.Upper_str.Click += new global::System.EventHandler(this.change_Upper_str_Click);
+            this.write.Click += new EventHandler(this.OcrWriteClick);
+            this.zh.Text = "中文标点";
+            this.zh.Click += new EventHandler(this.Switch2ZhClick);
+            this.en.Text = "英文标点";
+            this.en.Click += new EventHandler(this.Switch2EnClick);
+            this.ZhTrans.Text = "中文繁体";
+            this.ZhTrans.Click += new EventHandler(this.Switch2ZhTransClick);
+            this.TransZh.Text = "中文简体";
+            this.TransZh.Click += new EventHandler(this.Switch2TransZhClick);
+            this.StrUpper.Text = "英文大写";
+            this.StrUpper.Click += new EventHandler(this.Switch2StrUpperClick);
+            this.UpperStr.Text = "英文小写";
+            this.UpperStr.Click += new EventHandler(this.Switch2UpperStrClick);
             this.pinyin.Text = "汉语拼音";
-            this.pinyin.Click += new global::System.EventHandler(this.change_pinyin_Click);
-            this.change_button = this.Main_change;
-            this.change_button.DropDownItems.AddRange(new ToolStripItem[] { this.Chinese, this.English, this.zh_tra, this.tra_zh, this.str_Upper, this.Upper_str, this.pinyin });
-            this.interface_button = this.Main_jiekou;
-            this.interface_button.DropDownItems.AddRange(new ToolStripItem[] { this.sougou, this.tencent, this.youdao, this.baidu, this.toolStripSeparator1, this.Mathfuntion, this.ocr_table, this.shupai });
+            this.pinyin.Click += new EventHandler(this.Switch2PinyinClick);
+            this.change_button = this.mainChange;
+            this.change_button.DropDownItems.AddRange(new ToolStripItem[] { this.zh, this.en, this.ZhTrans, this.TransZh, this.StrUpper, this.UpperStr, this.pinyin });
+            this.interface_button = this.mainInterface;
+            this.interface_button.DropDownItems.AddRange(new ToolStripItem[] { this.sougou, this.tencent, this.youdao, this.baidu, this.toolStripSeparator1, this.mathFunction, this.tableOcr, this.verticalScan });
             if (Helper.Config.Get("配置", "接口") == "百度")
             {
-                this.ch_en.Text = "中英√";
+                this.ch2en.Text = "中英√";
             }
             else
             {
-                this.ch_en.Text = "中英";
+                this.ch2en.Text = "中英";
             }
-            this.ch_en.Click += new global::System.EventHandler(this.OCR_baidu_Ch_and_En_Click);
+            this.ch2en.Click += new EventHandler(this.OcrBaiduZhEnClick);
             this.jap.Text = "日语";
-            this.jap.Click += new global::System.EventHandler(this.OCR_baidu_Jap_Click);
+            this.jap.Click += new EventHandler(this.OCR_baidu_Jap_Click);
             this.kor.Text = "韩语";
-            this.kor.Click += new global::System.EventHandler(this.OCR_baidu_Kor_Click);
-            ((ToolStripDropDownItem)this.baidu).DropDownItems.AddRange(new ToolStripItem[] { this.ch_en, this.jap, this.kor });
-            this.left_right.Text = "从左向右";
-            this.left_right.Click += new global::System.EventHandler(this.OCR_lefttoright_Click);
-            this.righ_left.Text = "从右向左";
-            this.righ_left.Click += new global::System.EventHandler(this.OCR_righttoleft_Click);
-            ((ToolStripDropDownItem)this.shupai).DropDownItems.AddRange(new ToolStripItem[] { this.left_right, this.righ_left });
-            this.RichBoxBody.InnerContextMenuStrip = this.menu;
-            this.RichBoxBody_T.InnerContextMenuStrip = this.menu_copy;
-            this.PictureBox1.Image = (Image)new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain)).GetObject("loadcat.gif");
-            this.PictureBox1.Size = new Size(85, 85);
-            this.PictureBox1.Location = (Point)new Size((int)this.font_base.Width * 34 - this.PictureBox1.Size.Width / 2, (int)(110f * this.F_factor));
-            this.PictureBox1.BackColor = Color.White;
-            this.PictureBox1.Visible = false;
+            this.kor.Click += new EventHandler(this.OCR_baidu_Kor_Click);
+            ((ToolStripDropDownItem)this.baidu).DropDownItems.AddRange(new ToolStripItem[] { this.ch2en, this.jap, this.kor });
+            this.left2right.Text = "从左向右";
+            this.left2right.Click += new EventHandler(this.OCR_lefttoright_Click);
+            this.right2left.Text = "从右向左";
+            this.right2left.Click += new EventHandler(this.OCR_righttoleft_Click);
+            ((ToolStripDropDownItem)this.verticalScan).DropDownItems.AddRange(new ToolStripItem[] { this.left2right, this.right2left });
+            this.richBox.InnerContextMenuStrip = this.menu;
+            this.richBoxTrans.InnerContextMenuStrip = this.menuCopy;
+            this.image1.Image = (Image)new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain)).GetObject("loadcat.gif");
+            this.image1.Size = new Size(85, 85);
+            this.image1.Location = (Point)new Size((int)this.fontBase.Width * 34 - this.image1.Size.Width / 2, (int)(110f * this.fontFactor));
+            this.image1.BackColor = Color.White;
+            this.image1.Visible = false;
             base.SuspendLayout();
             base.StartPosition = FormStartPosition.Manual;
             base.Location = (Point)new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
-            base.Size = new Size((int)this.font_base.Width * 23, (int)this.font_base.Height * 24);
-            base.Controls.Add(this.RichBoxBody_T);
-            base.Controls.Add(this.PictureBox1);
-            base.Controls.Add(this.RichBoxBody);
-            base.Load += new global::System.EventHandler(this.Load_Click);
-            base.Resize += new global::System.EventHandler(this.Form_Resize);
+            base.Size = new Size((int)this.fontBase.Width * 23, (int)this.fontBase.Height * 24);
+            base.Controls.Add(this.richBoxTrans);
+            base.Controls.Add(this.image1);
+            base.Controls.Add(this.richBox);
+            base.Load += new EventHandler(this.Load_Click);
+            base.Resize += new EventHandler(this.Form_Resize);
             base.Name = "Form1";
             this.Text = "耗时：";
             if (Helper.Config.Get("工具栏", "顶置") == "True")
@@ -225,21 +226,21 @@ namespace TrOCR
 
         private global::System.ComponentModel.IContainer components;
 
-        public NotifyIcon minico;
+        public NotifyIcon notifyIcon;
 
         public ContextMenuStrip menu;
 
         private ToolStripMenuItem toolStrip;
 
-        public ToolStripMenuItem Main_copy;
+        public ToolStripMenuItem mainCopy;
 
-        public ToolStripMenuItem Main_paste;
+        public ToolStripMenuItem mainPaste;
 
-        public ToolStripMenuItem Main_selectall;
+        public ToolStripMenuItem mainSelectAll;
 
-        public ToolStripMenuItem Main_exit;
+        public ToolStripMenuItem mainExit;
 
-        public ToolStripMenuItem Main_jiekou;
+        public ToolStripMenuItem mainInterface;
 
         public ToolStripItem sougou;
 
@@ -251,98 +252,98 @@ namespace TrOCR
 
         public ToolStripDropDownItem interface_button;
 
-        public ToolStripMenuItem Main_change;
+        public ToolStripMenuItem mainChange;
 
         public ToolStripDropDownItem change_button;
 
-        public ToolStripMenuItem Chinese;
+        public ToolStripMenuItem zh;
 
-        public ToolStripMenuItem English;
+        public ToolStripMenuItem en;
 
-        public AdvRichTextBox RichBoxBody_T;
+        public AdvRichTextBox richBoxTrans;
 
-        public ContextMenuStrip menu_copy;
+        public ContextMenuStrip menuCopy;
 
-        public ToolStripMenuItem Trans_copy;
+        public ToolStripMenuItem transCopy;
 
-        public ToolStripMenuItem Trans_paste;
+        public ToolStripMenuItem transPaste;
 
-        public ToolStripMenuItem Trans_SelectAll;
+        public ToolStripMenuItem transSelectAll;
 
-        public ToolStripMenuItem Trans_close;
+        public ToolStripMenuItem transClose;
 
-        public SizeF font_base;
+        public SizeF fontBase;
 
-        public PictureBox PictureBox1;
+        public PictureBox image1;
 
-        public ToolStripMenuItem Split;
+        public ToolStripMenuItem split;
 
-        public ToolStripMenuItem Restore;
+        public ToolStripMenuItem restore;
 
-        public float F_factor;
+        public float fontFactor;
 
-        private AdvRichTextBox RichBoxBody;
+        private AdvRichTextBox richBox;
 
         private global::System.IntPtr nextClipboardViewer;
 
-        public ToolStripMenuItem baidu_v;
+        public ToolStripMenuItem baiduV;
 
-        public ToolStripMenuItem tencent_v;
+        public ToolStripMenuItem tencentV;
 
-        public ToolStripMenuItem baidu_s;
+        public ToolStripMenuItem baiduS;
 
         private ToolStripMenuItem speak;
 
-        private ToolStripMenuItem Trans_Voice;
+        private ToolStripMenuItem transVoice;
 
-        private ToolStripMenuItem zh_tra;
+        private ToolStripMenuItem ZhTrans;
 
-        private ToolStripMenuItem tra_zh;
+        private ToolStripMenuItem TransZh;
 
-        private ToolStripMenuItem str_Upper;
+        private ToolStripMenuItem StrUpper;
 
-        private ToolStripMenuItem Upper_str;
+        private ToolStripMenuItem UpperStr;
 
-        private ToolStripMenuItem ch_en;
+        private ToolStripMenuItem ch2en;
 
         private ToolStripMenuItem jap;
 
         private ToolStripMenuItem kor;
 
-        public ToolStripItem shupai;
+        public ToolStripItem verticalScan;
 
         public ToolStripItem write;
 
-        private ToolStripMenuItem left_right;
+        private ToolStripMenuItem left2right;
 
-        private ToolStripMenuItem righ_left;
+        private ToolStripMenuItem right2left;
 
-        private ToolStripMenuItem customize_Proxy;
+        private ToolStripMenuItem customizeProxy;
 
-        private ToolStripMenuItem null_Proxy;
+        private ToolStripMenuItem nullProxy;
 
-        private ToolStripMenuItem system_Proxy;
+        private ToolStripMenuItem systemProxy;
 
         private ToolStripMenuItem Proxy;
 
         private ToolStripMenuItem pinyin;
 
-        private ToolStripMenuItem trans_input;
+        private ToolStripMenuItem transInput;
 
-        private ToolStripMenuItem trans_google;
+        private ToolStripMenuItem transGoogle;
 
-        private ToolStripMenuItem trans_baidu;
+        private ToolStripMenuItem transBaidu;
 
-        private ToolStripMenuItem trans_tencent;
+        private ToolStripMenuItem transTencent;
 
-        private ToolStripMenuItem ocr_table;
+        private ToolStripMenuItem tableOcr;
 
         private ToolStripSeparator toolStripSeparator1;
 
-        private ToolStripMenuItem baidu_table;
+        private ToolStripMenuItem tableBaidu;
 
-        private ToolStripMenuItem ali_table;
+        private ToolStripMenuItem tableAli;
 
-        public ToolStripItem Mathfuntion;
+        public ToolStripItem mathFunction;
     }
 }

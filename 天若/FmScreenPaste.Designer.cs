@@ -1,6 +1,8 @@
-﻿namespace TrOCR
+﻿using System.Windows.Forms;
+
+namespace TrOCR
 {
-	public partial class FmScreenPaste : global::System.Windows.Forms.Form
+	public partial class FmScreenPaste : Form
 	{
 		protected override void Dispose(bool disposing)
 		{
@@ -13,16 +15,16 @@
 
 		private void InitializeComponent()
 		{
-			this.RightMenu = new global::System.Windows.Forms.ContextMenuStrip();
-			this.关闭ToolStripMenuItem = new global::System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator1 = new global::System.Windows.Forms.ToolStripSeparator();
-			this.toolStripMenuItem6 = new global::System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem8 = new global::System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator2 = new global::System.Windows.Forms.ToolStripSeparator();
-			this.TopmostMenuItem = new global::System.Windows.Forms.ToolStripMenuItem();
+			this.RightMenu = new ContextMenuStrip();
+			this.关闭ToolStripMenuItem = new ToolStripMenuItem();
+			this.toolStripSeparator1 = new ToolStripSeparator();
+			this.toolStripMenuItem6 = new ToolStripMenuItem();
+			this.toolStripMenuItem8 = new ToolStripMenuItem();
+			this.toolStripSeparator2 = new ToolStripSeparator();
+			this.TopmostMenuItem = new ToolStripMenuItem();
 			this.RightMenu.SuspendLayout();
 			base.SuspendLayout();
-			this.RightMenu.Items.AddRange(new global::System.Windows.Forms.ToolStripItem[] { this.关闭ToolStripMenuItem, this.toolStripSeparator1, this.toolStripMenuItem6, this.toolStripMenuItem8, this.toolStripSeparator2, this.TopmostMenuItem });
+			this.RightMenu.Items.AddRange(new ToolStripItem[] { this.关闭ToolStripMenuItem, this.toolStripSeparator1, this.toolStripMenuItem6, this.toolStripMenuItem8, this.toolStripSeparator2, this.TopmostMenuItem });
 			this.RightMenu.Name = "dSkinContextMenuStrip2";
 			this.RightMenu.ShowImageMargin = false;
 			this.RightMenu.Size = new global::System.Drawing.Size(124, 126);
@@ -48,7 +50,7 @@
 			this.TopmostMenuItem.Text = "置顶窗体";
 			this.TopmostMenuItem.Click += new global::System.EventHandler(this.TopmostMenuClick);
 			this.ContextMenuStrip = this.RightMenu;
-			base.StartPosition = global::System.Windows.Forms.FormStartPosition.Manual;
+			base.StartPosition = FormStartPosition.Manual;
 			base.TopMost = true;
 			base.ShowInTaskbar = false;
 			this.RightMenu.ResumeLayout(false);
@@ -57,18 +59,18 @@
 
 		private global::System.ComponentModel.IContainer components;
 
-		private global::System.Windows.Forms.ContextMenuStrip RightMenu;
+		private ContextMenuStrip RightMenu;
 
-		private global::System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
+		private ToolStripMenuItem toolStripMenuItem6;
 
-		private global::System.Windows.Forms.ToolStripMenuItem toolStripMenuItem8;
+		private ToolStripMenuItem toolStripMenuItem8;
 
-		private global::System.Windows.Forms.ToolStripMenuItem 关闭ToolStripMenuItem;
+		private ToolStripMenuItem 关闭ToolStripMenuItem;
 
-		private global::System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private ToolStripSeparator toolStripSeparator1;
 
-		private global::System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private ToolStripSeparator toolStripSeparator2;
 
-		private global::System.Windows.Forms.ToolStripMenuItem TopmostMenuItem;
+		private ToolStripMenuItem TopmostMenuItem;
 	}
 }

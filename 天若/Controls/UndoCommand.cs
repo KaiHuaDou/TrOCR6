@@ -4,17 +4,18 @@ namespace TrOCR.Controls;
 
 public class UndoCommand
 {
-    public string Record { get; private set; }
-    private List<string> undoList = new( );
+    private bool CanUndo;
     private List<string> redoList = new( );
     private int undoCount = -1;
-    private bool CanUndo;
+    private List<string> undoList = new( );
 
     public UndoCommand(int UndoCount)
     {
         undoCount = UndoCount + 1;
         undoList.Add("");
     }
+
+    public string Record { get; private set; }
 
     public void Execute(string command)
     {
@@ -32,6 +33,15 @@ public class UndoCommand
         }
     }
 
+    public void Redo( )
+    {
+        if (redoList.Count > 0)
+        {
+            Record = redoList[redoList.Count - 1];
+            redoList.RemoveAt(redoList.Count - 1);
+        }
+    }
+
     public void Undo( )
     {
         if (undoList.Count <= 1)
@@ -40,14 +50,5 @@ public class UndoCommand
         redoList.Add(undoList[undoList.Count - 1]);
         undoList.RemoveAt(undoList.Count - 1);
         Record = undoList[undoList.Count - 1];
-    }
-
-    public void Redo( )
-    {
-        if (redoList.Count > 0)
-        {
-            Record = redoList[redoList.Count - 1];
-            redoList.RemoveAt(redoList.Count - 1);
-        }
     }
 }

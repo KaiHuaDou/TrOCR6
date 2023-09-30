@@ -11,8 +11,8 @@ namespace TrOCR;
 
 public partial class FmScreenPaste : Form
 {
-    private bool leftFlag;
     private bool isAeroEnable;
+    private bool leftFlag;
     private Point mouseOff;
 
     public FmScreenPaste(Image image, Point location)
@@ -22,7 +22,7 @@ public partial class FmScreenPaste : Form
         BackgroundImage = image;
         Location = location;
         FormBorderStyle = FormBorderStyle.None;
-        MouseDown += FormMouseDown_1;
+        MouseDown += FormMouseDownNew;
         MouseMove += FormMouseMove;
         MouseUp += FormMouseUp;
         Size size = image.Size;
@@ -128,13 +128,12 @@ public partial class FmScreenPaste : Form
         SendMessage(Handle, num, num2 + num3, 0);
     }
 
-    private void FormMouseDown_1(object o, MouseEventArgs e)
+    private void FormMouseDownNew(object o, MouseEventArgs e)
     {
-        if (e.Button == MouseButtons.Left)
-        {
-            mouseOff = new Point(-e.X, -e.Y);
-            leftFlag = true;
-        }
+        if (e.Button != MouseButtons.Left)
+            return;
+        mouseOff = new Point(-e.X, -e.Y);
+        leftFlag = true;
     }
 
     private void FormMouseMove(object o, MouseEventArgs e)
@@ -148,8 +147,7 @@ public partial class FmScreenPaste : Form
 
     private void FormMouseUp(object o, MouseEventArgs e)
     {
-        if (leftFlag)
-            leftFlag = false;
+        leftFlag = false;
     }
 
     private void RightCMSOpening(object o, CancelEventArgs e)
@@ -169,16 +167,16 @@ public partial class FmScreenPaste : Form
             Filter = "JPEG图像(*.jpg)|*.jpg|PNG图像(*.png)|*.jpg|位图图像(*.bmp)|*.bmp",
             AddExtension = false,
             FileName = string.Concat(new string[]
-        {
-            "tianruo_",
-            DateTime.Now.Year.ToString(),
-            "-",
-            DateTime.Now.Month.ToString(),
-            "-",
-            DateTime.Now.Day.ToString(),
-            "-",
-            DateTime.Now.Ticks.ToString()
-        }),
+            {
+                "tianruo_",
+                DateTime.Now.Year.ToString(),
+                "-",
+                DateTime.Now.Month.ToString(),
+                "-",
+                DateTime.Now.Day.ToString(),
+                "-",
+                DateTime.Now.Ticks.ToString()
+            }),
             Title = "保存图片",
             FilterIndex = 1,
             RestoreDirectory = true
@@ -202,5 +200,5 @@ public partial class FmScreenPaste : Form
     }
 
     private void TopmostMenuClick(object o, EventArgs e)
-            => TopMost = !TopMost;
+        => TopMost = !TopMost;
 }

@@ -10,9 +10,9 @@ public static class StaticValue
     public static bool CaptureRejection;
     public static string CopyFormat = "无格式";
     public static string DateNow = "2023-10-01";
-    public static float Dpifactor = 1f;
+    public static float DpiFactor = 1f;
     public static string GoogleTransBack;
-    public static string GoogleTransTxt;
+    public static string GoogleTransText;
     public static int ImageHeight;
     public static Image ImageOCR;
     public static int ImageWidth;
