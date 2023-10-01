@@ -1,240 +1,130 @@
-﻿#pragma warning disable CA1712
-using System;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-
-using mshtml;
-
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Web;
+using static TrOCR.External.NativeMethods;
 namespace TrOCR.Helper;
 
 public static class Web
 {
-    private static Guid GUID_IWebBrowser2 = new("D30C1661-CDAF-11D0-8A3E-00C04FC9E26E");
-    private static Guid GUID_IWebBrowserApp = new("0002DF05-0000-0000-C000-000000000046");
+    public static string ContentLength(string text, string fromlang, string tolang)
+        => $"&source={fromlang}&target={tolang}&sourceText={HttpUtility.UrlEncode(text).Replace("+", "%20")}";
 
-    public enum OLECMDEXECOPT
+    public static string CookieToStr(CookieCollection cookie)
     {
-        OLECMDEXECOPTDODEFAULT,
-        OLECMDEXECOPTPROMPTUSER,
-        OLECMDEXECOPTDONTPROMPTUSER,
-        OLECMDEXECOPTSHOWHELP
-    }
-
-    [Flags]
-    public enum OLECMDF
-    {
-        OLECMDFDEFHIDEONCTXTMENU = 32,
-        OLECMDFENABLED = 2,
-        OLECMDFINVISIBLE = 16,
-        OLECMDFLATCHED = 4,
-        OLECMDFNINCHED = 8,
-        OLECMDFSUPPORTED = 1
-    }
-
-    public enum OLECMDID
-    {
-        OLECMDIDPAGESETUP = 8,
-        OLECMDIDPRINT = 6,
-        OLECMDIDPRINTPREVIEW,
-        OLECMDIDPROPERTIES = 10,
-        OLECMDIDSAVEAS = 4
-    }
-
-    [ComImport]
-    [ComVisible(true)]
-    [Guid("6D5140C1-7436-11CE-8034-00AA006009FA")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IServiceProvider
-    {
-        [PreserveSig]
-        [return: MarshalAs(UnmanagedType.I4)]
-        int QueryService(ref Guid guidService, ref Guid riid, [MarshalAs(UnmanagedType.Interface)] out object ppvObject);
-    }
-
-    [ComImport]
-    [Guid("D30C1661-CDAF-11d0-8A3E-00C04FC9E26E")]
-    [TypeLibType(TypeLibTypeFlags.FHidden | TypeLibTypeFlags.FDual | TypeLibTypeFlags.FOleAutomation)]
-    public interface IWebBrowser2
-    {
-        [DispId(100)]
-        void GoBack( );
-
-        [DispId(101)]
-        void GoForward( );
-
-        [DispId(102)]
-        void GoHome( );
-
-        [DispId(103)]
-        void GoSearch( );
-
-        [DispId(104)]
-        void Navigate([In] string Url, [In] ref object flags, [In] ref object targetFrameName, [In] ref object postData, [In] ref object headers);
-
-        [DispId(-550)]
-        void Refresh( );
-
-        [DispId(105)]
-        void Refresh2([In] ref object level);
-
-        [DispId(106)]
-        void Stop( );
-
-        [DispId(200)]
-        object Application
+        string text;
+        if (cookie == null)
         {
-            [return: MarshalAs(UnmanagedType.IDispatch)]
-            get;
+            text = string.Empty;
         }
-
-        [DispId(201)]
-        object Parent
+        else
         {
-            [return: MarshalAs(UnmanagedType.IDispatch)]
-            get;
+            string text2 = string.Empty;
+            foreach (object obj in cookie)
+            {
+                Cookie cookie2 = (Cookie) obj;
+                text2 += string.Format("{0}={1};", cookie2.Name, cookie2.Value);
+            }
+            text = text2;
         }
-
-        [DispId(202)]
-        object Container
-        {
-            [return: MarshalAs(UnmanagedType.IDispatch)]
-            get;
-        }
-
-        [DispId(203)]
-        object Document
-        {
-            [return: MarshalAs(UnmanagedType.IDispatch)]
-            get;
-        }
-
-        [DispId(204)]
-        bool TopLevelContainer { get; }
-
-        [DispId(205)]
-        string Type { get; }
-
-        [DispId(206)]
-        int Left { get; set; }
-
-        [DispId(207)]
-        int Top { get; set; }
-
-        [DispId(208)]
-        int Width { get; set; }
-
-        [DispId(209)]
-        int Height { get; set; }
-
-        [DispId(210)]
-        string LocationName { get; }
-
-        [DispId(211)]
-        string LocationURL { get; }
-
-        [DispId(212)]
-        bool Busy { get; }
-
-        [DispId(300)]
-        void Quit( );
-
-        [DispId(301)]
-        void ClientToWindow(out int pcx, out int pcy);
-
-        [DispId(302)]
-        void PutProperty([In] string property, [In] object vtValue);
-
-        [DispId(303)]
-        object GetProperty([In] string property);
-
-        [DispId(0)]
-        string Name { get; }
-
-        [DispId(-515)]
-        int HWND { get; }
-
-        [DispId(400)]
-        string FullName { get; }
-
-        [DispId(401)]
-        string Path { get; }
-
-        [DispId(402)]
-        bool Visible { get; set; }
-
-        [DispId(403)]
-        bool StatusBar { get; set; }
-
-        [DispId(404)]
-        string StatusText { get; set; }
-
-        [DispId(405)]
-        int ToolBar { get; set; }
-
-        [DispId(406)]
-        bool MenuBar { get; set; }
-
-        [DispId(407)]
-        bool FullScreen { get; set; }
-
-        [DispId(500)]
-        void Navigate2([In] ref object URL, [In] ref object flags, [In] ref object targetFrameName, [In] ref object postData, [In] ref object headers);
-
-        [DispId(501)]
-        OLECMDF QueryStatusWB([In] OLECMDID cmdID);
-
-        [DispId(502)]
-        void ExecWB([In] OLECMDID cmdID, [In] OLECMDEXECOPT cmdexecopt, ref object pvaIn, IntPtr pvaOut);
-
-        [DispId(503)]
-        void ShowBrowserBar([In] ref object pvaClsid, [In] ref object pvarShow, [In] ref object pvarSize);
-
-        [DispId(-525)]
-        WebBrowserReadyState ReadyState { get; }
-
-        [DispId(550)]
-        bool Offline { get; set; }
-
-        [DispId(551)]
-        bool Silent { get; set; }
-
-        [DispId(552)]
-        bool RegisterAsBrowser { get; set; }
-
-        [DispId(553)]
-        bool RegisterAsDropTarget { get; set; }
-
-        [DispId(554)]
-        bool TheaterMode { get; set; }
-
-        [DispId(555)]
-        bool AddressBar { get; set; }
-
-        [DispId(556)]
-        bool Resizable { get; set; }
+        return text;
     }
 
-    public static IHTMLDocument3 GetDocumentFromWindow(IHTMLWindow2 htmlWindow)
+    public static string GetCookies(string url)
     {
-        if (htmlWindow == null)
-            return null;
+        uint num = 1024U;
+        StringBuilder result = new((int) num);
+        if (!InternetGetCookieEx(url, null, result, ref num, 8192, IntPtr.Zero))
+        {
+            if (num < 0U)
+            {
+                return null;
+            }
+            result = new StringBuilder((int) num);
+            if (!InternetGetCookieEx(url, null, result, ref num, 8192, IntPtr.Zero))
+            {
+                return null;
+            }
+        }
+        return result.ToString( );
+    }
+
+    public static string GetHtml(string url)
+    {
+        string result = "";
+        HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+        req.Method = "POST";
+        req.ContentType = "application/x-www-form-urlencoded";
         try
         {
-            return (IHTMLDocument3) htmlWindow.document;
+            using (HttpWebResponse res = (HttpWebResponse) req.GetResponse( ))
+            {
+                using StreamReader reader = new(res.GetResponseStream( ), Encoding.UTF8);
+                result = reader.ReadToEnd( );
+                reader.Close( );
+                res.Close( );
+            }
+            req.Abort( );
         }
-        catch (COMException) { }
-        catch (UnauthorizedAccessException) { }
-        catch (Exception) { return null; }
+        catch
+        {
+            result = "";
+        }
+        return result;
+    }
+
+    public static string PostHtml(string url, string postStr)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(postStr);
+        string result = "";
+        HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+        req.Method = "POST";
+        req.Timeout = 6000;
+        req.ContentType = "application/x-www-form-urlencoded";
+        req.Headers.Add("Accept-Language: zh-CN,en,*");
         try
         {
-            IServiceProvider serviceProvider = (IServiceProvider) htmlWindow;
-            serviceProvider.QueryService(ref GUID_IWebBrowserApp, ref GUID_IWebBrowser2, out object obj);
-            return (IHTMLDocument3) ((IWebBrowser2) obj).Document;
+            using (Stream requestStream = req.GetRequestStream( ))
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+            }
+            Stream responseStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
+            StreamReader streamReader = new(responseStream, Encoding.GetEncoding("utf-8"));
+            result = streamReader.ReadToEnd( );
+            responseStream.Close( );
+            streamReader.Close( );
+            req.Abort( );
         }
-        catch (Exception ex)
+        catch { }
+        return result;
+    }
+
+    public static string PostHtmlFinal(string url, string postStr, string CookieContainer)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(postStr);
+        string text = "";
+        HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+        req.Method = "POST";
+        req.Accept = "*/*";
+        req.Timeout = 5000;
+        req.Headers.Add("Accept-Language:zh-CN,zh;q=0.9");
+        req.ContentType = "text/plain";
+        req.Headers.Add("Cookie:" + CookieContainer);
+        try
         {
-            Console.WriteLine(ex);
+            using (Stream reqStream = req.GetRequestStream( ))
+            {
+                reqStream.Write(bytes, 0, bytes.Length);
+            }
+            Stream resStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
+            StreamReader reader = new(resStream, Encoding.GetEncoding("utf-8"));
+            text = reader.ReadToEnd( );
+            resStream.Close( );
+            reader.Close( );
+            req.Abort( );
         }
-        return null;
+        catch { }
+        return text;
     }
 }

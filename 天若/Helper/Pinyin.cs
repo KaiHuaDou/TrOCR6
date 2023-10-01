@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace TrOCR.Controls;
+namespace TrOCR.Helper;
 
 public static class Pinyin
 {
@@ -19,23 +19,23 @@ public static class Pinyin
         }
     }
 
-    public static string ToPinyin(string CnChar)
+    public static string Convert(string str)
     {
-        StringBuilder stringBuilder = new( );
+        StringBuilder result = new( );
         string text = "";
-        foreach (char c in CnChar)
+        foreach (char c in str)
         {
             string text2 = c.ToString( );
             if (TextUtils.ContainsZh(c.ToString( )))
                 text2 = hashtable[c.ToString( )] as string;
-            stringBuilder = TextUtils.ContainEn(c.ToString( ))
-                ? stringBuilder.Append(text2)
+            result = TextUtils.ContainEn(c.ToString( ))
+                ? result.Append(text2)
                 : TextUtils.ContainEn(text)
-                ? stringBuilder.Append(" " + text2 + " ")
-                : stringBuilder.Append(text2 + " ");
+                ? result.Append(" " + text2 + " ")
+                : result.Append(text2 + " ");
             text = text2;
         }
-        return stringBuilder.ToString( ).Replace("  ", " ").Replace("\n ", "\n")
+        return result.ToString( ).Replace("  ", " ").Replace("\n ", "\n")
             .Replace(" \n", "\n")
             .Trim( );
     }

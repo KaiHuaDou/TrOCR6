@@ -29,9 +29,6 @@
         <Reference Include="Interop.MSScriptControl">
             <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\Interop.MSScriptControl.dll</HintPath>
         </Reference>
-        <Reference Include="Microsoft.mshtml">
-          <HintPath>C:\Program Files (x86)\Microsoft.NET\Primary Interop Assemblies\Microsoft.mshtml.dll</HintPath>
-        </Reference>
         <Reference Include="Newtonsoft.Json">
             <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\Newtonsoft.Json.dll</HintPath>
         </Reference>

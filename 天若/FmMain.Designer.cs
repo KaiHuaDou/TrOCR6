@@ -88,8 +88,8 @@ namespace TrOCR
             this.notifyIcon.Text = "双击开始截图识别";
             this.notifyIcon.Visible = true;
             this.notifyIcon.MouseDoubleClick += new MouseEventHandler(this.TrayDoubleClick);
-            this.fontBase.Width = 18f * this.fontFactor;
-            this.fontBase.Height = 17f * this.fontFactor;
+            this.fontBase.Width = 18f * this.dpiFactor;
+            this.fontBase.Height = 17f * this.dpiFactor;
             this.richBoxTrans.Visible = false;
             this.richBox.Dock = DockStyle.Fill;
             this.richBox.BorderStyle = BorderStyle.Fixed3D;
@@ -129,7 +129,7 @@ namespace TrOCR
             this.speak.Text = "朗读";
             this.speak.Click += new EventHandler(this.MainVoiceClick);
             this.baiduS.Text = "搜索";
-            this.baiduS.Click += new EventHandler(this.MaiSearchClick);
+            this.baiduS.Click += new EventHandler(this.MainSearchClick);
             this.mainChange.Text = "转换";
             this.mainInterface.Text = "接口";
             this.mainExit.Text = "退出";
@@ -143,7 +143,6 @@ namespace TrOCR
             this.tencent.Text = "腾讯";
             this.tencent.Click += new EventHandler(this.OcrTencentClick);
             this.baidu.Text = "百度";
-            this.baidu.Click += new EventHandler(this.OcrBaiduClick);
             this.youdao.Text = "有道";
             this.youdao.Click += new EventHandler(this.OcrYoudaoClick);
             this.tableOcr.Text = "表格";
@@ -153,7 +152,6 @@ namespace TrOCR
             this.tableAli.Click += new EventHandler(this.OcrTableAliClick);
             this.tableOcr.DropDownItems.AddRange(new ToolStripItem[] { this.tableBaidu, this.tableAli });
             this.verticalScan.Text = "竖排";
-            this.verticalScan.Click += new EventHandler(this.OcrVerticalClick);
             this.write.Text = "手写";
             this.write.Click += new EventHandler(this.OcrWriteClick);
             this.zh.Text = "中文标点";
@@ -189,15 +187,15 @@ namespace TrOCR
             this.kor.Click += new EventHandler(this.OCR_baidu_Kor_Click);
             ((ToolStripDropDownItem)this.baidu).DropDownItems.AddRange(new ToolStripItem[] { this.ch2en, this.jap, this.kor });
             this.left2right.Text = "从左向右";
-            this.left2right.Click += new EventHandler(this.OCR_lefttoright_Click);
+            this.left2right.Click += new EventHandler(this.OcrLtrClick);
             this.right2left.Text = "从右向左";
-            this.right2left.Click += new EventHandler(this.OCR_righttoleft_Click);
+            this.right2left.Click += new EventHandler(this.OcrRtlClick);
             ((ToolStripDropDownItem)this.verticalScan).DropDownItems.AddRange(new ToolStripItem[] { this.left2right, this.right2left });
             this.richBox.InnerContextMenuStrip = this.menu;
             this.richBoxTrans.InnerContextMenuStrip = this.menuCopy;
             this.image1.Image = (Image)new global::System.ComponentModel.ComponentResourceManager(typeof(FmMain)).GetObject("loadcat.gif");
             this.image1.Size = new Size(85, 85);
-            this.image1.Location = (Point)new Size((int)this.fontBase.Width * 34 - this.image1.Size.Width / 2, (int)(110f * this.fontFactor));
+            this.image1.Location = (Point)new Size((int)this.fontBase.Width * 34 - this.image1.Size.Width / 2, (int)(110f * this.dpiFactor));
             this.image1.BackColor = Color.White;
             this.image1.Visible = false;
             base.SuspendLayout();
@@ -208,7 +206,7 @@ namespace TrOCR
             base.Controls.Add(this.image1);
             base.Controls.Add(this.richBox);
             base.Load += new EventHandler(this.Load_Click);
-            base.Resize += new EventHandler(this.Form_Resize);
+            base.Resize += new EventHandler(this.FormResizing);
             base.Name = "Form1";
             this.Text = "耗时：";
             if (Helper.Config.Get("工具栏", "顶置") == "True")
@@ -280,7 +278,6 @@ namespace TrOCR
 
         public ToolStripMenuItem restore;
 
-        public float fontFactor;
 
         private AdvRichTextBox richBox;
 
