@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using TrOCR.Helper;
 
 namespace TrOCR.Controls;
 
@@ -35,7 +36,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
 
     public HWColorPicker( )
     {
-        Font = new Font(Font.Name, 9f / StaticValue.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         hoverItem = -1;
         InitializeComponent( );
         InitColor( );

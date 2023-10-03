@@ -337,4 +337,29 @@ public static class TextUtils
         }
         finalize(jarray, words, text, text2);
     }
+
+    public static string MergeLines(string text)
+    {
+        text = text.TrimEnd('\n').TrimEnd('\r').TrimEnd('\n');
+        if (text.Split(Environment.NewLine.ToCharArray( )).Length <= 1)
+            return text;
+        string[] array = text.Split(Environment.NewLine.ToCharArray( ));
+        string result = "";
+        for (int i = 0; i < array.Length - 1; i++)
+        {
+            string last1 = array[i].Substring(array[i].Length - 1, 1);
+            string last2 = array[i + 1].Substring(0, 1);
+            if (TextUtils.ContainEn(last1) && TextUtils.ContainEn(last2))
+                result = result + array[i] + " ";
+            else
+                result += array[i];
+        }
+        string last3 = result.Substring(result.Length - 1, 1);
+        string last4 = array[array.Length - 1].Substring(0, 1);
+        if (TextUtils.ContainEn(last3) && TextUtils.ContainEn(last4))
+            result = result + array[array.Length - 1] + " ";
+        else
+            result += array[array.Length - 1];
+        return result;
+    }
 }

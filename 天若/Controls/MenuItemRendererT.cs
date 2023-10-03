@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+using TrOCR.Helper;
 
 namespace TrOCR;
 
@@ -7,7 +8,7 @@ public class MenuItemRendererT : ToolStripProfessionalRenderer
 {
     public MenuItemRendererT( )
     {
-        textFont = new Font("微软雅黑", 9f / StaticValue.DpiFactor, FontStyle.Regular, GraphicsUnit.Point, 0);
+        textFont = new Font("微软雅黑", 9f / Defaults.DpiFactor, FontStyle.Regular, GraphicsUnit.Point, 0);
         menuItemSelectedColor = Color.White;
         menuItemBorderColor = Color.White;
         menuItemSelectedColor = Color.White;

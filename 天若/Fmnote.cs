@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using TrOCR.Helper;
 
 namespace TrOCR;
 
@@ -18,11 +19,11 @@ public partial class FmNote : Form
 
     public void SetTextNote( )
     {
-        for (int i = 0; i < StaticValue.NoteCount; i++)
+        for (int i = 0; i < Defaults.NoteCount; i++)
         {
             mainDataGrid.Rows[i].Cells[0].Value = i < 9
-                ? $"0{i + 1}." + StaticValue.Notes[i]
-                : $"{i + 1}.{StaticValue.Notes[i]}";
+                ? $"0{i + 1}." + Defaults.Notes[i]
+                : $"{i + 1}.{Defaults.Notes[i]}";
         }
     }
 
@@ -30,17 +31,17 @@ public partial class FmNote : Form
     {
         mainDataGrid.Rows.Clear( );
         mainDataGrid.ColumnCount = 1;
-        mainDataGrid.RowCount = StaticValue.NoteCount;
+        mainDataGrid.RowCount = Defaults.NoteCount;
         mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Helper.System.DpiFactor);
         mainDataGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
         mainDataGrid.AllowUserToResizeRows = false;
         mainDataGrid.AllowUserToResizeColumns = false;
-        for (int i = 0; i < StaticValue.NoteCount; i++)
+        for (int i = 0; i < Defaults.NoteCount; i++)
         {
-            mainDataGrid.Rows[i].Cells[0].Value = i < 9 ? "0" + (i + 1) + "." : (object) (i + 1 + ".");
+            mainDataGrid.Rows[i].Cells[0].Value = i < 9 ? $"0{i + 1}." : $"{i + 1}.";
         }
         mainDataGrid.Columns[0].DefaultCellStyle.SelectionBackColor = Color.DodgerBlue;
-        mainDataGrid.Size = new Size(Convert.ToInt32(402f * Helper.System.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
+        mainDataGrid.Size = new Size(Convert.ToInt32(402f * Helper.System.DpiFactor), Defaults.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
         ClientSize = mainDataGrid.Size;
         base.MaximumSize = new Size(Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3);
         mainDataGrid.MaximumSize = new Size(Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3 - 5);
@@ -108,28 +109,6 @@ public partial class FmNote : Form
     {
         ComponentResourceManager componentResourceManager = new(typeof(FmMain));
         Icon = (Icon) componentResourceManager.GetObject("minico.Icon");
-        mainDataGrid.ColumnCount = 1;
-        mainDataGrid.RowCount = StaticValue.NoteCount;
-        mainDataGrid.Columns[0].Width = Convert.ToInt32(400f * Helper.System.DpiFactor);
-        mainDataGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
-        mainDataGrid.AllowUserToResizeRows = false;
-        mainDataGrid.AllowUserToResizeColumns = false;
-        for (int i = 0; i < StaticValue.NoteCount; i++)
-        {
-            mainDataGrid.Rows[i].Cells[0].Value = i < 9
-            ? string.Concat(new object[]
-            {
-                    "0",
-                    i + 1,
-                    ".",
-                    StaticValue.Notes[i]
-            })
-            : (object) (i + 1 + "." + StaticValue.Notes[i]);
-        }
-        mainDataGrid.Columns[0].DefaultCellStyle.SelectionBackColor = Color.DodgerBlue;
-        mainDataGrid.Size = new Size(Convert.ToInt32(402f * Helper.System.DpiFactor), StaticValue.NoteCount * mainDataGrid.Rows[0].Cells[0].Size.Height + 2);
-        ClientSize = mainDataGrid.Size;
-        base.MaximumSize = new Size(Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3);
-        mainDataGrid.MaximumSize = new Size(Size.Width, Screen.GetWorkingArea(this).Height / 4 * 3 - 5);
+        TextNoteChange( );
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using static TrOCR.External.NativeMethods;
 
 namespace TrOCR.Helper;
 public static class ImageUtils
@@ -155,6 +157,43 @@ public static class ImageUtils
         c.CopyTo(array, a.Length + b.Length);
         return array;
     }
+
+    public static void SetImage(Bitmap bitmap, int left, int top, IntPtr handle)
+    {
+        if (!Image.IsCanonicalPixelFormat(bitmap.PixelFormat) || !Image.IsAlphaPixelFormat(bitmap.PixelFormat))
+        {
+            throw new BadImageFormatException("图片必须是32位色彩且带 Alpha 通道的图片");
+        }
+        IntPtr intPtr = IntPtr.Zero;
+        IntPtr dc = GetDC(IntPtr.Zero);
+        IntPtr intPtr2 = IntPtr.Zero;
+        IntPtr intPtr3 = CreateCompatibleDC(dc);
+        try
+        {
+            Point point = new(left, top);
+            Size size = new(bitmap.Width, bitmap.Height);
+            BLENDFUNCTION blendfunction = default;
+            Point point2 = new(0, 0);
+            intPtr2 = bitmap.GetHbitmap(Color.FromArgb(0));
+            intPtr = SelectObject(intPtr3, intPtr2);
+            blendfunction.BlendOp = 0;
+            blendfunction.SourceConstantAlpha = byte.MaxValue;
+            blendfunction.AlphaFormat = 1;
+            blendfunction.BlendFlags = 0;
+            UpdateLayeredWindow(handle, dc, ref point, ref size, intPtr3, ref point2, 0, ref blendfunction, 2);
+        }
+        finally
+        {
+            if (intPtr2 != IntPtr.Zero)
+            {
+                SelectObject(intPtr3, intPtr);
+                DeleteObject(intPtr2);
+            }
+            ReleaseDC(IntPtr.Zero, dc);
+            DeleteDC(intPtr3);
+        }
+    }
+
     public static Bitmap ToGray(Bitmap image)
     {
         Bitmap bitmap = new(image.Width, image.Height);

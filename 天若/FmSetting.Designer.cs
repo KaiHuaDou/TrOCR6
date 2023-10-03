@@ -348,7 +348,7 @@ namespace TrOCR
             this.百度_btn.TabIndex = 10;
             this.百度_btn.Text = "密钥测试";
             this.百度_btn.UseVisualStyleBackColor = false;
-            this.百度_btn.Click += new global::System.EventHandler(this.百度_btn_Click);
+            this.百度_btn.Click += new global::System.EventHandler(this.百度Click);
             this.密钥Button_apply.BackColor = Color.White;
             this.密钥Button_apply.Location = new Point(6, 136);
             this.密钥Button_apply.Name = "密钥Button_apply";

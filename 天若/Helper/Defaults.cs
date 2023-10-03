@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using TrOCR.Controls;
 
-namespace TrOCR;
+namespace TrOCR.Helper;
 
-public static class StaticValue
+public static class Defaults
 {
     public static string BaiduApiId = "";
     public static string BaiduApiKey = "";
@@ -16,7 +17,7 @@ public static class StaticValue
     public static int ImageHeight;
     public static Image ImageOCR;
     public static int ImageWidth;
-    public static IntPtr mainhandle;
+    public static IntPtr MainHandle;
     public static string Merge;
     public static string Note = "";
     public static int NoteCount = 40;
@@ -29,12 +30,9 @@ public static class StaticValue
     public static bool SetRecord;
     public static bool SetSpilt;
     public static bool SetTrans;
-    public static string Single_;
     public static string Split;
     public static bool Topmost;
     public static string UpdateText = "天若 OCR 更新";
     public static string Version = "6.0.0";
-    public static bool Zh2En = true;
-    public static bool Zh2Jp;
-    public static bool Zh2Ko;
+    public static TranslateType TransType = TranslateType.ZhEn;
 }

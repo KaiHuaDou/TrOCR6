@@ -26,7 +26,7 @@ public sealed partial class FmSetting : Form
 {
     public FmSetting( )
     {
-        Font = new Font(Font.Name, 9f / StaticValue.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         InitializeComponent( );
     }
 
@@ -536,7 +536,7 @@ public sealed partial class FmSetting : Form
         }
     }
 
-    private void FormClosed(object o, FormClosedEventArgs e)
+    private new void FormClosed(object o, FormClosedEventArgs e)
     {
         Config.Set("配置", "开机自启", Box开机.Checked.ToString( ));
         Config.Set("配置", "快速翻译", Box翻译.Checked.ToString( ));
@@ -607,8 +607,8 @@ public sealed partial class FmSetting : Form
         ReadConfig( );
         Box代理服务器.CheckedChanged += chbox_代理服务器_CheckedChanged;
         更新Button_check.Click += 更新Check;
-        Text更新日期.Text = "更新时间：" + StaticValue.DateNow;
-        Text版本号.Text = "当前版本：" + StaticValue.Version;
+        Text更新日期.Text = "更新时间：" + Defaults.DateNow;
+        Text版本号.Text = "当前版本：" + Defaults.Version;
         Box更新说明.Text = (string) componentResourceManager.GetObject("更新说明");
         Box更新说明.ReadOnly = true;
         Box更新说明.WordWrap = true;
@@ -655,60 +655,38 @@ public sealed partial class FmSetting : Form
         {
             textBox.Text = "请按下快捷键";
             pictureBox.Image = Resources.快捷键_0;
-            if (textBox.Name.Contains("文字识别"))
-            {
-                Config.Set("快捷键", "文字识别", Box文字识别.Text);
-            }
-            if (textBox.Name.Contains("翻译文本"))
-            {
-                Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
-            }
-            if (textBox.Name.Contains("记录界面"))
-            {
-                Config.Set("快捷键", "记录界面", Box记录界面.Text);
-            }
-            if (textBox.Name.Contains("识别界面"))
-            {
-                Config.Set("快捷键", "识别界面", Box识别界面.Text);
-                return;
-            }
+            SetShortcut(textBox.Name);
         }
         else if (e.KeyValue is not 16 and not 17 and not 18)
         {
-            string[] array = e.KeyData.ToString( ).Replace(" ", "").Replace("Control", "Ctrl")
+            string[] keys = e.KeyData.ToString( )
+                .Replace(" ", "").Replace("Control", "Ctrl")
                 .Split(new char[] { ',' });
             pictureBox.Image = Resources.快捷键_1;
-            if (array.Length == 1)
+            if (keys.Length == 1)
+                textBox.Text = keys[0];
+            else if (keys.Length == 2)
+                textBox.Text = keys[1] + "+" + keys[0];
+            if (keys.Length <= 2)
             {
-                textBox.Text = array[0];
-            }
-            if (array.Length == 2)
-            {
-                textBox.Text = array[1] + "+" + array[0];
-            }
-            if (array.Length <= 2)
-            {
-                if (textBox.Name.Contains("文字识别"))
-                {
-                    Config.Set("快捷键", "文字识别", Box文字识别.Text);
-                }
-                if (textBox.Name.Contains("翻译文本"))
-                {
-                    Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
-                }
-                if (textBox.Name.Contains("记录界面"))
-                {
-                    Config.Set("快捷键", "记录界面", Box记录界面.Text);
-                }
-                if (textBox.Name.Contains("识别界面"))
-                {
-                    Config.Set("快捷键", "识别界面", Box识别界面.Text);
-                }
+                SetShortcut(textBox.Name);
             }
         }
     }
 
-    private void 百度_btn_Click(object o, EventArgs e)
+    private void SetShortcut(string type)
+    {
+        if (type.Contains("文字识别"))
+            Config.Set("快捷键", "文字识别", Box文字识别.Text);
+        if (type.Contains("翻译文本"))
+            Config.Set("快捷键", "翻译文本", Box翻译文本.Text);
+        if (type.Contains("记录界面"))
+            Config.Set("快捷键", "记录界面", Box记录界面.Text);
+        if (type.Contains("识别界面"))
+            Config.Set("快捷键", "识别界面", Box识别界面.Text);
+    }
+
+    private void 百度Click(object o, EventArgs e)
     {
         if (!string.IsNullOrEmpty(GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + BoxBaiduId.Text + "&client_secret=" + BoxBaiduKey.Text))))
         {
@@ -754,7 +732,7 @@ public sealed partial class FmSetting : Form
     {
         if (!string.IsNullOrEmpty(Box问题反馈.Text))
         {
-            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + StaticValue.Version + "&nr=";
+            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + Defaults.Version + "&nr=";
             PostHtml("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(Box问题反馈.Text));
             Box问题反馈.Text = "";
             FmFlags.Display("感谢您的反馈！");

@@ -3,9 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -25,70 +23,38 @@ public partial class AdvRichTextBox : UserControl
     private bool mergeColor;
     private bool paragraphColor;
     private bool splitColor;
-    private string textFlag;
-    private bool toolFull;
     private bool toolSpace;
     private bool transColor;
     private UndoCommand undoCmd;
-
+    private WindowType windowType;
     public AdvRichTextBox( )
     {
         toolSpace = true;
-        toolFull = true;
         undoCmd = new UndoCommand(50);
-        Font = new Font(Font.Name, 9f / StaticValue.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         InitializeComponent( );
         ReadConfig( );
         EditBox.LanguageOption = RichTextBoxLanguageOptions.UIFonts;
+        SetFont(EditorFont.微软雅黑);
     }
 
-    public string Find
-    {
-        set
-        {
-            new Thread(new ThreadStart(typoCheckingApi)).Start( );
-            SetForegroundWindow(StaticValue.mainhandle);
-        }
-    }
     public new string Hide
     {
         set
         {
             EditBox.Focus( );
             mode.HideDropDown( );
-            Fontstyle.HideDropDown( );
-            languagle.HideDropDown( );
+            ButtonFont.HideDropDown( );
+            ButtonLang.HideDropDown( );
         }
     }
+
     public ContextMenuStrip InnerContextMenuStrip
     {
         get => EditBox.ContextMenuStrip;
         set => EditBox.ContextMenuStrip = value;
     }
-    public string Language
-    {
-        set
-        {
-            if (value == "中英")
-            {
-                zh_en.ForeColor = Color.Red;
-                zh_jp.ForeColor = Color.Black;
-                zh_ko.ForeColor = Color.Black;
-            }
-            if (value == "日语")
-            {
-                zh_en.ForeColor = Color.Black;
-                zh_jp.ForeColor = Color.Red;
-                zh_ko.ForeColor = Color.Black;
-            }
-            if (value == "韩语")
-            {
-                zh_en.ForeColor = Color.Black;
-                zh_jp.ForeColor = Color.Black;
-                zh_ko.ForeColor = Color.Red;
-            }
-        }
-    }
+
     public string Rtf
     {
         get => EditBox.Rtf;
@@ -96,36 +62,45 @@ public partial class AdvRichTextBox : UserControl
     }
 
     public string SelectText => EditBox.SelectedText;
+
     public override string Text
     {
         get => EditBox.Text;
-        set
-        {
-            EditBox.Font = new Font("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-            EditBox.Text = value;
-            EditBox.Font = new Font("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        }
+        set => EditBox.Text = value;
     }
 
-    public void SetTextFlag(string value)
+    public void CheckTyping( )
     {
-        textFlag = value;
-        if (textFlag == "天若幽心")
+        new Thread(typoCheckingApi).Start( );
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    public void SetToolBar(WindowType type)
+    {
+        windowType = type;
+        if (windowType == WindowType.Main)
         {
             toolStripToolBar.Items.AddRange(new ToolStripItem[]
             {
-                    topmost, Fontstyle, toolStripButtonBold, toolStripButtonColor, toolStripButtonLeft, toolStripButtonFull, toolStripButtonspace, toolStripButtonVoice, toolStripButtonFind, toolStripButtonSend,
-                    toolStripButtonNote, toolStripButtonParagraph, toolStripButtonFence, toolStripButtonSplit, toolStripButtonMerge, toolStripButtoncheck, toolStripButtonTrans
+                ButtonTopmost, ButtonFont, ButtonBold, ButtonColor, ButtonLeft, ButtonFull, ButtonSpace, ButtonVoice, ButtonFind, ButtonSend,
+                ButtonNote, ButtonParagraph, ButtonFence, ButtonSplit, ButtonMerge, ButtonCheck, ButtonTrans
             });
             return;
         }
         toolStripToolBar.Items.AddRange(new ToolStripItem[]
         {
-                languagle, Fontstyle, toolStripButtonBold, toolStripButtonColor, toolStripButtonLeft, toolStripButtonFull, toolStripButtonspace, toolStripButtonVoice, toolStripButtonFind, toolStripButtonSend,
-                toolStripButtonclose
+            ButtonLang, ButtonFont, ButtonBold, ButtonColor, ButtonLeft, ButtonFull, ButtonSpace, ButtonVoice, ButtonFind, ButtonSend,
+            ButtonClose
         });
     }
 
+    public void UpdateTransType( )
+    {
+        ZhEn.ForeColor = Defaults.TransType == TranslateType.ZhEn ? Color.Red : Color.Black;
+        ZhJp.ForeColor = Defaults.TransType == TranslateType.ZhJp ? Color.Red : Color.Black;
+        ZhKo.ForeColor = Defaults.TransType == TranslateType.ZhKo ? Color.Red : Color.Black;
+        SendMessage(Defaults.MainHandle, 786, 512);
+    }
     private void ButtonBoldClick(object o, EventArgs e)
     {
         Font selectionFont = EditBox.SelectionFont;
@@ -139,14 +114,14 @@ public partial class AdvRichTextBox : UserControl
             Font font2 = new(selectionFont, selectionFont.Style | FontStyle.Bold);
             EditBox.SelectionFont = font2;
         }
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
     }
 
     private void ButtonCheckClick(object o, EventArgs e)
     {
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
         new Thread(new ThreadStart(typoCheckingApi)).Start( );
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
     }
 
     private void ButtonCheckKeyDown(object o, MouseEventArgs e)
@@ -156,14 +131,14 @@ public partial class AdvRichTextBox : UserControl
         {
             if (!checkColor)
             {
-                toolStripButtoncheck.Image = (Image) componentResourceManager.GetObject("toolStripButtoncheck2.Image");
+                ButtonCheck.Image = (Image) componentResourceManager.GetObject("toolStripButtoncheck2.Image");
                 checkColor = true;
                 Config.Set("工具栏", "检查", "True");
                 return;
             }
             if (checkColor)
             {
-                toolStripButtoncheck.Image = (Image) componentResourceManager.GetObject("toolStripButtoncheck.Image");
+                ButtonCheck.Image = (Image) componentResourceManager.GetObject("toolStripButtoncheck.Image");
                 checkColor = false;
                 Config.Set("工具栏", "检查", "False");
             }
@@ -172,14 +147,14 @@ public partial class AdvRichTextBox : UserControl
 
     private void ButtonCloseClick(object o, EventArgs e)
     {
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
         SendMessage(GetForegroundWindow( ), 786, 511);
     }
 
     private void ButtonColorClick(object o, EventArgs e)
     {
-        EditBox.SelectionColor = toolStripButtonColor.SelectedColor;
-        SetForegroundWindow(StaticValue.mainhandle);
+        EditBox.SelectionColor = ButtonColor.SelectedColor;
+        SetForegroundWindow(Defaults.MainHandle);
     }
 
     private void ButtonFenceClick(object o, EventArgs e)
@@ -190,7 +165,7 @@ public partial class AdvRichTextBox : UserControl
             Process.Start("https://www.lanzous.com/i1ab3vg");
             return;
         }
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
         if (File.Exists("Data\\分栏预览图.jpg"))
         {
             Process process = new( );
@@ -214,18 +189,29 @@ public partial class AdvRichTextBox : UserControl
         {
             if (!fenceColor)
             {
-                toolStripButtonFence.Image = (Image) componentResourceManager.GetObject("toolStripButtonFence2.Image");
+                ButtonFence.Image = (Image) componentResourceManager.GetObject("toolStripButtonFence2.Image");
                 fenceColor = true;
                 Config.Set("工具栏", "分栏", "True");
                 return;
             }
-            if (fenceColor)
+            else if (fenceColor)
             {
-                toolStripButtonFence.Image = (Image) componentResourceManager.GetObject("toolStripButtonFence.Image");
+                ButtonFence.Image = (Image) componentResourceManager.GetObject("toolStripButtonFence.Image");
                 fenceColor = false;
                 Config.Set("工具栏", "分栏", "False");
             }
         }
+    }
+
+    private void ButtonFindClick(object o, EventArgs e)
+    {
+        SetForegroundWindow(Defaults.MainHandle);
+        ReplaceForm replaceForm = new(this)
+        {
+            Text = windowType == WindowType.Main ? "识别替换" : "翻译替换"
+        };
+        replaceForm.Location = PointToScreen(new Point((Width - replaceForm.Width) / 2, (Height - replaceForm.Height) / 2));
+        replaceForm.Show(this);
     }
 
     private void ButtonFullClick(object o, EventArgs e)
@@ -233,15 +219,51 @@ public partial class AdvRichTextBox : UserControl
         EditBox.SelectAll( );
         EditBox.SelectionAlignment = TextAlign.Justify;
         EditBox.Select(0, 0);
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    private void ButtonLeftClick(object o, EventArgs e)
+    {
+        EditBox.SelectAll( );
+        EditBox.SelectionAlignment = TextAlign.Left;
+        EditBox.Select(0, 0);
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    private void ButtonMergeClick(object o, EventArgs e)
+    {
+        EditBox.Text = TextUtils.MergeLines(EditBox.Text);
+        Application.DoEvents( );
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    private void ButtonMergeKeyDown(object o, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Right)
+            return;
+        SwitchSpiltMerge(true);
+    }
+
+    private void ButtonNoteClick(object o, EventArgs e)
+    {
+        SetForegroundWindow(Defaults.MainHandle);
+        SendMessage(Defaults.MainHandle, 786, 520);
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    private void ButtonSplitKeyDown(object o, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Right)
+            return;
+        SwitchSpiltMerge(false);
     }
 
     private void Form1_DragDrop(object o, DragEventArgs e)
     {
         try
         {
-            StaticValue.ImageOCR = Image.FromFile((e.Data.GetData(DataFormats.FileDrop, false) as string[])[0]);
-            SendMessage(StaticValue.mainhandle, 786, 580);
+            Defaults.ImageOCR = Image.FromFile((e.Data.GetData(DataFormats.FileDrop, false) as string[])[0]);
+            SendMessage(Defaults.MainHandle, 786, 580);
         }
         catch (Exception)
         {
@@ -259,10 +281,6 @@ public partial class AdvRichTextBox : UserControl
         e.Effect = DragDropEffects.None;
     }
 
-    private void Form1_MouseEnter(object o, EventArgs e)
-    {
-    }
-
     private void IndentTwo(int flag)
     {
         Font font = new(Font.Name, 9f * Helper.System.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
@@ -271,33 +289,6 @@ public partial class AdvRichTextBox : UserControl
         EditBox.SelectionIndent = (int) sizeF.Width * 2 * flag;
         EditBox.SelectionHangingIndent = -(int) sizeF.Width * 2 * flag;
         graphics.Dispose( );
-    }
-
-    private string PostHTML(string url, string content)
-    {
-        byte[] bytes = Encoding.UTF8.GetBytes(content);
-        string text = "";
-        HttpWebRequest httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
-        httpWebRequest.Method = "POST";
-        httpWebRequest.Timeout = 3000;
-        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-        httpWebRequest.Headers.Add("Accept-Encoding: gzip, deflate");
-        httpWebRequest.Headers.Add("Accept-Language: zh-CN,en,*");
-        try
-        {
-            using (Stream requestStream = httpWebRequest.GetRequestStream( ))
-            {
-                requestStream.Write(bytes, 0, bytes.Length);
-            }
-            Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
-            StreamReader streamReader = new(responseStream, Encoding.GetEncoding("utf-8"));
-            text = streamReader.ReadToEnd( );
-            responseStream.Close( );
-            streamReader.Close( );
-            httpWebRequest.Abort( );
-        }
-        catch { }
-        return text;
     }
 
     private void ReadConfig( )
@@ -319,80 +310,58 @@ public partial class AdvRichTextBox : UserControl
         ComponentResourceManager componentResourceManager = new(typeof(AdvRichTextBox));
         if (isTopmost)
         {
-            topmost.Image = (Image) componentResourceManager.GetObject("main.Image");
-            StaticValue.Topmost = true;
+            ButtonTopmost.Image = (Image) componentResourceManager.GetObject("main.Image");
+            Defaults.Topmost = true;
         }
-        if (!isTopmost)
+        else
         {
-            topmost.Image = (Image) componentResourceManager.GetObject("mode.Image");
-            StaticValue.Topmost = false;
+            ButtonTopmost.Image = (Image) componentResourceManager.GetObject("mode.Image");
+            Defaults.Topmost = false;
         }
         if (Config.Get("工具栏", "合并") == "__ERROR__")
-        {
             Config.Set("工具栏", "合并", "False");
-        }
-        mergeColor = bool.Parse(Config.Get("工具栏", "合并"));
         if (Config.Get("工具栏", "拆分") == "__ERROR__")
-        {
             Config.Set("工具栏", "拆分", "False");
-        }
-        splitColor = bool.Parse(Config.Get("工具栏", "拆分"));
         if (Config.Get("工具栏", "检查") == "__ERROR__")
-        {
             Config.Set("工具栏", "检查", "False");
-        }
-        checkColor = bool.Parse(Config.Get("工具栏", "检查"));
         if (Config.Get("工具栏", "翻译") == "__ERROR__")
-        {
             Config.Set("工具栏", "翻译", "False");
-        }
-        transColor = bool.Parse(Config.Get("工具栏", "翻译"));
         if (Config.Get("工具栏", "分段") == "__ERROR__")
-        {
             Config.Set("工具栏", "分段", "False");
-        }
-        paragraphColor = bool.Parse(Config.Get("工具栏", "分段"));
         if (Config.Get("工具栏", "分栏") == "__ERROR__")
-        {
             Config.Set("工具栏", "分栏", "False");
-        }
+        mergeColor = bool.Parse(Config.Get("工具栏", "合并"));
+        splitColor = bool.Parse(Config.Get("工具栏", "拆分"));
+        checkColor = bool.Parse(Config.Get("工具栏", "检查"));
+        transColor = bool.Parse(Config.Get("工具栏", "翻译"));
+        paragraphColor = bool.Parse(Config.Get("工具栏", "分段"));
         fenceColor = bool.Parse(Config.Get("工具栏", "分栏"));
-        toolStripButtonFence.Image = fenceColor
+        ButtonFence.Image = fenceColor
             ? (Image) componentResourceManager.GetObject("toolStripButtonFence2.Image")
             : (Image) componentResourceManager.GetObject("toolStripButtonFence.Image");
-        toolStripButtonParagraph.Image = paragraphColor
+        ButtonParagraph.Image = paragraphColor
             ? (Image) componentResourceManager.GetObject("toolStripButtonParagraph2.Image")
             : (Image) componentResourceManager.GetObject("toolStripButtonParagraph.Image");
-        toolStripButtoncheck.Image = checkColor
+        ButtonCheck.Image = checkColor
             ? (Image) componentResourceManager.GetObject("toolStripButtoncheck2.Image")
             : (Image) componentResourceManager.GetObject("toolStripButtoncheck.Image");
-        toolStripButtonMerge.Image = mergeColor
+        ButtonMerge.Image = mergeColor
             ? (Image) componentResourceManager.GetObject("toolStripButtonMerge_2.Image")
             : (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
-        toolStripButtonSplit.Image = splitColor
+        ButtonSplit.Image = splitColor
             ? (Image) componentResourceManager.GetObject("toolStripButtonSplit_2.Image")
             : (Image) componentResourceManager.GetObject("toolStripButtonSplit.Image");
         if (transColor)
         {
-            toolStripButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans2.Image");
+            ButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans2.Image");
             return;
         }
-        toolStripButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans.Image");
+        ButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans.Image");
     }
 
-    private void RichBoxMouseDown(object o, MouseEventArgs e)
+    private void RichBoxKeyDown(object o, KeyEventArgs e)
     {
-        if (e.Button == MouseButtons.Left)
-        {
-            SetForegroundWindow(StaticValue.mainhandle);
-        }
-    }
-
-    private void richeditbox_TextChanged(object o, EventArgs e) => undoCmd.Execute(EditBox.Text);
-
-    private void richTextBox1_KeyDown(object o, KeyEventArgs e)
-    {
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
         if (e.Control && e.KeyCode == Keys.V)
         {
             e.SuppressKeyPress = true;
@@ -410,192 +379,75 @@ public partial class AdvRichTextBox : UserControl
         }
         if (e.Control && e.KeyCode == Keys.F)
         {
-            ReplaceForm replaceForm = new(this);
-            if (textFlag == "天若幽心")
-            {
-                replaceForm.Text = "识别替换";
-                replaceForm.Location = PointToScreen(new Point((Width - replaceForm.Width) / 2, (Height - replaceForm.Height) / 2));
-            }
-            else
-            {
-                replaceForm.Text = "翻译替换";
-                replaceForm.Location = PointToScreen(new Point((Width - replaceForm.Width) / 2, (Height - replaceForm.Height) / 2));
-            }
-            replaceForm.Show(this);
+            ButtonFindClick(o, e);
         }
     }
 
-    private void richTextBox1_LinkClicked(object o, LinkClickedEventArgs e) => Process.Start(e.LinkText);
+    private void RichBoxMouseDown(object o, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Left)
+            return;
+        SetForegroundWindow(Defaults.MainHandle);
+    }
+
+    private void RichBoxTextChanged(object o, EventArgs e)
+        => undoCmd.Execute(EditBox.Text);
+    private void RichBoxTextClicked(object o, LinkClickedEventArgs e)
+        => Process.Start(e.LinkText);
+
+    private void SetFont(EditorFont font)
+    {
+        font宋体.ForeColor = font == EditorFont.宋体 ? Color.Red : Color.Black;
+        font黑体.ForeColor = font == EditorFont.黑体 ? Color.Red : Color.Black;
+        font楷体.ForeColor = font == EditorFont.楷体 ? Color.Red : Color.Black;
+        font微软雅黑.ForeColor = font == EditorFont.微软雅黑 ? Color.Red : Color.Black;
+        font新罗马.ForeColor = font == EditorFont.新罗马 ? Color.Red : Color.Black;
+        string text = EditBox.Text;
+        EditBox.Text = "";
+        EditBox.Font = new(font.ToString( ), 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
+        EditBox.Text = text;
+    }
 
     private void SetFont黑体(object o, EventArgs e)
-    {
-        font宋体.ForeColor = Color.Black;
-        font黑体.ForeColor = Color.Red;
-        font楷体.ForeColor = Color.Black;
-        font微软雅黑.ForeColor = Color.Black;
-        font新罗马.ForeColor = Color.Black;
-        string text = EditBox.Text;
-        EditBox.Text = "";
-        Font font = new("黑体", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        EditBox.Font = font;
-        EditBox.Text = text;
-    }
+        => SetFont(EditorFont.黑体);
 
     private void SetFont楷体(object o, EventArgs e)
-    {
-        font宋体.ForeColor = Color.Black;
-        font黑体.ForeColor = Color.Black;
-        font楷体.ForeColor = Color.Red;
-        font微软雅黑.ForeColor = Color.Black;
-        font新罗马.ForeColor = Color.Black;
-        string text = EditBox.Text;
-        EditBox.Text = "";
-        Font font = new("STKaiti", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        EditBox.Font = font;
-        EditBox.Text = text;
-    }
+        => SetFont(EditorFont.楷体);
 
     private void SetFont宋体(object o, EventArgs e)
-    {
-        font宋体.ForeColor = Color.Red;
-        font黑体.ForeColor = Color.Black;
-        font楷体.ForeColor = Color.Black;
-        font微软雅黑.ForeColor = Color.Black;
-        font新罗马.ForeColor = Color.Black;
-        string text = EditBox.Text;
-        EditBox.Text = "";
-        Font font = new("宋体", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        EditBox.Font = font;
-        EditBox.Text = text;
-    }
+        => SetFont(EditorFont.宋体);
 
     private void SetFont微软雅黑(object o, EventArgs e)
-    {
-        font宋体.ForeColor = Color.Black;
-        font黑体.ForeColor = Color.Black;
-        font楷体.ForeColor = Color.Black;
-        font微软雅黑.ForeColor = Color.Red;
-        font新罗马.ForeColor = Color.Black;
-        string text = EditBox.Text;
-        EditBox.Text = "";
-        Font font = new("微软雅黑", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        EditBox.Font = font;
-        EditBox.Text = text;
-    }
+        => SetFont(EditorFont.微软雅黑);
 
     private void SetFont新罗马(object o, EventArgs e)
+        => SetFont(EditorFont.新罗马);
+    private void SwitchSpiltMerge(bool isMerge)
     {
-        font宋体.ForeColor = Color.Black;
-        font黑体.ForeColor = Color.Black;
-        font楷体.ForeColor = Color.Black;
-        font微软雅黑.ForeColor = Color.Black;
-        font新罗马.ForeColor = Color.Red;
-        string text = EditBox.Text;
-        EditBox.Text = "";
-        Font font = new("Times New Roman", 16f * Helper.System.DpiFactor, GraphicsUnit.Pixel);
-        EditBox.Font = font;
-        EditBox.Text = text;
-    }
-    private void TextBox1TextChanged(object o, EventArgs e)
-        => undoCmd.Execute(EditBox.Text);
-    private void toolStripButtonFind_Click(object o, EventArgs e)
-    {
-        SetForegroundWindow(StaticValue.mainhandle);
-        ReplaceForm replaceForm = new(this);
-        if (textFlag == "天若幽心")
+        ComponentResourceManager componentResourceManager = new(typeof(AdvRichTextBox));
+        if (isMerge ? !mergeColor : !splitColor)
         {
-            replaceForm.Text = "识别替换";
-            replaceForm.Location = PointToScreen(new Point((Width - replaceForm.Width) / 2, (Height - replaceForm.Height) / 2));
+            ButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit_2.Image");
+            ButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
+            splitColor = true;
+            mergeColor = false;
+            Defaults.SetSpilt = true;
+            Defaults.SetMerge = false;
+            Config.Set("工具栏", "拆分", "True");
+            Config.Set("工具栏", "合并", "False");
+            return;
         }
         else
         {
-            replaceForm.Text = "翻译替换";
-            replaceForm.Location = PointToScreen(new Point((Width - replaceForm.Width) / 2, (Height - replaceForm.Height) / 2));
+            ButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
+            ButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit.Image");
+            splitColor = false;
+            mergeColor = false;
+            Defaults.SetSpilt = false;
+            Defaults.SetMerge = false;
+            Config.Set("工具栏", "合并", "False");
+            Config.Set("工具栏", "拆分", "False");
         }
-        replaceForm.Show(this);
-    }
-    private void toolStripButtonIndent_Click(object o, EventArgs e) => SetForegroundWindow(StaticValue.mainhandle);
-
-    private void toolStripButtonLeft_Click(object o, EventArgs e)
-    {
-        EditBox.SelectAll( );
-        EditBox.SelectionAlignment = TextAlign.Left;
-        EditBox.Select(0, 0);
-        SetForegroundWindow(StaticValue.mainhandle);
-    }
-
-    private void toolStripButtonMerge_Click(object o, EventArgs e)
-    {
-        string text = EditBox.Text.TrimEnd(new char[] { '\n' }).TrimEnd(new char[] { '\r' }).TrimEnd(new char[] { '\n' });
-        if (text.Split(Environment.NewLine.ToCharArray( )).Length > 1)
-        {
-            string[] array = text.Split(Environment.NewLine.ToCharArray( ));
-            string text2 = "";
-            for (int i = 0; i < array.Length - 1; i++)
-            {
-                string text3 = array[i].Substring(array[i].Length - 1, 1);
-                string text4 = array[i + 1].Substring(0, 1);
-                if (TextUtils.ContainEn(text3) && TextUtils.ContainEn(text4))
-                {
-                    text2 = text2 + array[i] + " ";
-                }
-                else
-                {
-                    text2 += array[i];
-                }
-            }
-            string text5 = text2.Substring(text2.Length - 1, 1);
-            string text6 = array[array.Length - 1].Substring(0, 1);
-            if (TextUtils.ContainEn(text5) && TextUtils.ContainEn(text6))
-            {
-                text2 = text2 + array[array.Length - 1] + " ";
-            }
-            else
-            {
-                text2 += array[array.Length - 1];
-            }
-            EditBox.Text = text2;
-        }
-        Application.DoEvents( );
-        SetForegroundWindow(StaticValue.mainhandle);
-    }
-
-    private void toolStripButtonMerge_keydown(object o, MouseEventArgs e)
-    {
-        ComponentResourceManager componentResourceManager = new(typeof(AdvRichTextBox));
-        if (e.Button == MouseButtons.Right)
-        {
-            if (!mergeColor)
-            {
-                toolStripButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge_2.Image");
-                toolStripButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit.Image");
-                splitColor = false;
-                mergeColor = true;
-                StaticValue.SetSpilt = false;
-                StaticValue.SetMerge = true;
-                Config.Set("工具栏", "合并", "True");
-                Config.Set("工具栏", "拆分", "False");
-                return;
-            }
-            if (mergeColor)
-            {
-                toolStripButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
-                toolStripButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit.Image");
-                splitColor = false;
-                mergeColor = false;
-                StaticValue.SetSpilt = false;
-                StaticValue.SetMerge = false;
-                Config.Set("工具栏", "合并", "False");
-                Config.Set("工具栏", "拆分", "False");
-            }
-        }
-    }
-
-    private void toolStripButtonNote_Click(object o, EventArgs e)
-    {
-        SetForegroundWindow(StaticValue.mainhandle);
-        SendMessage(StaticValue.mainhandle, 786, 520);
-        SetForegroundWindow(StaticValue.mainhandle);
     }
 
     private void toolStripButtonParagraph_Click(object o, EventArgs e)
@@ -608,14 +460,14 @@ public partial class AdvRichTextBox : UserControl
         {
             if (!paragraphColor)
             {
-                toolStripButtonParagraph.Image = (Image) componentResourceManager.GetObject("toolStripButtonParagraph2.Image");
+                ButtonParagraph.Image = (Image) componentResourceManager.GetObject("toolStripButtonParagraph2.Image");
                 paragraphColor = true;
                 Config.Set("工具栏", "分段", "True");
                 return;
             }
-            if (paragraphColor)
+            else
             {
-                toolStripButtonParagraph.Image = (Image) componentResourceManager.GetObject("toolStripButtonParagraph.Image");
+                ButtonParagraph.Image = (Image) componentResourceManager.GetObject("toolStripButtonParagraph.Image");
                 paragraphColor = false;
                 Config.Set("工具栏", "分段", "False");
             }
@@ -649,50 +501,19 @@ public partial class AdvRichTextBox : UserControl
             EditBox.Select(0, 0);
             toolSpace = true;
         }
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
     }
 
     private void toolStripButtonSplit_Click(object o, EventArgs e)
     {
-        EditBox.Text = StaticValue.Split;
+        EditBox.Text = Defaults.Split;
         Application.DoEvents( );
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
     }
-    private void toolStripButtonSplit_keydown(object o, MouseEventArgs e)
-    {
-        ComponentResourceManager componentResourceManager = new(typeof(AdvRichTextBox));
-        if (e.Button == MouseButtons.Right)
-        {
-            if (!splitColor)
-            {
-                toolStripButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit_2.Image");
-                toolStripButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
-                splitColor = true;
-                mergeColor = false;
-                StaticValue.SetSpilt = true;
-                StaticValue.SetMerge = false;
-                Config.Set("工具栏", "拆分", "True");
-                Config.Set("工具栏", "合并", "False");
-                return;
-            }
-            if (splitColor)
-            {
-                toolStripButtonMerge.Image = (Image) componentResourceManager.GetObject("toolStripButtonMerge.Image");
-                toolStripButtonSplit.Image = (Image) componentResourceManager.GetObject("toolStripButtonSplit.Image");
-                splitColor = false;
-                mergeColor = false;
-                StaticValue.SetSpilt = false;
-                StaticValue.SetMerge = false;
-                Config.Set("工具栏", "合并", "False");
-                Config.Set("工具栏", "拆分", "False");
-            }
-        }
-    }
-
     private void toolStripButtonTrans_Click(object o, EventArgs e)
     {
-        SendMessage(StaticValue.mainhandle, 786, 512);
-        SetForegroundWindow(StaticValue.mainhandle);
+        SendMessage(Defaults.MainHandle, 786, 512);
+        SetForegroundWindow(Defaults.MainHandle);
     }
 
     private void toolStripButtontrans_keydown(object o, MouseEventArgs e)
@@ -702,14 +523,14 @@ public partial class AdvRichTextBox : UserControl
         {
             if (!transColor)
             {
-                toolStripButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans2.Image");
+                ButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans2.Image");
                 transColor = true;
                 Config.Set("工具栏", "翻译", "True");
                 return;
             }
             if (transColor)
             {
-                toolStripButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans.Image");
+                ButtonTrans.Image = (Image) componentResourceManager.GetObject("toolStripButtonTrans.Image");
                 transColor = false;
                 Config.Set("工具栏", "翻译", "False");
             }
@@ -718,9 +539,9 @@ public partial class AdvRichTextBox : UserControl
 
     private void toolStripButtonVoice_Click(object o, EventArgs e)
     {
-        SetForegroundWindow(StaticValue.mainhandle);
-        SendMessage(StaticValue.mainhandle, 786, 518);
-        SetForegroundWindow(StaticValue.mainhandle);
+        SetForegroundWindow(Defaults.MainHandle);
+        SendMessage(Defaults.MainHandle, 786, 518);
+        SetForegroundWindow(Defaults.MainHandle);
     }
     private void toolStripToolBar_Click(object o, EventArgs e)
     {
@@ -733,18 +554,18 @@ public partial class AdvRichTextBox : UserControl
         {
             if (!isTopmost)
             {
-                topmost.Image = (Image) componentResourceManager.GetObject("main.Image");
-                StaticValue.Topmost = true;
+                ButtonTopmost.Image = (Image) componentResourceManager.GetObject("main.Image");
+                Defaults.Topmost = true;
                 isTopmost = true;
                 Config.Set("工具栏", "顶置", "True");
-                SendMessage(StaticValue.mainhandle, 600, 725);
+                SendMessage(Defaults.MainHandle, 600, 725);
                 return;
             }
-            topmost.Image = (Image) componentResourceManager.GetObject("mode.Image");
-            StaticValue.Topmost = false;
+            ButtonTopmost.Image = (Image) componentResourceManager.GetObject("mode.Image");
+            Defaults.Topmost = false;
             isTopmost = false;
             Config.Set("工具栏", "顶置", "False");
-            SendMessage(StaticValue.mainhandle, 600, 725);
+            SendMessage(Defaults.MainHandle, 600, 725);
         }
     }
 
@@ -755,7 +576,7 @@ public partial class AdvRichTextBox : UserControl
         EditBox.Select(0, 0);
         try
         {
-            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(PostHTML("http://www.cuobiezi.net/api/v1/zh_spellcheck/client/pos/json", "{\"check_mode\": \"value2\",\"content\": \"" + EditBox.Text + "\", \"content2\": \"value1\",  \"doc_type\": \"value2\",\"method\": \"value2\",\"return_format\": \"value2\",\"username\": \"tianruoyouxin\"}")))["Cases"].ToString( ));
+            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(Web.PostHtml("http://www.cuobiezi.net/api/v1/zh_spellcheck/client/pos/json", "{\"check_mode\": \"value2\",\"content\": \"" + EditBox.Text + "\", \"content2\": \"value1\",  \"doc_type\": \"value2\",\"method\": \"value2\",\"return_format\": \"value2\",\"username\": \"tianruoyouxin\"}")))["Cases"].ToString( ));
             for (int i = 0; i < jarray.Count; i++)
             {
                 JObject jobject = JObject.Parse(jarray[i].ToString( ));
@@ -771,36 +592,21 @@ public partial class AdvRichTextBox : UserControl
         catch { }
         EditBox.Select(0, 0);
     }
-    private void zh_en_Click(object o, EventArgs e)
+    private void ZhEnClick(object o, EventArgs e)
     {
-        zh_en.ForeColor = Color.Red;
-        zh_jp.ForeColor = Color.Black;
-        zh_ko.ForeColor = Color.Black;
-        StaticValue.Zh2En = true;
-        StaticValue.Zh2Jp = false;
-        StaticValue.Zh2Ko = false;
-        SendMessage(StaticValue.mainhandle, 786, 512);
+        Defaults.TransType = TranslateType.ZhEn;
+        UpdateTransType( );
     }
 
-    private void zh_jp_Click(object o, EventArgs e)
+    private void ZhJpClick(object o, EventArgs e)
     {
-        zh_en.ForeColor = Color.Black;
-        zh_jp.ForeColor = Color.Red;
-        zh_ko.ForeColor = Color.Black;
-        StaticValue.Zh2En = false;
-        StaticValue.Zh2Jp = true;
-        StaticValue.Zh2Ko = false;
-        SendMessage(StaticValue.mainhandle, 786, 512);
+        Defaults.TransType = TranslateType.ZhJp;
+        UpdateTransType( );
     }
 
-    private void zh_ko_Click(object o, EventArgs e)
+    private void ZhKoClick(object o, EventArgs e)
     {
-        zh_en.ForeColor = Color.Black;
-        zh_jp.ForeColor = Color.Black;
-        zh_ko.ForeColor = Color.Red;
-        StaticValue.Zh2En = false;
-        StaticValue.Zh2Jp = false;
-        StaticValue.Zh2Ko = true;
-        SendMessage(StaticValue.mainhandle, 786, 512);
+        Defaults.TransType = TranslateType.ZhKo;
+        UpdateTransType( );
     }
 }

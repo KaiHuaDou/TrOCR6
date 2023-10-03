@@ -52,42 +52,6 @@ public partial class FmLoading : Form
         ResumeLayout(false);
     }
 
-    public void SetBits(Bitmap bitmap)
-    {
-        if (Image.IsCanonicalPixelFormat(bitmap.PixelFormat) && Image.IsAlphaPixelFormat(bitmap.PixelFormat))
-        {
-            IntPtr intPtr = IntPtr.Zero;
-            IntPtr dc = GetDC(IntPtr.Zero);
-            IntPtr intPtr2 = IntPtr.Zero;
-            IntPtr intPtr3 = CreateCompatibleDC(dc);
-            try
-            {
-                Point point = new(Left, Top);
-                Size size = new(bitmap.Width, bitmap.Height);
-                BLENDFUNCTION blendfunction = default;
-                Point point2 = new(0, 0);
-                intPtr2 = bitmap.GetHbitmap(Color.FromArgb(0));
-                intPtr = SelectObject(intPtr3, intPtr2);
-                blendfunction.BlendOp = 0;
-                blendfunction.SourceConstantAlpha = byte.MaxValue;
-                blendfunction.AlphaFormat = 1;
-                blendfunction.BlendFlags = 0;
-                UpdateLayeredWindow(Handle, dc, ref point, ref size, intPtr3, ref point2, 0, ref blendfunction, 2);
-                return;
-            }
-            finally
-            {
-                if (intPtr2 != IntPtr.Zero)
-                {
-                    SelectObject(intPtr3, intPtr);
-                    DeleteObject(intPtr2);
-                }
-                ReleaseDC(IntPtr.Zero, dc);
-                DeleteDC(intPtr3);
-            }
-        }
-        throw new ApplicationException("图片必须是32位带Alhpa通道的图片");
-    }
     public void SetPng( )
     {
         string text;
@@ -136,7 +100,7 @@ public partial class FmLoading : Form
                 count = 0;
             }
             backgrond = (Image) new ComponentResourceManager(typeof(FmLoading)).GetObject(count + windowType + ".png");
-            SetBits((Bitmap) backgrond);
+            ImageUtils.SetImage((Bitmap) backgrond, Left, Top , Handle);
             count++;
         }
         catch

@@ -11,24 +11,16 @@ public static class Web
     public static string ContentLength(string text, string fromlang, string tolang)
         => $"&source={fromlang}&target={tolang}&sourceText={HttpUtility.UrlEncode(text).Replace("+", "%20")}";
 
-    public static string CookieToStr(CookieCollection cookie)
+    public static string CookieToStr(CookieCollection cookies)
     {
-        string text;
-        if (cookie == null)
+        if (cookies == null)
+            return string.Empty;
+        string result = string.Empty;
+        foreach (Cookie cookie in cookies)
         {
-            text = string.Empty;
+            result += string.Format("{0}={1};", cookie.Name, cookie.Value);
         }
-        else
-        {
-            string text2 = string.Empty;
-            foreach (object obj in cookie)
-            {
-                Cookie cookie2 = (Cookie) obj;
-                text2 += string.Format("{0}={1};", cookie2.Name, cookie2.Value);
-            }
-            text = text2;
-        }
-        return text;
+        return result;
     }
 
     public static string GetCookies(string url)
@@ -74,26 +66,42 @@ public static class Web
         return result;
     }
 
-    public static string PostHtml(string url, string postStr)
+    private static string PostCompressContent(string url, string content)
     {
-        byte[] bytes = Encoding.UTF8.GetBytes(postStr);
-        string result = "";
+        HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+        req.Method = "POST";
+        req.Timeout = 3000;
+        req.ContentType = "application/x-www-form-urlencoded";
+        req.Headers.Add("Accept-Encoding: gzip, deflate");
+        req.Headers.Add("Accept-Language: zh-CN,en,*");
+        return HttpReq(content, req);
+    }
+
+    public static string PostHtml(string url, string content)
+    {
         HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
         req.Method = "POST";
         req.Timeout = 6000;
         req.ContentType = "application/x-www-form-urlencoded";
         req.Headers.Add("Accept-Language: zh-CN,en,*");
+        return HttpReq(content, req);
+    }
+
+    public static string HttpReq(string content, HttpWebRequest req)
+    {
+        string result = "";
+        byte[] bytes = Encoding.UTF8.GetBytes(content);
         try
         {
-            using (Stream requestStream = req.GetRequestStream( ))
+            using (Stream reqStream = req.GetRequestStream( ))
             {
-                requestStream.Write(bytes, 0, bytes.Length);
+                reqStream.Write(bytes, 0, bytes.Length);
             }
-            Stream responseStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
-            StreamReader streamReader = new(responseStream, Encoding.GetEncoding("utf-8"));
-            result = streamReader.ReadToEnd( );
-            responseStream.Close( );
-            streamReader.Close( );
+            Stream resStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
+            StreamReader reader = new(resStream, Encoding.GetEncoding("utf-8"));
+            result = reader.ReadToEnd( );
+            resStream.Close( );
+            reader.Close( );
             req.Abort( );
         }
         catch { }
@@ -126,5 +134,36 @@ public static class Web
         }
         catch { }
         return text;
+    }
+
+    private static string GetBaiduHtml(string url, CookieContainer cookie, string refer, string contentLength)
+    {
+        string result;
+        try
+        {
+            string text = "";
+            HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+            req.Method = "POST";
+            req.Referer = refer;
+            req.Timeout = 1500;
+            req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            byte[] bytes = Encoding.UTF8.GetBytes(contentLength);
+            Stream reqStream = req.GetRequestStream( );
+            reqStream.Write(bytes, 0, bytes.Length);
+            reqStream.Close( );
+            using (HttpWebResponse res = (HttpWebResponse) req.GetResponse( ))
+            {
+                using StreamReader reader = new(res.GetResponseStream( ), Encoding.UTF8);
+                text = reader.ReadToEnd( );
+                reader.Close( );
+                res.Close( );
+            }
+            result = text;
+        }
+        catch
+        {
+            result = GetBaiduHtml(url, cookie, refer, contentLength);
+        }
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 using static TrOCR.External.NativeMethods;
 
 namespace TrOCR.Helper;
@@ -150,5 +151,24 @@ public static class Config
             Set("特殊", "ali_account", "");
         if (Get("特殊", "ali_password") == "__ERROR__")
             Set("特殊", "ali_password", "");
+    }
+
+    public static void SetHotkey(string control, string key, string original, int flag)
+    {
+        string[] hotkeys = (original + "+").Split('+');
+        if (hotkeys.Length == 3)
+        {
+            control = hotkeys[0];
+            key = hotkeys[1];
+        }
+        else if (hotkeys.Length == 2)
+        {
+            control = "None";
+            key = original;
+        }
+        hotkeys = new string[] { control, key };
+        if (!RegisterHotKey(Defaults.MainHandle, flag, (KeyModifiers) Enum.Parse(typeof(KeyModifiers), hotkeys[0].Trim( )), (Keys) Enum.Parse(typeof(Keys), hotkeys[1].Trim( ))))
+            FmFlags.Display("快捷键冲突，请更换！");
+        RegisterHotKey(Defaults.MainHandle, flag, (KeyModifiers) Enum.Parse(typeof(KeyModifiers), hotkeys[0].Trim( )), (Keys) Enum.Parse(typeof(Keys), hotkeys[1].Trim( )));
     }
 }
