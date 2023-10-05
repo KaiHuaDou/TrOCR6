@@ -18,23 +18,21 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="ZXing.Net" Version="0.16.9" />
         <Reference Include="System.Core" />
         <Reference Include="System.Web" />
         <Reference Include="Emgu.CV.World">
-            <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\Emgu.CV.World.dll</HintPath>
+            <HintPath>..\reference\Emgu.CV.World.dll</HintPath>
         </Reference>
         <Reference Include="HttpHelper">
-            <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\HttpHelper.dll</HintPath>
+            <HintPath>..\reference\HttpHelper.dll</HintPath>
         </Reference>
-        <Reference Include="Interop.MSScriptControl">
-            <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\Interop.MSScriptControl.dll</HintPath>
+        <Reference Include="ShareX.HelpersLib">
+            <HintPath>..\reference\ShareX.HelpersLib.dll</HintPath>
         </Reference>
         <Reference Include="ShareX.ScreenCaptureLib">
-            <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\ShareX.ScreenCaptureLib.dll</HintPath>
-        </Reference>
-        <Reference Include="zxing">
-            <HintPath>..\..\..\Program Files\Cencrack\天若OCR文字识别\zxing.dll</HintPath>
+            <HintPath>..\reference\ShareX.ScreenCaptureLib.dll</HintPath>
         </Reference>
     </ItemGroup>
     <ItemGroup>

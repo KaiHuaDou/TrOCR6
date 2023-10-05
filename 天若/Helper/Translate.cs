@@ -14,7 +14,7 @@ public static class Translate
         string result = "";
         try
         {
-            (string from, string to) = ParseFromTo(text, result);
+            (string from, string to) = ParseFromTo(text);
             HttpHelper httpHelper = new( );
             HttpItem httpItem = new( )
             {
@@ -48,7 +48,7 @@ public static class Translate
         string result = "";
         try
         {
-            (string from, string to) = ParseFromTo(text, result, ZhId: "zh-CN");
+            (string from, string to) = ParseFromTo(text, ZhName: "zh-CN");
             HttpHelper httpHelper = new( );
             HttpItem httpItem = new( )
             {
@@ -82,7 +82,7 @@ public static class Translate
         string result = "";
         try
         {
-            (string from, string to) = ParseFromTo(text, result);
+            (string from, string to) = ParseFromTo(text);
             JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(FmMain.TencentPOST("https://fanyi.qq.com/api/translate", Web.ContentLength(text, from, to))))["translate"]["records"].ToString( ));
             for (int i = 0; i < jarray.Count; i++)
             {
@@ -97,31 +97,31 @@ public static class Translate
         return result;
     }
 
-    private static (string, string) ParseFromTo(string text, string result, string ZhId = "zh")
+    private static (string, string) ParseFromTo(string text, string ZhName = "zh")
     {
+        text = text.Trim( );
         string from = "", to = "";
-        switch (Defaults.TransType)
+        switch (Globals.TransType)
         {
             case TranslateType.ZhEn:
             {
-                bool flag = TextUtils.CountZh(text.Trim( )) > TextUtils.CountEn(text.Trim( ))
-                            || (TextUtils.CountEn(result.Trim( )) == 1 && TextUtils.CountZh(result.Trim( )) == 1);
-                from = flag ? ZhId : "en";
-                to = flag ? "en" : ZhId;
+                bool flag = TextUtils.CountZh(text) > TextUtils.CountEn(text);
+                from = flag ? ZhName : "en";
+                to = flag ? "en" : ZhName;
                 break;
             }
             case TranslateType.ZhJp:
             {
-                bool flag = TextUtils.ContainJap(TextUtils.RepalceStr(TextUtils.RemoveZh(text.Trim( ))));
-                from = flag ? ZhId : "jp";
-                to = flag ? "jp" : ZhId;
+                bool flag = TextUtils.CountZh(text) > TextUtils.CountJp(text);
+                from = flag ? ZhName : "jp";
+                to = flag ? "jp" : ZhName;
                 break;
             }
             case TranslateType.ZhKo:
             {
-                bool flag = TextUtils.ContainKor(text.Trim( ));
-                from = flag ? ZhId : "ko";
-                to = flag ? "ko" : ZhId;
+                bool flag = TextUtils.CountZh(text) > TextUtils.CountKo(text);
+                from = flag ? ZhName : "ko";
+                to = flag ? "ko" : ZhName;
                 break;
             }
         }
@@ -132,11 +132,11 @@ public static class Translate
     {
         string transInterface = Config.Get("配置", "翻译接口");
         if (transInterface == "谷歌")
-            return Helper.Translate.Google(text);
+            return Google(text);
         else if (transInterface == "百度")
-            return Helper.Translate.Baidu(text);
+            return Baidu(text);
         else if (transInterface == "腾讯")
-            return Helper.Translate.Tencent(text);
+            return Tencent(text);
         return "";
     }
 }

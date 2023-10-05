@@ -80,7 +80,6 @@ public class FloatLayerBase : Form
         }
     }
 
-
     protected sealed override CreateParams CreateParams
     {
         get
@@ -139,56 +138,55 @@ public class FloatLayerBase : Form
         Owner = control.FindForm( );
     }
 
-    public void Show(Control control) 
+    public void Show(Control control)
         => Show(control, 0, control.Height);
 
-    public void Show(Control control, int offsetX, int offsetY) 
+    public void Show(Control control, int offsetX, int offsetY)
         => Show(control, new Point(offsetX, offsetY));
 
-    public void Show(Control control, Point offset) 
+    public void Show(Control control, Point offset)
         => ShowInternal(control, offset);
 
-    public void Show(ToolStripItem item) 
+    public void Show(ToolStripItem item)
         => Show(item, 0, item.Height);
 
-    public void Show(ToolStripItem item, int offsetX, int offsetY) 
+    public void Show(ToolStripItem item, int offsetX, int offsetY)
         => Show(item, new Point(offsetX, offsetY));
 
-    public void Show(ToolStripItem item, Point offset) 
+    public void Show(ToolStripItem item, Point offset)
         => ShowInternal(item, offset);
 
-    public DialogResult ShowDialog(Control control) 
+    public DialogResult ShowDialog(Control control)
         => ShowDialog(control, 0, control.Height);
 
-    public DialogResult ShowDialog(Control control, int offsetX, int offsetY) 
+    public DialogResult ShowDialog(Control control, int offsetX, int offsetY)
         => ShowDialog(control, new Point(offsetX, offsetY));
 
-    public DialogResult ShowDialog(Control control, Point offset) 
+    public DialogResult ShowDialog(Control control, Point offset)
         => ShowDialogInternal(control, offset);
 
-    public DialogResult ShowDialog(ToolStripItem item) 
+    public DialogResult ShowDialog(ToolStripItem item)
         => ShowDialog(item, 0, item.Height + 4);
 
-    public DialogResult ShowDialog(ToolStripItem item, int offsetX, int offsetY) 
+    public DialogResult ShowDialog(ToolStripItem item, int offsetX, int offsetY)
         => ShowDialog(item, new Point(offsetX, offsetY));
 
-    public DialogResult ShowDialog(ToolStripItem item, Point offset) 
+    public DialogResult ShowDialog(ToolStripItem item, Point offset)
         => ShowDialogInternal(item, offset);
-
 
     public DialogResult ShowDialogInternal(Component controlOrItem, Point offset)
     {
-        DialogResult dialogResult;
+        DialogResult result;
         if (Visible)
         {
-            dialogResult = DialogResult.None;
+            result = DialogResult.None;
         }
         else
         {
             SetLocationAndOwner(controlOrItem, offset);
-            dialogResult = base.ShowDialog( );
+            result = base.ShowDialog( );
         }
-        return dialogResult;
+        return result;
     }
 
     public void ShowInternal(Component controlOrItem, Point offset)

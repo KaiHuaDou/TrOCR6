@@ -49,12 +49,6 @@ public static class TextUtils
     public static bool ContainEn(string str)
         => Regex.IsMatch(str, "[a-zA-Z]");
 
-    public static bool ContainJap(string str)
-        => Regex.IsMatch(str, "[\\u3040-\\u309F]") || Regex.IsMatch(str, "[\\u30A0-\\u30FF]");
-
-    public static bool ContainKor(string str)
-        => Regex.IsMatch(str, "[\\uac00-\\ud7ff]");
-
     public static bool ContainPunctuation(string str)
         => Regex.IsMatch(str, "\\p{P}");
 
@@ -65,19 +59,16 @@ public static class TextUtils
         => Regex.IsMatch(str, "[\\u4e00-\\u9fa5]");
 
     public static int CountEn(string text)
-        => Regex.Matches(text, "\\s+").Count + 1;
+        => Regex.Matches(text, "[A-Za-z]").Count;
+
+    public static int CountJp(string str)
+        => Regex.Matches(str, "[\\u3040-\\u309F]").Count + Regex.Matches(str, "[\\u30A0-\\u30FF]").Count;
+
+    public static int CountKo(string str)
+        => Regex.Matches(str, "[\\uac00-\\ud7ff]").Count;
 
     public static int CountZh(string str)
-    {
-        int num = 0;
-        Regex regex = new("^[\\u4E00-\\u9FA5]{0,}$");
-        for (int i = 0; i < str.Length; i++)
-        {
-            if (regex.IsMatch(str[i].ToString( )))
-                num++;
-        }
-        return num;
-    }
+        => Regex.Matches(str, "[\\u4E00-\\u9FA5]").Count;
 
     public static int GetFirstNum(string str)
         => Convert.ToInt32(str.Split(',')[0]);
@@ -102,15 +93,14 @@ public static class TextUtils
         return text;
     }
 
+    public static bool HasBasicPunctuation(string text)
+        => ",;，；、<>《》()-（）".IndexOf(text) != -1;
+
     public static bool HasPunctuation(string str)
     {
         string text = ContainsZh(str) ? "[\\；\\，\\。\\！\\？]" : "[\\;\\,\\.\\!\\?]";
         return Regex.IsMatch(str, text);
     }
-
-    public static bool HasBasicPunctuation(string text)
-        => ",;，；、<>《》()-（）".IndexOf(text) != -1;
-
     public static bool IsNum(string str)
     {
         for (int i = 0; i < str.Length; i++)
@@ -126,6 +116,31 @@ public static class TextUtils
 
     public static bool IsSplited(string text)
         => "。？！?!：".IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1;
+
+    public static string MergeLines(string text)
+    {
+        text = text.TrimEnd('\n').TrimEnd('\r').TrimEnd('\n');
+        if (text.Split(Environment.NewLine.ToCharArray( )).Length <= 1)
+            return text;
+        string[] array = text.Split(Environment.NewLine.ToCharArray( ));
+        string result = "";
+        for (int i = 0; i < array.Length - 1; i++)
+        {
+            string last1 = array[i].Substring(array[i].Length - 1, 1);
+            string last2 = array[i + 1].Substring(0, 1);
+            if (ContainEn(last1) && ContainEn(last2))
+                result = result + array[i] + " ";
+            else
+                result += array[i];
+        }
+        string last3 = result.Substring(result.Length - 1, 1);
+        string last4 = array[array.Length - 1].Substring(0, 1);
+        if (ContainEn(last3) && ContainEn(last4))
+            result = result + array[array.Length - 1] + " ";
+        else
+            result += array[array.Length - 1];
+        return result;
+    }
 
     public static string PunctuationChEn(string text)
     {
@@ -245,22 +260,8 @@ public static class TextUtils
         return Path.GetFileName(text2);
     }
 
-    public static string RepalceStr(string hexData)
+    public static string RepalceZh(string hexData)
         => Regex.Replace(hexData, "[\\p{P}+~$`^=|__～\uff40＄\uff3e＋＝｜＜＞￥×┊ ]", "").ToUpperInvariant( );
-
-    public static string ToSimplified(string source)
-    {
-        string text = new(' ', source.Length);
-        LCMapString(2048, 33554432, source, source.Length, text, text.Length);
-        return text;
-    }
-
-    public static string ToTraditional(string source)
-    {
-        string text = new(' ', source.Length);
-        LCMapString(2048, 67108864, source, source.Length, text, source.Length);
-        return text;
-    }
 
     public static void TextCheck(JArray jarray, int lastlength, string words, Action<JArray, string, string, string> finalize)
     {
@@ -321,7 +322,7 @@ public static class TextUtils
                 text2 = text2 + jobject[words].ToString( ).Trim( ) + " ";
             }
             else if ((ContainsZh(array[array.Length - lastlength].ToString( ))
-                && IsNum(array2[0].ToString( ))) || (IsNum(array[array.Length - lastlength].ToString( )) && ContainsZh(array2[0].ToString( ))) || IsNum(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( )))
+                && IsNum(array2[0].ToString( ))) || (IsNum(array[array.Length - lastlength].ToString( )) && ContainsZh(array2[0].ToString( ))) || (IsNum(array[array.Length - lastlength].ToString( )) && IsNum(array2[0].ToString( ))))
             {
                 text2 += jobject[words].ToString( ).Trim( );
             }
@@ -338,28 +339,17 @@ public static class TextUtils
         finalize(jarray, words, text, text2);
     }
 
-    public static string MergeLines(string text)
+    public static string ToSimplified(string source)
     {
-        text = text.TrimEnd('\n').TrimEnd('\r').TrimEnd('\n');
-        if (text.Split(Environment.NewLine.ToCharArray( )).Length <= 1)
-            return text;
-        string[] array = text.Split(Environment.NewLine.ToCharArray( ));
-        string result = "";
-        for (int i = 0; i < array.Length - 1; i++)
-        {
-            string last1 = array[i].Substring(array[i].Length - 1, 1);
-            string last2 = array[i + 1].Substring(0, 1);
-            if (TextUtils.ContainEn(last1) && TextUtils.ContainEn(last2))
-                result = result + array[i] + " ";
-            else
-                result += array[i];
-        }
-        string last3 = result.Substring(result.Length - 1, 1);
-        string last4 = array[array.Length - 1].Substring(0, 1);
-        if (TextUtils.ContainEn(last3) && TextUtils.ContainEn(last4))
-            result = result + array[array.Length - 1] + " ";
-        else
-            result += array[array.Length - 1];
-        return result;
+        string text = new(' ', source.Length);
+        LCMapString(2048, 33554432, source, source.Length, text, text.Length);
+        return text;
+    }
+
+    public static string ToTraditional(string source)
+    {
+        string text = new(' ', source.Length);
+        LCMapString(2048, 67108864, source, source.Length, text, source.Length);
+        return text;
     }
 }

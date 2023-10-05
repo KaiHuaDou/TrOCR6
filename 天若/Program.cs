@@ -45,7 +45,7 @@ internal static class Program
         {
             new FmSetting { SelectedTab = FmSettingTab.更新 }.ShowDialog( );
         }
-        if (Config.Get("更新", "检测更新") is "True" or "__ERROR__")
+        if (Config.Get("更新", "检测更新") is "True" or "_ERROR_")
         {
             new Thread(Update.CheckUpdate).Start( );
             if (Config.Get("更新", "更新间隔") == "True")

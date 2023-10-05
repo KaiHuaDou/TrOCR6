@@ -1,8 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Emgu.CV;
+using TrOCR.Controls;
+using static System.Net.Mime.MediaTypeNames;
 using static TrOCR.External.NativeMethods;
 namespace TrOCR.Helper;
 
@@ -66,14 +70,23 @@ public static class Web
         return result;
     }
 
-    private static string PostCompressContent(string url, string content)
+    public static string PostCompressContent(string url, byte[] content, string referer, OcrType type = OcrType.None)
     {
         HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
         req.Method = "POST";
-        req.Timeout = 3000;
-        req.ContentType = "application/x-www-form-urlencoded";
-        req.Headers.Add("Accept-Encoding: gzip, deflate");
-        req.Headers.Add("Accept-Language: zh-CN,en,*");
+        req.Timeout = 8000;
+        req.Referer = referer;
+        req.ReadWriteTimeout = 2000;
+        if (type == OcrType.Youdao)
+        {
+            req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+        }
+        else if (type == OcrType.Tencent)
+        {
+            req.ContentType = "multipart/form-data; boundary=RDEqU0w702X9cWPJ";
+            req.Headers.Add("Accept-Encoding: gzip, deflate");
+            req.Headers.Add("Accept-Language: zh-CN,en,*");
+        }
         return HttpReq(content, req);
     }
 
@@ -88,9 +101,11 @@ public static class Web
     }
 
     public static string HttpReq(string content, HttpWebRequest req)
+        => HttpReq(Encoding.UTF8.GetBytes(content), req);
+
+    public static string HttpReq(byte[] bytes, HttpWebRequest req)
     {
         string result = "";
-        byte[] bytes = Encoding.UTF8.GetBytes(content);
         try
         {
             using (Stream reqStream = req.GetRequestStream( ))
@@ -98,7 +113,7 @@ public static class Web
                 reqStream.Write(bytes, 0, bytes.Length);
             }
             Stream resStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
-            StreamReader reader = new(resStream, Encoding.GetEncoding("utf-8"));
+            StreamReader reader = new(resStream, Encoding.GetEncoding("UTF-8"));
             result = reader.ReadToEnd( );
             resStream.Close( );
             reader.Close( );
@@ -165,5 +180,14 @@ public static class Web
             result = GetBaiduHtml(url, cookie, refer, contentLength);
         }
         return result;
+    }
+
+    public static byte[] MergeBytes(byte[] a, byte[] b, byte[] c)
+    {
+        byte[] array = new byte[a.Length + b.Length + c.Length];
+        a.CopyTo(array, 0);
+        b.CopyTo(array, a.Length);
+        c.CopyTo(array, a.Length + b.Length);
+        return array;
     }
 }

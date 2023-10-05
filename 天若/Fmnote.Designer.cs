@@ -15,7 +15,7 @@
 		{
 			base.Location = new global::System.Drawing.Point(global::System.Windows.Forms.Screen.AllScreens[0].WorkingArea.Width - base.Width, global::System.Windows.Forms.Screen.AllScreens[0].WorkingArea.Height - base.Height);
 			base.Hide();
-			this.Font = new global::System.Drawing.Font(this.Font.Name, 9f / global::TrOCR.Helper.Defaults.DpiFactor, this.Font.Style, this.Font.Unit, this.Font.GdiCharSet, this.Font.GdiVerticalFont);
+			this.Font = new global::System.Drawing.Font(this.Font.Name, 9f / global::TrOCR.Helper.Globals.DpiFactor, this.Font.Style, this.Font.Unit, this.Font.GdiCharSet, this.Font.GdiVerticalFont);
 			this.copyItem = new global::System.Windows.Forms.ToolStripMenuItem();
 			this.components = new global::System.ComponentModel.Container();
 			this.mainDataGrid = new global::System.Windows.Forms.DataGridView();

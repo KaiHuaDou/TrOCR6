@@ -26,7 +26,7 @@ public sealed partial class FmSetting : Form
 {
     public FmSetting( )
     {
-        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / Globals.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         InitializeComponent( );
     }
 
@@ -123,7 +123,7 @@ public sealed partial class FmSetting : Form
     public void ReadConfig( )
     {
         string value = Config.Get("配置", "开机自启");
-        if (value == "__ERROR__")
+        if (value == "_ERROR_")
         {
             Box开机.Checked = true;
         }
@@ -136,7 +136,7 @@ public sealed partial class FmSetting : Form
             Box开机.Checked = true;
         }
         string value2 = Config.Get("配置", "快速翻译");
-        if (value2 == "__ERROR__")
+        if (value2 == "_ERROR_")
         {
             Box翻译.Checked = true;
         }
@@ -149,7 +149,7 @@ public sealed partial class FmSetting : Form
             Box翻译.Checked = true;
         }
         string value3 = Config.Get("配置", "识别弹窗");
-        if (value3 == "__ERROR__")
+        if (value3 == "_ERROR_")
         {
             Box弹窗.Checked = true;
         }
@@ -163,18 +163,18 @@ public sealed partial class FmSetting : Form
         }
         string value4 = Config.Get("配置", "窗体动画");
         Box动画.Text = value4;
-        if (value4 == "__ERROR__")
+        if (value4 == "_ERROR_")
         {
             Box动画.Text = "窗体";
         }
         string value5 = Config.Get("配置", "记录数目");
         Box记录.Value = Convert.ToInt32(value5);
-        if (value5 == "__ERROR__")
+        if (value5 == "_ERROR_")
         {
             Box记录.Value = 20m;
         }
         string value6 = Config.Get("配置", "自动保存");
-        if (value6 == "__ERROR__")
+        if (value6 == "_ERROR_")
         {
             Box保存.Checked = false;
         }
@@ -198,31 +198,31 @@ public sealed partial class FmSetting : Form
         }
         string value7 = Config.Get("配置", "截图位置");
         Box截图位置.Text = value7;
-        if (value7 == "__ERROR__")
+        if (value7 == "_ERROR_")
         {
             Box截图位置.Text = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
         }
         string value8 = Config.Get("快捷键", "文字识别");
         Box文字识别.Text = value8;
-        if (value8 == "__ERROR__")
+        if (value8 == "_ERROR_")
         {
             Box文字识别.Text = "F4";
         }
         string value9 = Config.Get("快捷键", "翻译文本");
         Box翻译文本.Text = value9;
-        if (value9 == "__ERROR__")
+        if (value9 == "_ERROR_")
         {
             Box翻译文本.Text = "F9";
         }
         string value10 = Config.Get("快捷键", "记录界面");
         Box记录界面.Text = value10;
-        if (value10 == "__ERROR__")
+        if (value10 == "_ERROR_")
         {
             Box记录界面.Text = "请按下快捷键";
         }
         string value11 = Config.Get("快捷键", "识别界面");
         Box识别界面.Text = value11;
-        if (value11 == "__ERROR__")
+        if (value11 == "_ERROR_")
         {
             Box识别界面.Text = "请按下快捷键";
         }
@@ -232,19 +232,19 @@ public sealed partial class FmSetting : Form
         pictureBox_识别界面.Image = (Box识别界面.Text == "请按下快捷键") ? Resources.快捷键_0 : Resources.快捷键_1;
         string value12 = Config.Get("密钥_百度", "secret_id");
         BoxBaiduId.Text = value12;
-        if (value12 == "__ERROR__")
+        if (value12 == "_ERROR_")
         {
             BoxBaiduId.Text = "YsZKG1wha34PlDOPYaIrIIKO";
         }
         string value13 = Config.Get("密钥_百度", "secret_key");
         BoxBaiduKey.Text = value13;
-        if (value13 == "__ERROR__")
+        if (value13 == "_ERROR_")
         {
             BoxBaiduKey.Text = "HPRZtdOHrdnnETVsZM2Nx7vbDkMfxrkD";
         }
         string value14 = Config.Get("代理", "代理类型");
         Box代理.Text = value14;
-        if (value14 == "__ERROR__")
+        if (value14 == "_ERROR_")
         {
             Box代理.Text = "系统代理";
         }
@@ -263,18 +263,18 @@ public sealed partial class FmSetting : Form
         }
         string value15 = Config.Get("代理", "服务器");
         Box服务器.Text = value15;
-        if (value15 == "__ERROR__")
+        if (value15 == "_ERROR_")
         {
             Box服务器.Text = "127.0.0.1";
         }
         string value16 = Config.Get("代理", "端口");
         Box端口.Text = value16;
-        if (value16 == "__ERROR__")
+        if (value16 == "_ERROR_")
         {
             Box端口.Text = "1080";
         }
         string value17 = Config.Get("代理", "需要密码");
-        if (value17 == "__ERROR__")
+        if (value17 == "_ERROR_")
         {
             Box代理服务器.Checked = false;
         }
@@ -288,13 +288,13 @@ public sealed partial class FmSetting : Form
         }
         string value18 = Config.Get("代理", "服务器账号");
         Box代理账号.Text = value18;
-        if (value18 == "__ERROR__")
+        if (value18 == "_ERROR_")
         {
             Box代理账号.Text = "";
         }
         string value19 = Config.Get("代理", "服务器密码");
         Box代理密码.Text = value19;
-        if (value19 == "__ERROR__")
+        if (value19 == "_ERROR_")
         {
             Box代理密码.Text = "";
         }
@@ -309,7 +309,7 @@ public sealed partial class FmSetting : Form
             Box代理密码.Enabled = false;
         }
         string value20 = Config.Get("更新", "检测更新");
-        if (value20 == "__ERROR__")
+        if (value20 == "_ERROR_")
         {
             Box检查更新.Checked = false;
         }
@@ -331,7 +331,7 @@ public sealed partial class FmSetting : Form
             Box间隔时间.Enabled = false;
         }
         string value21 = Config.Get("更新", "更新间隔");
-        if (value21 == "__ERROR__")
+        if (value21 == "_ERROR_")
         {
             Box更新间隔.Checked = false;
         }
@@ -353,12 +353,12 @@ public sealed partial class FmSetting : Form
         }
         string value22 = Config.Get("更新", "间隔时间");
         Box间隔时间.Value = Convert.ToInt32(value22);
-        if (value5 == "__ERROR__")
+        if (value5 == "_ERROR_")
         {
             Box间隔时间.Value = 24m;
         }
         string value23 = Config.Get("截图音效", "剪贴板");
-        if (value23 == "__ERROR__")
+        if (value23 == "_ERROR_")
         {
             Box截图剪贴板.Checked = false;
         }
@@ -371,7 +371,7 @@ public sealed partial class FmSetting : Form
             Box截图剪贴板.Checked = false;
         }
         string value24 = Config.Get("截图音效", "自动保存");
-        if (value24 == "__ERROR__")
+        if (value24 == "_ERROR_")
         {
             Box截图保存.Checked = true;
         }
@@ -385,12 +385,12 @@ public sealed partial class FmSetting : Form
         }
         string value25 = Config.Get("截图音效", "音效路径");
         Box音效路径.Text = value25;
-        if (value25 == "__ERROR__")
+        if (value25 == "_ERROR_")
         {
             Box音效路径.Text = "Data\\screenshot.wav";
         }
         string value26 = Config.Get("取色器", "类型");
-        if (value26 == "__ERROR__")
+        if (value26 == "_ERROR_")
         {
             Box取色.Checked = false;
         }
@@ -607,8 +607,8 @@ public sealed partial class FmSetting : Form
         ReadConfig( );
         Box代理服务器.CheckedChanged += chbox_代理服务器_CheckedChanged;
         更新Button_check.Click += 更新Check;
-        Text更新日期.Text = "更新时间：" + Defaults.DateNow;
-        Text版本号.Text = "当前版本：" + Defaults.Version;
+        Text更新日期.Text = "更新时间：" + Globals.UpdateTime;
+        Text版本号.Text = "当前版本：" + Globals.UpdateVersion;
         Box更新说明.Text = (string) componentResourceManager.GetObject("更新说明");
         Box更新说明.ReadOnly = true;
         Box更新说明.WordWrap = true;
@@ -732,7 +732,7 @@ public sealed partial class FmSetting : Form
     {
         if (!string.IsNullOrEmpty(Box问题反馈.Text))
         {
-            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + Defaults.Version + "&nr=";
+            string text = "sm=%E5%A4%A9%E8%8B%A5OCR%E6%96%87%E5%AD%97%E8%AF%86%E5%88%AB" + Globals.UpdateVersion + "&nr=";
             PostHtml("http://cd.ys168.com/f_ht/ajcx/lyd.aspx?cz=lytj&pdgk=1&pdgly=0&pdzd=0&tou=1&yzm=undefined&_dlmc=tianruoyouxin&_dlmm=", text + HttpUtility.UrlEncode(Box问题反馈.Text));
             Box问题反馈.Text = "";
             FmFlags.Display("感谢您的反馈！");

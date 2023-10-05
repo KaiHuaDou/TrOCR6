@@ -147,16 +147,7 @@ public static class ImageUtils
     }
 
     public static byte[] ImageToByteArray(Image img)
-            => (byte[]) new ImageConverter( ).ConvertTo(img, typeof(byte[]));
-
-    public static byte[] MergeBytes(byte[] a, byte[] b, byte[] c)
-    {
-        byte[] array = new byte[a.Length + b.Length + c.Length];
-        a.CopyTo(array, 0);
-        b.CopyTo(array, a.Length);
-        c.CopyTo(array, a.Length + b.Length);
-        return array;
-    }
+        => (byte[]) new ImageConverter( ).ConvertTo(img, typeof(byte[]));
 
     public static void SetImage(Bitmap bitmap, int left, int top, IntPtr handle)
     {

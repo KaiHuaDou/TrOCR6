@@ -10,7 +10,7 @@ public class MenuItemRenderer : ToolStripProfessionalRenderer
 {
     public MenuItemRenderer( )
     {
-        textFont = new Font("微软雅黑", 9f / Defaults.DpiFactor, FontStyle.Regular, GraphicsUnit.Point, 0);
+        textFont = new Font("微软雅黑", 9f / Globals.DpiFactor, FontStyle.Regular, GraphicsUnit.Point, 0);
         menuItemSelectedColor = Color.White;
         menuItemBorderColor = Color.White;
         menuItemSelectedColor = Color.White;

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using TrOCR.Controls;
 
 namespace TrOCR.External;
 internal static class NativeMethods
@@ -41,7 +42,7 @@ internal static class NativeMethods
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     public static extern int GetPrivateProfileString(string sectionName, string keyName, string @default, StringBuilder returnedString, int size, string fileName);
-    
+
     [DllImport("kernel32.dll")]
     public static extern uint GetTickCount( );
 
@@ -84,7 +85,11 @@ internal static class NativeMethods
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
 
-    public static IntPtr SendMessage(IntPtr hWnd, int msg, int wParam) => SendMessage(hWnd, msg, wParam, "");
+    public static void SendMessage(IntPtr hwnd, MsgFlag msg, MsgFlag wParam)
+        => SendMessage(hwnd, (int) msg, (int) wParam);
+
+    public static IntPtr SendMessage(IntPtr hWnd, int msg, int wParam) 
+        => SendMessage(hWnd, msg, wParam, "");
 
     [DllImport("user32.dll")]
     public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);

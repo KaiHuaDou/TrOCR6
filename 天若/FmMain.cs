@@ -68,7 +68,7 @@ public partial class FmMain : Form
     private string splitedText;
     private Thread thread;
     private TimeSpan timeUsed;
-    private string transFlag;
+    private string isTransOpen;
     private string transHotkey;
     private byte[] ttsData;
     private string typeSetText;
@@ -81,22 +81,22 @@ public partial class FmMain : Form
         isMerged = false;
         isSplited = false;
         isSplited = false;
-        Defaults.CaptureRejection = false;
+        Globals.CaptureRejection = false;
         pinyinFlag = false;
         isTranslated = false;
         autoResetEvent = new AutoResetEvent(false);
         imagelist = new List<Image>( );
-        Defaults.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
+        Globals.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
         baiduFlags = "";
         esc = "";
         voiceCount = 0;
         fmNote = new FmNote( );
-        pubnote = new string[Defaults.NoteCount];
-        for (int i = 0; i < Defaults.NoteCount; i++)
+        pubnote = new string[Globals.NoteCount];
+        for (int i = 0; i < Globals.NoteCount; i++)
             pubnote[i] = "";
-        Defaults.Notes = pubnote;
-        Defaults.MainHandle = Handle;
-        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Globals.Notes = pubnote;
+        Globals.MainHandle = Handle;
+        Font = new Font(Font.Name, 9f / Globals.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         googleTransText = "";
         isNumOk = 0;
         dpiFactor = Helper.System.DpiFactor;
@@ -194,202 +194,193 @@ public partial class FmMain : Form
             Visible = false;
             return;
         }
-        if (m.Msg == 600 && (int) m.WParam == 725)
+        if (m.Msg == 786 && (int) m.WParam == 725)
         {
-            if (Config.Get("工具栏", "顶置") == "True")
+            TopMost = Config.Get("工具栏", "顶置") == "True";
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 530 && richBox.Text != null)
+        {
+            p_note(richBox.Text);
+            Globals.Notes = pubnote;
+            if (fmNote.Created)
             {
-                TopMost = true;
-                return;
+                fmNote.SetTextNote( );
             }
-            TopMost = false;
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 520)
+        {
+            fmNote.Show( );
+            fmNote.Focus( );
+            fmNote.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - fmNote.Width, Screen.PrimaryScreen.WorkingArea.Height - fmNote.Height);
+            fmNote.WindowState = FormWindowState.Normal;
             return;
         }
-        else
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 580)
         {
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 530 && richBox.Text != null)
+            UnregisterHotKey(Handle, 205);
+            changeQQScreenshot = false;
+            FormBorderStyle = FormBorderStyle.None;
+            Hide( );
+            formWidth = isTransOpen == "开启" ? Width / 2 : Width;
+            formHeight = Height;
+            notifyIcon.Visible = false;
+            notifyIcon.Visible = true;
+            menu.Close( );
+            menuCopy.Close( );
+            autoFlag = "开启";
+            splitedText = "";
+            richBox.Text = "***该区域未发现文本***";
+            richBoxTrans.Text = "";
+            typeSetText = "";
+            isTransOpen = "关闭";
+            transClose.PerformClick( );
+            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+            FormBorderStyle = FormBorderStyle.Sizable;
+            Globals.CaptureRejection = true;
+            imageScreen = Globals.ImageOCR;
+            if (Config.Get("工具栏", "分栏") == "True")
             {
-                p_note(richBox.Text);
-                Defaults.Notes = pubnote;
-                if (fmNote.Created)
+                notifyIcon.Visible = true;
+                thread = new Thread(new ThreadStart(ShowLoading));
+                thread.Start( );
+                timeUsed = new TimeSpan(DateTime.Now.Ticks);
+                Image image = imageScreen;
+                Bitmap bitmap = new(image.Width, image.Height);
+                Graphics graphics = Graphics.FromImage(bitmap);
+                graphics.DrawImage(image, 0, 0, image.Width, image.Height);
+                graphics.Save( );
+                graphics.Dispose( );
+                ImageOri = bitmap;
+                ((Bitmap) FindBundingBoxFences((Bitmap) image)).Save("Data\\分栏预览图.jpg");
+            }
+            else
+            {
+                notifyIcon.Visible = true;
+                thread = new Thread(new ThreadStart(ShowLoading));
+                thread.Start( );
+                timeUsed = new TimeSpan(DateTime.Now.Ticks);
+                MessageLoad messageload = new( );
+                messageload.ShowDialog( );
+                if (messageload.DialogResult == DialogResult.OK)
                 {
-                    fmNote.SetTextNote( );
+                    escThread = new Thread(new ThreadStart(MainOcrThread));
+                    escThread.Start( );
                 }
             }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 520)
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 590 && speakCopyB == "朗读")
+        {
+            Tts( );
+            return;
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 511)
+        {
+            base.MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+            isTransOpen = "关闭";
+            richBox.Dock = DockStyle.Fill;
+            richBoxTrans.Visible = false;
+            image1.Visible = false;
+            richBoxTrans.Text = "";
+            if (WindowState == FormWindowState.Maximized)
             {
-                fmNote.Show( );
-                fmNote.Focus( );
-                fmNote.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - fmNote.Width, Screen.PrimaryScreen.WorkingArea.Height - fmNote.Height);
-                fmNote.WindowState = FormWindowState.Normal;
+                WindowState = FormWindowState.Normal;
+            }
+            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 512)
+        {
+            TranslateClick( );
+        }
+        if (m.Msg == 786 && m.WParam.ToInt32( ) == 518)
+        {
+            if (ActiveControl.Name == "htmlTextBoxBody")
+            {
+                htmltxt = richBox.Text;
+            }
+            if (ActiveControl.Name == "rich_trans")
+            {
+                htmltxt = richBoxTrans.Text;
+            }
+            if (string.IsNullOrEmpty(htmltxt))
+            {
                 return;
             }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 580)
+            Tts( );
+        }
+        if (m.Msg == 161)
+        {
+            SetForegroundWindow(Handle);
+            base.WndProc(ref m);
+            return;
+        }
+        if (m.Msg != 163)
+        {
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 222)
+            {
+                ExitThread( );
+            }
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 200)
             {
                 UnregisterHotKey(Handle, 205);
-                changeQQScreenshot = false;
-                FormBorderStyle = FormBorderStyle.None;
-                Hide( );
-                formWidth = transFlag == "开启" ? Width / 2 : Width;
-                formHeight = Height;
-                notifyIcon.Visible = false;
-                notifyIcon.Visible = true;
-                menu.Close( );
-                menuCopy.Close( );
-                autoFlag = "开启";
-                splitedText = "";
-                richBox.Text = "***该区域未发现文本***";
-                richBoxTrans.Text = "";
-                typeSetText = "";
-                transFlag = "关闭";
-                transClose.PerformClick( );
-                Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
-                FormBorderStyle = FormBorderStyle.Sizable;
-                Defaults.CaptureRejection = true;
-                imageScreen = Defaults.ImageOCR;
-                if (Config.Get("工具栏", "分栏") == "True")
+                menu.Hide( );
+                richBox.Hide = "";
+                richBoxTrans.Hide = "";
+                MainOcrQuickCapture( );
+            }
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 206)
+            {
+                if (!fmNote.Visible || base.Focused)
                 {
-                    notifyIcon.Visible = true;
-                    thread = new Thread(new ThreadStart(ShowLoading));
-                    thread.Start( );
-                    timeUsed = new TimeSpan(DateTime.Now.Ticks);
-                    Image image = imageScreen;
-                    Bitmap bitmap = new(image.Width, image.Height);
-                    Graphics graphics = Graphics.FromImage(bitmap);
-                    graphics.DrawImage(image, 0, 0, image.Width, image.Height);
-                    graphics.Save( );
-                    graphics.Dispose( );
-                    ImageOri = bitmap;
-                    ((Bitmap) FindBundingBoxFences((Bitmap) image)).Save("Data\\分栏预览图.jpg");
+                    fmNote.Show( );
+                    fmNote.WindowState = FormWindowState.Normal;
+                    fmNote.Visible = true;
                 }
                 else
                 {
-                    notifyIcon.Visible = true;
-                    thread = new Thread(new ThreadStart(ShowLoading));
-                    thread.Start( );
-                    timeUsed = new TimeSpan(DateTime.Now.Ticks);
-                    MessageLoad messageload = new( );
-                    messageload.ShowDialog( );
-                    if (messageload.DialogResult == DialogResult.OK)
-                    {
-                        escThread = new Thread(new ThreadStart(MainOcrThread));
-                        escThread.Start( );
-                    }
+                    fmNote.Hide( );
+                    fmNote.WindowState = FormWindowState.Minimized;
+                    fmNote.Visible = false;
                 }
             }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 590 && speakCopyB == "朗读")
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 235)
             {
-                Tts( );
-                return;
-            }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 511)
-            {
-                base.MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
-                transFlag = "关闭";
-                richBox.Dock = DockStyle.Fill;
-                richBoxTrans.Visible = false;
-                image1.Visible = false;
-                richBoxTrans.Text = "";
-                if (WindowState == FormWindowState.Maximized)
+                if (!Visible)
                 {
+                    TopMost = true;
+                    Show( );
                     WindowState = FormWindowState.Normal;
-                }
-                Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
-            }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 512)
-            {
-                TranslateClick( );
-            }
-            if (m.Msg == 786 && m.WParam.ToInt32( ) == 518)
-            {
-                if (ActiveControl.Name == "htmlTextBoxBody")
-                {
-                    htmltxt = richBox.Text;
-                }
-                if (ActiveControl.Name == "rich_trans")
-                {
-                    htmltxt = richBoxTrans.Text;
-                }
-                if (string.IsNullOrEmpty(htmltxt))
-                {
-                    return;
-                }
-                Tts( );
-            }
-            if (m.Msg == 161)
-            {
-                SetForegroundWindow(Handle);
-                base.WndProc(ref m);
-                return;
-            }
-            if (m.Msg != 163)
-            {
-                if (m.Msg == 786 && m.WParam.ToInt32( ) == 222)
-                {
-                    ExitThread( );
-                }
-                if (m.Msg == 786 && m.WParam.ToInt32( ) == 200)
-                {
-                    UnregisterHotKey(Handle, 205);
-                    menu.Hide( );
-                    richBox.Hide = "";
-                    richBoxTrans.Hide = "";
-                    MainOcrQuickCapture( );
-                }
-                if (m.Msg == 786 && m.WParam.ToInt32( ) == 206)
-                {
-                    if (!fmNote.Visible || base.Focused)
+                    Visible = true;
+                    Thread.Sleep(100);
+                    if (Config.Get("工具栏", "顶置") == "False")
                     {
-                        fmNote.Show( );
-                        fmNote.WindowState = FormWindowState.Normal;
-                        fmNote.Visible = true;
-                    }
-                    else
-                    {
-                        fmNote.Hide( );
-                        fmNote.WindowState = FormWindowState.Minimized;
-                        fmNote.Visible = false;
+                        TopMost = false;
+                        return;
                     }
                 }
-                if (m.Msg == 786 && m.WParam.ToInt32( ) == 235)
+                else
                 {
-                    if (!Visible)
-                    {
-                        TopMost = true;
-                        Show( );
-                        WindowState = FormWindowState.Normal;
-                        Visible = true;
-                        Thread.Sleep(100);
-                        if (Config.Get("工具栏", "顶置") == "False")
-                        {
-                            TopMost = false;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Hide( );
-                        Visible = false;
-                    }
+                    Hide( );
+                    Visible = false;
                 }
-                if (m.Msg == 786 && m.WParam.ToInt32( ) == 205)
-                {
-                    translateText( );
-                }
-                base.WndProc(ref m);
-                return;
             }
-            if (transFlag == "开启")
+            if (m.Msg == 786 && m.WParam.ToInt32( ) == 205)
             {
-                WindowState = FormWindowState.Normal;
-                Size = new Size((int) fontBase.Width * 23 * 2, (int) fontBase.Height * 24);
-                Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10 * 2, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
-                return;
+                translateText( );
             }
-            WindowState = FormWindowState.Normal;
-            Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
-            Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+            base.WndProc(ref m);
             return;
         }
+        if (isTransOpen == "开启")
+        {
+            WindowState = FormWindowState.Normal;
+            Size = new Size((int) fontBase.Width * 23 * 2, (int) fontBase.Height * 24);
+            Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10 * 2, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
+            return;
+        }
+        WindowState = FormWindowState.Normal;
+        Location = (Point) new Size(Screen.PrimaryScreen.Bounds.Width / 2 - Screen.PrimaryScreen.Bounds.Width / 10, Screen.PrimaryScreen.Bounds.Height / 2 - Screen.PrimaryScreen.Bounds.Height / 6);
+        Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
+        return;
     }
 
     private void TextFinalize(JArray jarray, string words, string text, string text2)
@@ -616,7 +607,7 @@ public partial class FmMain : Form
     {
         try
         {
-            Defaults.CaptureRejection = false;
+            Globals.CaptureRejection = false;
             esc = "退出";
             fmLoading.FormClose = "窗体已关闭";
             escThread.Abort( );
@@ -783,7 +774,7 @@ public partial class FmMain : Form
 
     private void MainOcrQuickCapture( )
     {
-        if (!Defaults.CaptureRejection)
+        if (!Globals.CaptureRejection)
         {
             try
             {
@@ -791,7 +782,7 @@ public partial class FmMain : Form
                 FormBorderStyle = FormBorderStyle.None;
                 Visible = false;
                 Thread.Sleep(100);
-                formWidth = transFlag == "开启" ? Width / 2 : Width;
+                formWidth = isTransOpen == "开启" ? Width / 2 : Width;
                 verticalRightText = "";
                 verticalLeftText = "";
                 formHeight = Height;
@@ -804,14 +795,14 @@ public partial class FmMain : Form
                 richBox.Text = "***该区域未发现文本***";
                 richBoxTrans.Text = "";
                 typeSetText = "";
-                transFlag = "关闭";
+                isTransOpen = "关闭";
                 if (Config.Get("工具栏", "翻译") == "False")
                 {
                     transClose.PerformClick( );
                 }
                 Size = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
                 FormBorderStyle = FormBorderStyle.Sizable;
-                Defaults.CaptureRejection = true;
+                Globals.CaptureRejection = true;
                 imageScreen = RegionCaptureTasks.GetRegionImage_Mo(new RegionCaptureOptions
                 {
                     ShowMagnifier = false,
@@ -844,7 +835,7 @@ public partial class FmMain : Form
                         Config.SetHotkey(text, text2, value, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    Defaults.CaptureRejection = false;
+                    Globals.CaptureRejection = false;
                 }
                 else if (mode_flag == "区域多选")
                 {
@@ -858,7 +849,7 @@ public partial class FmMain : Form
                             Config.SetHotkey(text3, text4, value2, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        Defaults.CaptureRejection = false;
+                        Globals.CaptureRejection = false;
                     }
                     else
                     {
@@ -879,7 +870,7 @@ public partial class FmMain : Form
                         Config.SetHotkey(text5, text6, value3, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    Defaults.CaptureRejection = false;
+                    Globals.CaptureRejection = false;
                     FmFlags.Display("已复制颜色");
                 }
                 else if (imageScreen == null)
@@ -892,7 +883,7 @@ public partial class FmMain : Form
                         Config.SetHotkey(text7, text8, value4, 205);
                     }
                     UnregisterHotKey(Handle, 222);
-                    Defaults.CaptureRejection = false;
+                    Globals.CaptureRejection = false;
                 }
                 else
                 {
@@ -921,7 +912,7 @@ public partial class FmMain : Form
                             Config.SetHotkey(text9, text10, value5, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        Defaults.CaptureRejection = false;
+                        Globals.CaptureRejection = false;
                         if (Config.Get("截图音效", "剪贴板") == "True")
                         {
                             Helper.System.PlaySong(Config.Get("截图音效", "音效路径"), Handle);
@@ -932,7 +923,7 @@ public partial class FmMain : Form
                     {
                         string text11 = Config.Get("配置", "截图位置") + "\\" + TextUtils.RenameFile(Config.Get("配置", "截图位置"), "图片.Png");
                         imageScreen.Save(text11, ImageFormat.Png);
-                        Defaults.CaptureRejection = false;
+                        Globals.CaptureRejection = false;
                         if (Config.Get("截图音效", "自动保存") == "True")
                         {
                             Helper.System.PlaySong(Config.Get("截图音效", "音效路径"), Handle);
@@ -942,7 +933,7 @@ public partial class FmMain : Form
                     else if (mode_flag == "多区域自动保存" && Config.Get("配置", "自动保存") == "True")
                     {
                         ImageUtils.GetSubImage(imageScreen, array);
-                        Defaults.CaptureRejection = false;
+                        Globals.CaptureRejection = false;
                         if (Config.Get("截图音效", "自动保存") == "True")
                         {
                             Helper.System.PlaySong(Config.Get("截图音效", "音效路径"), Handle);
@@ -994,7 +985,7 @@ public partial class FmMain : Form
                             Config.SetHotkey(text12, text13, value6, 205);
                         }
                         UnregisterHotKey(Handle, 222);
-                        Defaults.CaptureRejection = false;
+                        Globals.CaptureRejection = false;
                     }
                     else if (imageScreen != null)
                     {
@@ -1032,7 +1023,7 @@ public partial class FmMain : Form
             }
             catch
             {
-                Defaults.CaptureRejection = false;
+                Globals.CaptureRejection = false;
             }
         }
     }
@@ -1094,7 +1085,7 @@ public partial class FmMain : Form
     {
         imageScreen.Dispose( );
         GC.Collect( );
-        Defaults.CaptureRejection = false;
+        Globals.CaptureRejection = false;
         string text = typeSetText;
         text = TextUtils.CheckStr(text);
         splitedText = TextUtils.CheckStr(splitedText);
@@ -1110,7 +1101,7 @@ public partial class FmMain : Form
         {
             richBox.Text = text;
         }
-        Defaults.Split = splitedText;
+        Globals.SplitedText = splitedText;
         if (bool.Parse(Config.Get("工具栏", "拆分")) || isSplited)
         {
             isSplited = false;
@@ -1133,13 +1124,13 @@ public partial class FmMain : Form
         if (richBox.Text != null)
         {
             p_note(richBox.Text);
-            Defaults.Notes = pubnote;
+            Globals.Notes = pubnote;
             if (fmNote.Created)
             {
                 fmNote.SetTextNote( );
             }
         }
-        TopMost = Defaults.Topmost;
+        TopMost = Globals.Topmost;
         Text = "耗时：" + text2;
         notifyIcon.Visible = true;
         if (interfaceFlag == "从右向左")
@@ -1199,7 +1190,7 @@ public partial class FmMain : Form
         WindowState = FormWindowState.Normal;
         Size = new Size(formWidth, formHeight);
         SetForegroundWindow(Handle);
-        Defaults.GoogleTransText = richBox.Text;
+        Globals.GoogleTransText = richBox.Text;
         if (bool.Parse(Config.Get("工具栏", "翻译")))
         {
             try
@@ -1267,7 +1258,7 @@ public partial class FmMain : Form
         splitedText = "";
         try
         {
-            baiduVip = Web.GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + Defaults.BaiduApiId + "&client_secret=" + Defaults.BaiduApiKey));
+            baiduVip = Web.GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + Globals.BaiduApiId + "&client_secret=" + Globals.BaiduApiKey));
             if (string.IsNullOrEmpty(baiduVip))
             {
                 MessageBox.Show("请检查密钥输入是否正确！", "提醒");
@@ -1515,7 +1506,7 @@ public partial class FmMain : Form
             string text3 = "\r\n" + text + "--\r\n";
             byte[] bytes = Encoding.ASCII.GetBytes(text2);
             byte[] bytes2 = Encoding.ASCII.GetBytes(text3);
-            byte[] array2 = ImageUtils.MergeBytes(bytes, array, bytes2);
+            byte[] array2 = Web.MergeBytes(bytes, array, bytes2);
             HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("http://ocr.shouji.sogou.com/v2/ocr/json");
             httpWebRequest.Timeout = 8000;
             httpWebRequest.Method = "POST";
@@ -1581,7 +1572,8 @@ public partial class FmMain : Form
         }
     }
 
-    private void OcrTableAliClick(object o, EventArgs e) => OcrForeach("阿里表格");
+    private void OcrTableAliClick(object o, EventArgs e)
+        => OcrForeach("阿里表格");
 
     private void OcrTableBaidu( )
     {
@@ -1589,7 +1581,7 @@ public partial class FmMain : Form
         splitedText = "";
         try
         {
-            baiduVip = Web.GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + Defaults.BaiduApiId + "&client_secret=" + Defaults.BaiduApiKey));
+            baiduVip = Web.GetHtml(string.Format("{0}?{1}", "https://aip.baidubce.com/oauth/2.0/token", "grant_type=client_credentials&client_id=" + Globals.BaiduApiId + "&client_secret=" + Globals.BaiduApiKey));
             if (string.IsNullOrEmpty(baiduVip))
             {
                 MessageBox.Show("请检查密钥输入是否正确！", "提醒");
@@ -1687,28 +1679,12 @@ public partial class FmMain : Form
             {
                 image = imageScreen;
             }
-            byte[] array = ImageUtils.ImageToByte(image);
-            string text2 = text + "\r\nContent-Disposition: form-data; name=\"image_file\"; filename=\"pic.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
-            string text3 = "\r\n" + text + "--\r\n";
-            byte[] bytes = Encoding.ASCII.GetBytes(text2);
-            byte[] bytes2 = Encoding.ASCII.GetBytes(text3);
-            byte[] array2 = ImageUtils.MergeBytes(bytes, array, bytes2);
-            HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create("https://ai.qq.com/cgi-bin/appdemo_generalocr");
-            httpWebRequest.Method = "POST";
-            httpWebRequest.Referer = "http://ai.qq.com/product/ocr.shtml";
-            httpWebRequest.Headers.Add("Accept-Encoding", "gzip,deflate");
-            httpWebRequest.ContentType = "multipart/form-data; boundary=" + text.Substring(2);
-            httpWebRequest.Timeout = 8000;
-            httpWebRequest.ReadWriteTimeout = 2000;
-            byte[] array3 = array2;
-            using (Stream requestStream = httpWebRequest.GetRequestStream( ))
-            {
-                requestStream.Write(array3, 0, array2.Length);
-            }
-            Stream responseStream = ((HttpWebResponse) httpWebRequest.GetResponse( )).GetResponseStream( );
-            string text4 = new StreamReader(responseStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-            responseStream.Close( );
-            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(text4))["data"]["item_list"].ToString( ));
+            byte[] imageBytes = ImageUtils.ImageToByte(image);
+            string text2 = $"{text}\r\nContent-Disposition: form-data; name=\"image_file\"; filename=\"pic.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
+            string text3 = $"\r\n{text}--\r\n";
+            byte[] reqBytes = Web.MergeBytes(Encoding.ASCII.GetBytes(text2), imageBytes, Encoding.ASCII.GetBytes(text3));
+            string result = Web.PostCompressContent("https://ai.qq.com/cgi-bin/appdemo_generalocr", reqBytes, "http://ai.qq.com/product/ocr.shtml", OcrType.Tencent);
+            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(result))["data"]["item_list"].ToString( ));
             TextUtils.TextCheck(jarray, 1, "itemstring", TextFinalize);
         }
         catch
@@ -1796,20 +1772,8 @@ public partial class FmMain : Form
             image = new Bitmap(b);
             byte[] array = ImageUtils.ImageToByte(image);
             byte[] bytes = Encoding.UTF8.GetBytes($"imgBase=data{HttpUtility.UrlEncode(":image/jpeg;base64," + Convert.ToBase64String(array))}&lang=auto&company=");
-            HttpWebRequest req = (HttpWebRequest) WebRequest.Create("http://aidemo.youdao.com/ocrapi1");
-            req.Method = "POST";
-            req.Referer = "http://aidemo.youdao.com/ocrdemo";
-            req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-            req.Timeout = 8000;
-            req.ReadWriteTimeout = 2000;
-            using (Stream reqStream = req.GetRequestStream( ))
-            {
-                reqStream.Write(bytes, 0, bytes.Length);
-            }
-            Stream resStream = ((HttpWebResponse) req.GetResponse( )).GetResponseStream( );
-            string res = new StreamReader(resStream, Encoding.GetEncoding("utf-8")).ReadToEnd( );
-            resStream.Close( );
-            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(res))["lines"].ToString( ));
+            string result = Web.PostCompressContent("http://aidemo.youdao.com/ocrapi1", bytes, "http://aidemo.youdao.com/ocrdemo", OcrType.Youdao);
+            JArray jarray = JArray.Parse(((JObject) JsonConvert.DeserializeObject(result))["lines"].ToString( ));
             TextUtils.TextCheck(jarray, 1, "words", TextFinalize);
             image.Dispose( );
         }
@@ -1825,11 +1789,11 @@ public partial class FmMain : Form
 
     private void p_note(string a)
     {
-        for (int i = 0; i < Defaults.NoteCount; i++)
+        for (int i = 0; i < Globals.NoteCount; i++)
         {
-            if (i == Defaults.NoteCount - 1)
+            if (i == Globals.NoteCount - 1)
             {
-                pubnote[Defaults.NoteCount - 1] = a;
+                pubnote[Globals.NoteCount - 1] = a;
             }
             else
             {
@@ -1871,7 +1835,7 @@ public partial class FmMain : Form
             }
         }
         interfaceFlag = Config.Get("配置", "接口");
-        if (interfaceFlag == "__ERROR__")
+        if (interfaceFlag == "_ERROR_")
         {
             Config.Set("配置", "接口", "搜狗");
             OcrForeach("搜狗");
@@ -1908,15 +1872,15 @@ public partial class FmMain : Form
             string text9 = "F11";
             Config.SetHotkey(text8, text9, value4, 235);
         }
-        Defaults.BaiduApiId = Config.Get("密钥_百度", "secret_id");
-        if (Config.Get("密钥_百度", "secret_id") == "__ERROR__")
+        Globals.BaiduApiId = Config.Get("密钥_百度", "secret_id");
+        if (Config.Get("密钥_百度", "secret_id") == "_ERROR_")
         {
-            Defaults.BaiduApiId = "请输入secret_id";
+            Globals.BaiduApiId = "请输入secret_id";
         }
-        Defaults.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
-        if (Config.Get("密钥_百度", "secret_key") == "__ERROR__")
+        Globals.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
+        if (Config.Get("密钥_百度", "secret_key") == "_ERROR_")
         {
-            Defaults.BaiduApiKey = "请输入secret_key";
+            Globals.BaiduApiKey = "请输入secret_key";
         }
     }
 
@@ -2221,7 +2185,7 @@ public partial class FmMain : Form
     private void TransCloseClick(object o, EventArgs e)
     {
         base.MinimumSize = new Size((int) fontBase.Width * 23, (int) fontBase.Height * 24);
-        transFlag = "关闭";
+        isTransOpen = "关闭";
         richBox.Dock = DockStyle.Fill;
         richBoxTrans.Visible = false;
         image1.Visible = false;
@@ -2239,7 +2203,8 @@ public partial class FmMain : Form
         richBoxTrans.EditBox.Copy( );
     }
 
-    private void TransGoogleClick(object o, EventArgs e) => TranslateForeach("谷歌");
+    private void TransGoogleClick(object o, EventArgs e)
+        => TranslateForeach("谷歌");
 
     private void TranslateChild( )
     {
@@ -2252,7 +2217,7 @@ public partial class FmMain : Form
         typeSetText = richBox.Text;
         richBoxTrans.Visible = true;
         WindowState = FormWindowState.Normal;
-        transFlag = "开启";
+        isTransOpen = "开启";
         richBox.Dock = DockStyle.None;
         richBoxTrans.Dock = DockStyle.None;
         richBoxTrans.BorderStyle = BorderStyle.Fixed3D;
@@ -2329,7 +2294,7 @@ public partial class FmMain : Form
         TranslateClick( );
         FormBorderStyle = FormBorderStyle.Sizable;
         Visible = true;
-        SetForegroundWindow(Defaults.MainHandle);
+        SetForegroundWindow(Globals.MainHandle);
         Show( );
         WindowState = FormWindowState.Normal;
         if (Config.Get("工具栏", "顶置") == "True")
@@ -2362,17 +2327,17 @@ public partial class FmMain : Form
         {
             if (interfaceFlag == "韩语")
             {
-                Defaults.TransType = TranslateType.ZhEn;
+                Globals.TransType = TranslateType.ZhEn;
                 richBox.UpdateTransType( );
             }
             else if (interfaceFlag == "日语")
             {
-                Defaults.TransType = TranslateType.ZhEn;
+                Globals.TransType = TranslateType.ZhEn;
                 richBox.UpdateTransType( );
             }
             else if (interfaceFlag == "中英")
             {
-                Defaults.TransType = TranslateType.ZhEn;
+                Globals.TransType = TranslateType.ZhEn;
                 richBox.UpdateTransType( );
             }
             googleTransText = Helper.Translate.TranslateAsConfig(typeSetText);
@@ -2454,13 +2419,13 @@ public partial class FmMain : Form
         fmSetting.ShowDialog( );
         if (fmSetting.DialogResult == DialogResult.OK)
         {
-            Defaults.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
-            pubnote = new string[Defaults.NoteCount];
-            for (int i = 0; i < Defaults.NoteCount; i++)
+            Globals.NoteCount = Convert.ToInt32(Config.Get("配置", "记录数目"));
+            pubnote = new string[Globals.NoteCount];
+            for (int i = 0; i < Globals.NoteCount; i++)
             {
                 pubnote[i] = "";
             }
-            Defaults.Notes = pubnote;
+            Globals.Notes = pubnote;
             fmNote.TextNoteChange( );
             fmNote.Location = new Point(Screen.AllScreens[0].WorkingArea.Width - fmNote.Width, Screen.AllScreens[0].WorkingArea.Height - fmNote.Height);
             if (Config.Get("快捷键", "文字识别") != "请按下快捷键")
@@ -2496,8 +2461,8 @@ public partial class FmMain : Form
             proxyPort = Config.Get("代理", "端口");
             proxyName = Config.Get("代理", "服务器账号");
             proxyPassword = Config.Get("代理", "服务器密码");
-            Defaults.BaiduApiId = Config.Get("密钥_百度", "secret_id");
-            Defaults.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
+            Globals.BaiduApiId = Config.Get("密钥_百度", "secret_id");
+            Globals.BaiduApiKey = Config.Get("密钥_百度", "secret_key");
             if (proxyFlag == "不使用代理")
             {
                 WebRequest.DefaultWebProxy = null;

@@ -120,7 +120,7 @@ namespace TrOCR
             this.transTencent.Click += new EventHandler(this.TransTencentClick);
             this.menuCopy.Items.AddRange(new ToolStripItem[] { this.transCopy, this.transPaste, this.transSelectAll, this.transVoice, this.transInput, this.transClose });
             this.transInput.DropDownItems.AddRange(new ToolStripItem[] { this.transGoogle, this.transBaidu, this.transTencent });
-            this.menuCopy.Font = new Font("微软雅黑", 9f / Defaults.DpiFactor, FontStyle.Regular);
+            this.menuCopy.Font = new Font("微软雅黑", 9f / Globals.DpiFactor, FontStyle.Regular);
             this.mainCopy.Text = "复制";
             this.mainCopy.Click += new EventHandler(this.MainCopyClick);
             this.mainPaste.Text = "粘贴";
@@ -136,7 +136,7 @@ namespace TrOCR
             this.mainExit.Text = "退出";
             this.mainExit.Click += new EventHandler(this.TrayExitClick);
             this.menu.Items.AddRange(new ToolStripItem[] { this.mainCopy, this.mainPaste, this.mainSelectAll, this.speak, this.baiduS, this.mainChange, this.mainInterface, this.mainExit });
-            this.menu.Font = new Font("微软雅黑", 9f / Defaults.DpiFactor, FontStyle.Regular);
+            this.menu.Font = new Font("微软雅黑", 9f / Globals.DpiFactor, FontStyle.Regular);
             this.sougou.Text = "搜狗√";
             this.sougou.Click += new EventHandler(this.OcrSogouClick);
             this.mathFunction.Text = "公式";

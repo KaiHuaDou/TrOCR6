@@ -36,7 +36,7 @@ public class HWColorPicker : FloatLayerBase, IDisposable
 
     public HWColorPicker( )
     {
-        Font = new Font(Font.Name, 9f / Defaults.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
+        Font = new Font(Font.Name, 9f / Globals.DpiFactor, Font.Style, Font.Unit, Font.GdiCharSet, Font.GdiVerticalFont);
         hoverItem = -1;
         InitializeComponent( );
         InitColor( );
